@@ -50,8 +50,8 @@
   "validthis": false,
 
    "globals": {
-    "console": true
+    "console": true,
     "window": true,
     "document": true
-  },
+  }
 }
