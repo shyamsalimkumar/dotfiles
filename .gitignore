@@ -157,3 +157,6 @@ sftp-config.json
 [Ll]ib
 [Ss]cripts
 
+### Vim/NeoVim ###
+# NeoVim
+nvim/.config/nvim/plugged/*
