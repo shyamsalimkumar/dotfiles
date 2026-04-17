@@ -1,0 +1,32 @@
+{
+    "makefile.configureOnOpen": true,
+    "git.openRepositoryInParentFolders": "never",
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "go.toolsManagement.autoUpdate": true,
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "claudeCode.preferredLocation": "panel",
+    "editor.fontSize": 10,
+    "git.blame.editorDecoration.enabled": false,
+    "[css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "protobuf.externalLinter.enabled": true,
+    "protobuf.externalLinter.linter": "buf",
+    "protobuf.externalLinter.bufPath": "/opt/homebrew/bin/buf",
+    "protobuf.buf.path": "/opt/homebrew/bin/buf",
+    "protobuf.protoc.path": "/opt/homebrew/bin/protoc",
+    "workbench.colorTheme": "Dark Modern"
+}

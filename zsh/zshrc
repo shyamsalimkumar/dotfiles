@@ -1,0 +1,101 @@
+
+export GOPATH=$HOME/go
+export GOBIN=$GOPATH/bin
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+# gcloud binaries
+export PATH=/opt/homebrew/share/google-cloud-sdk/bin:$PATH
+
+
+autoload -Uz compinit && compinit
+
+# load nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+# export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
+export CLOUDSDK_PYTHON=/opt/homebrew/bin/python3
+# export GOPRIVATE=
+
+alias docker_start='colima start --profile default --activate --arch aarch64 --cpu 10 --disk 48 --memory 8 --mount ${HOME}:w --mount-inotify --ssh-agent --vm-type vz --vz-rosetta -v'
+
+load-nvmrc() {
+  local node_version="$(nvm version)"
+  local nvmrc_path="$(nvm_find_nvmrc)"
+
+  if [ -n "$nvmrc_path" ]; then
+    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+    if [ "$nvmrc_node_version" = "N/A" ]; then
+      nvm install
+    elif [ "$nvmrc_node_version" != "$node_version" ]; then
+      nvm use
+    fi
+  elif [ "$node_version" != "$(nvm version default)" ]; then
+    echo "Reverting to nvm default version"
+    nvm use default
+  fi
+}
+
+function sort_json() {
+  jq 'def sort_arrays:
+      . as $in |
+      if type == "array" then
+          map(sort_arrays) | sort
+      elif type == "object" then
+          with_entries(.value |= sort_arrays)
+      else
+          .
+      end;
+  sort_arrays'
+}
+
+load-nvmrc
+
+# gcloud completion
+source /opt/homebrew/share//google-cloud-sdk/completion.zsh.inc
+
+# kubectl completion
+source <(kubectl completion zsh)
+export PATH="/usr/local/sbin:$PATH"
+export PATH="/usr/local/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
+
+export COLIMA_VM="default"
+export COLIMA_VM_SOCKET="${HOME}/.colima/${COLIMA_VM}/docker.sock"
+export DOCKER_HOST="unix://${COLIMA_VM_SOCKET}"
+
+autoload -Uz colors && colors
+
+set_prompt() {
+  local dt="%D{%d/%m/%y %H:%M:%S}"
+  local userhost="%n@%m"
+  local cwd="%~"
+  local sym="%#"
+
+  # Add virtual environment indicator
+  local venv_indicator=""
+  if [[ -n "$VIRTUAL_ENV" ]]; then
+    venv_indicator="%{$fg[cyan]%}($(basename $VIRTUAL_ENV))%{$reset_color%} "
+  fi
+
+  PROMPT="[$dt] ${venv_indicator}${userhost} ${cwd} ${sym} "
+  RPROMPT=""  # keep right prompt empty like your original
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd set_prompt
+set_prompt   # set immediately for the first prompt
+
+# basictex
+export PATH="/usr/local/texlive/2026basic/bin/universal-darwin:$PATH"
+
+[[ -f ~/.aliases.personal ]] && source ~/.aliases.personal
+[[ -f ~/.aliases.work ]] && source ~/.aliases.work
+
+# keep at the end of the file
+eval "$(direnv hook zsh)"
+export PATH="$HOME/.local/bin:$HOME/.local/bin/personal:$HOME/.local/bin/work:$PATH"
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
