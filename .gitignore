@@ -160,3 +160,13 @@ sftp-config.json
 ### Vim/NeoVim ###
 # NeoVim
 nvim/.config/nvim/plugged/*
+
+### Helpers ###
+helpers/work/*
+!helpers/work/.gitkeep
+
+### Zsh ###
+zsh/aliases.work
+
+### Claude Code ###
+claude/settings.local.json
