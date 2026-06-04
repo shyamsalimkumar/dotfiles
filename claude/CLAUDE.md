@@ -44,6 +44,12 @@
 5. Surface blockers as soon as identified
 6. Capture learnings after corrections
 
+## Git Worktrees
+- Always create worktrees in one of two locations:
+  - `./worktrees/<branch-name>` inside the project repo, OR
+  - `~/worktrees/<project-name>-<branch-name>` in the home directory
+- Prefer `./worktrees/` when the repo's `.gitignore` covers it; use `~/worktrees/` otherwise
+
 ## Core Principles
 - **Simplicity First**: Make every change as simple as possible. Impact minimal code. Don't introduce unnecessary complexity.
 - **No Laziness**: Don't cut corners. No temporary fixes. Senior developer standards apply.
