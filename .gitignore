@@ -155,7 +155,8 @@ sftp-config.json
 [Bb]in
 [Ii]nclude
 [Ll]ib
-[Ss]cripts
+[Ss]cripts/
+!scripts/
 
 ### Vim/NeoVim ###
 # NeoVim
