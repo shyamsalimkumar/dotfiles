@@ -4,8 +4,10 @@ description: Interview the user relentlessly about a plan or design until reachi
 inspiration: YT talk by Matt Pocock
 ---
 
-Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Interview the user relentlessly about every aspect of their plan or design until you reach a shared understanding. Walk down each branch of the design decision tree, resolving dependencies between decisions one-by-one.
 
-Ask the questions one at a time.
-
-If a question can be answered by exploring the codebase, explore the codebase instead.
+Rules:
+1. Ask one question at a time; wait for the user's answer before asking the next.
+2. With each question, state your recommended answer.
+3. If a question can be answered by exploring the codebase, explore instead of asking the user.
+4. Stop when every open decision has an agreed answer, then post a summary listing each decision and its resolution.

@@ -1,88 +1,60 @@
-<!-- imported from: https://github.com/getsentry/skills/tree/main/skills/security-review -->
 ---
 name: security-review
 description: Security code review for vulnerabilities. Use when asked to "security review", "find vulnerabilities", "check for security issues", "audit security", "OWASP review", or review code for injection, XSS, authentication, authorization, cryptography issues. Provides systematic review with confidence-based reporting.
 allowed-tools: Read, Grep, Glob, Bash, Task
-license: LICENSE
 ---
+<!-- imported from: https://github.com/getsentry/skills/tree/main/skills/security-review -->
+<!-- Based on OWASP Cheat Sheet Series (CC BY-SA 4.0) https://cheatsheetseries.owasp.org/ -->
 
-<!--
-Reference material based on OWASP Cheat Sheet Series (CC BY-SA 4.0)
-https://cheatsheetseries.owasp.org/
--->
+# Security Review
 
-# Security Review Skill
-
-Identify exploitable security vulnerabilities in code. Report only **HIGH CONFIDENCE** findings—clear vulnerable patterns with attacker-controlled input.
+Identify exploitable security vulnerabilities in code. Report only HIGH confidence findings: a clearly vulnerable pattern reached by attacker-controlled input.
 
 ## Scope: Research vs. Reporting
 
-**CRITICAL DISTINCTION:**
+- **Report on**: only the specific file, diff, or code the user provided.
+- **Research**: the ENTIRE codebase to build confidence before reporting.
 
-- **Report on**: Only the specific file, diff, or code provided by the user
-- **Research**: The ENTIRE codebase to build confidence before reporting
-
-Before flagging any issue, you MUST research the codebase to understand:
-- Where does this input actually come from? (Trace data flow)
-- Is there validation/sanitization elsewhere?
-- How is this configured? (Check settings, config files, middleware)
-- What framework protections exist?
-
-**Do NOT report issues based solely on pattern matching.** Investigate first, then report only what you're confident is exploitable.
+Never report an issue from pattern matching alone. Before flagging anything, research:
+1. Where does this input actually come from? Trace the data flow.
+2. Is it set at deployment (settings, env vars, config files) or from user input?
+3. Is there validation, sanitization, or allowlisting upstream?
+4. Do framework protections apply (auto-escaping, query parameterization, sanitizing middleware/decorators, libraries like DOMPurify or bleach)?
 
 ## Confidence Levels
 
 | Level | Criteria | Action |
 |-------|----------|--------|
 | **HIGH** | Vulnerable pattern + attacker-controlled input confirmed | **Report** with severity |
-| **MEDIUM** | Vulnerable pattern, input source unclear | **Note** as "Needs verification" |
+| **MEDIUM** | Vulnerable pattern, input source unclear | List under **"Needs Verification"** |
 | **LOW** | Theoretical, best practice, defense-in-depth | **Do not report** |
 
 ## Do Not Flag
 
-### General Rules
 - Test files (unless explicitly reviewing test security)
 - Dead code, commented code, documentation strings
 - Patterns using **constants** or **server-controlled configuration**
 - Code paths that require prior authentication to reach (note the auth requirement instead)
 
-### Server-Controlled Values (NOT Attacker-Controlled)
+### Server-Controlled Values (NOT attacker-controlled)
 
-These are configured by operators, not controlled by attackers:
+Set by operators at deployment, not by attackers: framework settings (`settings.API_URL`, `django.conf.settings.*`), environment variables (`os.environ.get('DATABASE_URL')`), config files (`config.yaml`, `app.config['KEY']`), hardcoded constants (`BASE_URL = "https://api.internal"`).
 
-| Source | Example | Why It's Safe |
-|--------|---------|---------------|
-| Django settings | `settings.API_URL`, `settings.ALLOWED_HOSTS` | Set via config/env at deployment |
-| Environment variables | `os.environ.get('DATABASE_URL')` | Deployment configuration |
-| Config files | `config.yaml`, `app.config['KEY']` | Server-side files |
-| Framework constants | `django.conf.settings.*` | Not user-modifiable |
-| Hardcoded values | `BASE_URL = "https://api.internal"` | Compile-time constants |
-
-**SSRF Example - NOT a vulnerability:**
 ```python
-# SAFE: URL comes from Django settings (server-controlled)
-response = requests.get(f"{settings.SEER_AUTOFIX_URL}{path}")
+requests.get(f"{settings.SEER_AUTOFIX_URL}{path}")  # SAFE: URL from settings (server-controlled)
+requests.get(request.GET.get('url'))                # VULNERABLE: URL from request (attacker-controlled)
 ```
 
-**SSRF Example - IS a vulnerability:**
-```python
-# VULNERABLE: URL comes from request (attacker-controlled)
-response = requests.get(request.GET.get('url'))
-```
-
-### Framework-Mitigated Patterns
-Check language guides before flagging. Common false positives:
+### Framework-Mitigated Patterns (safe by default)
 
 | Pattern | Why It's Usually Safe |
 |---------|----------------------|
-| Django `{{ variable }}` | Auto-escaped by default |
-| React `{variable}` | Auto-escaped by default |
-| Vue `{{ variable }}` | Auto-escaped by default |
+| Django `{{ variable }}`, Vue `{{ variable }}`, React `{variable}` | Auto-escaped by default |
 | `User.objects.filter(id=input)` | ORM parameterizes queries |
 | `cursor.execute("...%s", (input,))` | Parameterized query |
 | `innerHTML = "<b>Loading...</b>"` | Constant string, no user input |
 
-**Only flag these when:**
+Flag these ONLY when protection is bypassed:
 - Django: `{{ var|safe }}`, `{% autoescape off %}`, `mark_safe(user_input)`
 - React: `dangerouslySetInnerHTML={{__html: userInput}}`
 - Vue: `v-html="userInput"`
@@ -90,61 +62,32 @@ Check language guides before flagging. Common false positives:
 
 ## Review Process
 
-### 1. Detect Context
+### 1. Identify vulnerability classes for the code type
 
-What type of code am I reviewing?
+| Code Type | Check For |
+|-----------|-----------|
+| API endpoints, routes | Authorization (IDOR, privilege escalation), authentication (sessions, credentials, password storage), injection (SQL, NoSQL, OS command, LDAP, template) |
+| Frontend, templates | XSS (reflected, stored, DOM-based), CSRF |
+| File handling, uploads | Path traversal, upload validation, XXE |
+| Crypto, secrets, tokens | Weak algorithms, key management, weak randomness, secrets exposure, PII in logs |
+| Data serialization | Unsafe deserialization (pickle, YAML, Java, PHP) |
+| External requests | SSRF |
+| Business workflows | Race conditions, workflow bypass |
+| GraphQL, REST design | Mass assignment, missing rate limits, over-exposure |
+| Config, headers, CORS | Misconfiguration, debug mode, insecure defaults, missing headers |
+| CI/CD, dependencies | Supply chain, pipeline security, untrusted actions |
+| Error handling | Fail-open logic, information disclosure |
+| Audit, logging | Missing audit trail, log injection |
+| Modern surfaces | Prototype pollution, LLM prompt injection, WebSocket input |
+| Infrastructure (Dockerfile, K8s/Helm, Terraform, cloud/IAM) | Container privileges, RBAC, exposed secrets, IaC misconfiguration |
 
-| Code Type | Load These References |
-|-----------|----------------------|
-| API endpoints, routes | `authorization.md`, `authentication.md`, `injection.md` |
-| Frontend, templates | `xss.md`, `csrf.md` |
-| File handling, uploads | `file-security.md` |
-| Crypto, secrets, tokens | `cryptography.md`, `data-protection.md` |
-| Data serialization | `deserialization.md` |
-| External requests | `ssrf.md` |
-| Business workflows | `business-logic.md` |
-| GraphQL, REST design | `api-security.md` |
-| Config, headers, CORS | `misconfiguration.md` |
-| CI/CD, dependencies | `supply-chain.md` |
-| Error handling | `error-handling.md` |
-| Audit, logging | `logging.md` |
+Language specifics — Python: Django/Flask/FastAPI patterns; JS/TS: Node/Express/React/Vue/Next.js; Go: Go-specific stdlib and goroutine patterns; Rust: `unsafe` blocks and FFI boundaries; Java: Spring/Java EE patterns.
 
-### 2. Load Language Guide
+### 2. Research each potential issue
 
-Based on file extension or imports:
+Run the numbered 4-point research checklist under "Scope: Research vs. Reporting" against the actual codebase (grep for the input source, config, middleware, validators).
 
-| Indicators | Guide |
-|------------|-------|
-| `.py`, `django`, `flask`, `fastapi` | `languages/python.md` |
-| `.js`, `.ts`, `express`, `react`, `vue`, `next` | `languages/javascript.md` |
-| `.go`, `go.mod` | `languages/go.md` |
-| `.rs`, `Cargo.toml` | `languages/rust.md` |
-| `.java`, `spring`, `@Controller` | `languages/java.md` |
-
-### 3. Load Infrastructure Guide (if applicable)
-
-| File Type | Guide |
-|-----------|-------|
-| `Dockerfile`, `.dockerignore` | `infrastructure/docker.md` |
-| K8s manifests, Helm charts | `infrastructure/kubernetes.md` |
-| `.tf`, Terraform | `infrastructure/terraform.md` |
-| GitHub Actions, `.gitlab-ci.yml` | `infrastructure/ci-cd.md` |
-| AWS/GCP/Azure configs, IAM | `infrastructure/cloud.md` |
-
-### 4. Research Before Flagging
-
-**For each potential issue, research the codebase to build confidence:**
-
-- Where does this value actually come from? Trace the data flow.
-- Is it configured at deployment (settings, env vars) or from user input?
-- Is there validation, sanitization, or allowlisting elsewhere?
-- What framework protections apply?
-
-Only report issues where you have HIGH confidence after understanding the broader context.
-
-### 5. Verify Exploitability
-
-For each potential finding, confirm:
+### 3. Verify exploitability
 
 **Is the input attacker-controlled?**
 
@@ -159,19 +102,13 @@ For each potential finding, confirm:
 | Database content from other users | Framework settings |
 | WebSocket messages | |
 
-**Does the framework mitigate this?**
-- Check language guide for auto-escaping, parameterization
-- Check for middleware/decorators that sanitize
+**Does the framework mitigate it?** Auto-escaping, parameterization, sanitizing middleware/decorators.
 
-**Is there validation upstream?**
-- Input validation before this code
-- Sanitization libraries (DOMPurify, bleach, etc.)
+**Is there validation upstream?** Input validation before this code; sanitization libraries (DOMPurify, bleach, etc.).
 
-### 6. Report HIGH Confidence Only
+### 4. Report HIGH confidence only
 
-Skip theoretical issues. Report only what you've confirmed is exploitable after research.
-
----
+Skip theoretical issues. Report only what you have confirmed is exploitable after research.
 
 ## Severity Classification
 
@@ -181,8 +118,6 @@ Skip theoretical issues. Report only what you've confirmed is exploitable after 
 | **High** | Exploitable with conditions, significant impact | Stored XSS, SSRF to metadata, IDOR to sensitive data |
 | **Medium** | Specific conditions required, moderate impact | Reflected XSS, CSRF on state-changing actions, path traversal |
 | **Low** | Defense-in-depth, minimal direct impact | Missing headers, verbose errors, weak algorithms in non-critical context |
-
----
 
 ## Quick Patterns Reference
 
@@ -216,34 +151,34 @@ AWS_SECRET_ACCESS_KEY = "..."
 private_key = "-----BEGIN"
 ```
 
-### Check Context First (MUST Investigate Before Flagging)
+### Check Context First (MUST investigate before flagging)
 ```
-# SSRF - ONLY if URL is from user input, NOT from settings/config
-requests.get(request.GET['url'])     # FLAG: User-controlled URL
-requests.get(settings.API_URL)       # SAFE: Server-controlled config
-requests.get(f"{settings.BASE}/{x}") # CHECK: Is 'x' user input?
+# SSRF - only if URL is from user input, NOT settings/config
+requests.get(request.GET['url'])     # FLAG: user-controlled URL
+requests.get(settings.API_URL)       # SAFE: server-controlled config
+requests.get(f"{settings.BASE}/{x}") # CHECK: is 'x' user input?
 
-# Path traversal - ONLY if path is from user input
-open(request.GET['file'])            # FLAG: User-controlled path
-open(settings.LOG_PATH)              # SAFE: Server-controlled config
-open(f"{BASE_DIR}/{filename}")       # CHECK: Is 'filename' user input?
+# Path traversal - only if path is from user input
+open(request.GET['file'])            # FLAG: user-controlled path
+open(settings.LOG_PATH)              # SAFE: server-controlled config
+open(f"{BASE_DIR}/{filename}")       # CHECK: is 'filename' user input?
 
-# Open redirect - ONLY if URL is from user input
-redirect(request.GET['next'])        # FLAG: User-controlled redirect
-redirect(settings.LOGIN_URL)         # SAFE: Server-controlled config
+# Open redirect - only if URL is from user input
+redirect(request.GET['next'])        # FLAG: user-controlled redirect
+redirect(settings.LOGIN_URL)         # SAFE: server-controlled config
 
-# Weak crypto - ONLY if used for security purposes
-hashlib.md5(file_content)            # SAFE: File checksums, caching
-hashlib.md5(password)                # FLAG: Password hashing
-random.random()                      # SAFE: Non-security uses (UI, sampling)
-random.random() for token            # FLAG: Security tokens need secrets module
+# Weak crypto - only if used for security purposes
+hashlib.md5(file_content)            # SAFE: checksums, caching
+hashlib.md5(password)                # FLAG: password hashing
+random.random()                      # SAFE: non-security uses (UI, sampling)
+random.random() for token            # FLAG: security tokens need secrets module
 ```
-
----
 
 ## Output Format
 
-```markdown
+Risk Level = highest finding severity; Confidence = High if all findings are HIGH confidence, Mixed if any items land in Needs Verification.
+
+````markdown
 ## Security Review: [File/Component Name]
 
 ### Summary
@@ -269,45 +204,6 @@ random.random() for token            # FLAG: Security tokens need secrets module
 #### [VERIFY-001] [Potential Issue]
 - **Location**: `file.py:456`
 - **Question**: [What needs to be verified]
-```
+````
 
 If no vulnerabilities found, state: "No high-confidence vulnerabilities identified."
-
----
-
-## Reference Files
-
-### Core Vulnerabilities (`references/`)
-| File | Covers |
-|------|--------|
-| `injection.md` | SQL, NoSQL, OS command, LDAP, template injection |
-| `xss.md` | Reflected, stored, DOM-based XSS |
-| `authorization.md` | Authorization, IDOR, privilege escalation |
-| `authentication.md` | Sessions, credentials, password storage |
-| `cryptography.md` | Algorithms, key management, randomness |
-| `deserialization.md` | Pickle, YAML, Java, PHP deserialization |
-| `file-security.md` | Path traversal, uploads, XXE |
-| `ssrf.md` | Server-side request forgery |
-| `csrf.md` | Cross-site request forgery |
-| `data-protection.md` | Secrets exposure, PII, logging |
-| `api-security.md` | REST, GraphQL, mass assignment |
-| `business-logic.md` | Race conditions, workflow bypass |
-| `modern-threats.md` | Prototype pollution, LLM injection, WebSocket |
-| `misconfiguration.md` | Headers, CORS, debug mode, defaults |
-| `error-handling.md` | Fail-open, information disclosure |
-| `supply-chain.md` | Dependencies, build security |
-| `logging.md` | Audit failures, log injection |
-
-### Language Guides (`languages/`)
-- `python.md` - Django, Flask, FastAPI patterns
-- `javascript.md` - Node, Express, React, Vue, Next.js
-- `go.md` - Go-specific security patterns
-- `rust.md` - Rust unsafe blocks, FFI security
-- `java.md` - Spring, Java EE patterns
-
-### Infrastructure (`infrastructure/`)
-- `docker.md` - Container security
-- `kubernetes.md` - K8s RBAC, secrets, policies
-- `terraform.md` - IaC security
-- `ci-cd.md` - Pipeline security
-- `cloud.md` - AWS/GCP/Azure security
