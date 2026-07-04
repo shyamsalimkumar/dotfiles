@@ -18,7 +18,8 @@ cd ~/dotfiles
 3. **Linux** — installs Homebrew prerequisites via `apt-get` if available
 4. **Installs Homebrew** — if not already present
 5. **Runs `brew bundle`** — `Brewfile` (cross-platform) + `Brewfile.mac` (macOS only)
-6. **Creates symlinks** — links all dotfiles into `$HOME`, with OS-aware paths for VS Code
+6. **Installs global npm packages** — from `npm-globals.txt`, if present
+7. **Creates symlinks** — links all dotfiles into `$HOME`, with OS-aware paths for VS Code
 
 ## Brewfiles
 
@@ -26,6 +27,21 @@ cd ~/dotfiles
 |---|---|
 | `Brewfile` | macOS + Linux |
 | `Brewfile.mac` | macOS only (casks, colima, dockutil) |
+
+## npm globals
+
+`npm-globals.txt` tracks global npm packages (one per line), installed via `npm install -g` during setup.
+
+## Syncing packages
+
+Packages installed manually (`brew install`, `npm install -g`) don't update the tracked files automatically. Run the sync script to catch drift:
+
+```bash
+./scripts/sync-packages.sh --dry-run   # preview what would be added
+./scripts/sync-packages.sh             # apply
+```
+
+It appends newly installed Homebrew taps/formulae to `Brewfile`, casks to `Brewfile.mac`, and rewrites `npm-globals.txt` from your current global npm packages. New formulae default to `Brewfile` — move any macOS-only ones to `Brewfile.mac` yourself, since the script can't infer that automatically. Review the diff before committing.
 
 ## Symlinks
 
