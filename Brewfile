@@ -1,5 +1,9 @@
 # Taps
 tap "homebrew/bundle"
+tap "derailed/k9s"
+tap "dewey/tbm"
+tap "homeport/tap"
+tap "theboredteam/boring-notch"
 
 # Shell & core tools
 brew "bash"
@@ -50,8 +54,14 @@ brew "trurl"
 # Database
 brew "libpq"
 brew "pgsync"
+brew "golang-migrate"
 
 # Utilities
 brew "htop"
 brew "imagemagick"
 brew "yt-dlp"
+brew "gawk"
+brew "ghostscript"
+brew "libpcap"
+brew "qemu"
+brew "wget"

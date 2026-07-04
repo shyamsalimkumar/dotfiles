@@ -17,3 +17,8 @@ if [[ "$OS" == "Darwin" ]]; then
   echo "==> Installing macOS-specific packages..."
   brew bundle --file="$DOTFILES_DIR/Brewfile.mac" --no-lock
 fi
+
+if [[ -s "$DOTFILES_DIR/npm-globals.txt" ]] && command -v npm >/dev/null 2>&1; then
+  echo "==> Installing global npm packages..."
+  xargs npm install -g < "$DOTFILES_DIR/npm-globals.txt"
+fi
