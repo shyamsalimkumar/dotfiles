@@ -34,12 +34,19 @@ end
 -- share the same window list but each tracks its own current window, so
 -- a new tab no longer mirrors whatever window the previous tab was on
 -- (plain `tmux attach`/`new -A` would show the exact same window in both).
+-- Joining alone isn't enough, though: a freshly grouped session starts
+-- pointed at whatever window "base" was already on, so two tabs opened
+-- back to back land on the SAME window/pane (same pty) until one of them
+-- navigates elsewhere -- keystrokes in one show up in the other because
+-- it's literally one shell being viewed twice. `; new-window` immediately
+-- creates and switches to a brand-new window on join, so every new tab
+-- gets its own independent pane from the start.
 config.default_prog = {
   "/bin/zsh",
   "-l",
   "-c",
   "--",
-  "tmux has-session -t base 2>/dev/null && exec tmux new-session -t base || exec tmux new-session -s base",
+  "tmux has-session -t base 2>/dev/null && exec tmux new-session -t base \\; new-window || exec tmux new-session -s base",
 }
 
 -- Appearance
@@ -100,16 +107,7 @@ config.mouse_bindings = {
   },
 }
 
--- Cmd+K: clear the screen and scrollback, leaving nothing on the window.
 config.keys = {
-  {
-    key = "k",
-    mods = "CMD",
-    action = wezterm.action.Multiple {
-      wezterm.action.ClearScrollback("ScrollbackAndViewport"),
-      wezterm.action.SendKey { key = "l", mods = "CTRL" },
-    },
-  },
   -- Cmd+/: open the full key-binding reference (`wezterm show-keys`) in a
   -- new tab. Complements the built-in command palette (Cmd+Shift+P), which
   -- only lists actionable commands from the main key table.
