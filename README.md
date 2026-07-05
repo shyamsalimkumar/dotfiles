@@ -83,3 +83,14 @@ To re-run just the symlink step without installing packages:
 ```bash
 ./setupSymlinks.sh
 ```
+
+## Manual step
+
+```bash
+# choose what you need from this
+npx skills add vercel-labs/agent-skills
+# the following might be useful
+# npx skills add vercel-labs/skills@find-skills
+npx skills add anthropics/skills --skill skill-creator -g
+npx skills add kunchenguid/lavish-axi --skill lavish -g
+```

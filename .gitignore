@@ -171,3 +171,12 @@ zsh/aliases.work
 
 ### Claude Code ###
 claude/settings.local.json
+
+# Skills imported locally via `npx skills add` (see README "Manual step") land
+# as symlinks in claude/skills/ — don't track them; re-run the command to
+# recreate them on a fresh machine. .gitignore has no symlink-type matcher,
+# so add each new one's name here.
+claude/skills/skill-creator
+claude/skills/web-design-guidelines
+claude/skills/writing-guidelines
+claude/skills/lavish
