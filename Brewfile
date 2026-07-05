@@ -1,16 +1,22 @@
 # Taps
-tap "homebrew/bundle"
 tap "derailed/k9s"
 tap "dewey/tbm"
 tap "homeport/tap"
 tap "theboredteam/boring-notch"
 
+# Editors
+brew "neovim"
+
 # Shell & core tools
 brew "bash"
 brew "direnv"
+brew "starship"
+brew "tmux"
 brew "tree"
 brew "watchexec"
 brew "zsh"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
 
 # Version managers
 brew "mise"
@@ -28,8 +34,8 @@ brew "awscli"
 brew "cloud-sql-proxy"
 brew "docker"
 brew "docker-compose"
-brew "docker-completion"
 brew "k9s"
+brew "tbm"
 
 # gRPC & Protobuf
 brew "buf"
@@ -45,7 +51,6 @@ brew "transcrypt"
 # Data & APIs
 brew "jq"
 brew "yq"
-brew "python-yq"
 brew "jd"
 brew "dyff"
 brew "hurl"

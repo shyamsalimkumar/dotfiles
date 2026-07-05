@@ -2,6 +2,9 @@
 brew "colima"
 brew "dockutil"
 
+# Fonts
+cask "font-hack-nerd-font"
+
 # macOS Apps
 cask "1password"
 cask "1password-cli"
@@ -19,6 +22,7 @@ cask "rapidapi"
 cask "slack"
 cask "tableplus"
 cask "visual-studio-code"
+cask "wezterm"
 cask "zoom"
 cask "claude-code"
 cask "opensuperwhisper"

@@ -28,5 +28,8 @@
     "protobuf.externalLinter.bufPath": "/opt/homebrew/bin/buf",
     "protobuf.buf.path": "/opt/homebrew/bin/buf",
     "protobuf.protoc.path": "/opt/homebrew/bin/protoc",
-    "workbench.colorTheme": "Dark Modern"
+    "workbench.colorTheme": "Dark Modern",
+    "notebook.output.wordWrap": true,
+    "python.terminal.useEnvFile": true,
+    "editor.accessibilitySupport": "on"
 }

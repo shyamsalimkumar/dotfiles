@@ -17,6 +17,10 @@ Opt-in only: activate only when the user explicitly says "set git rules" or invo
 
 Never run `git push` unprompted. Pushing is fine only when the user explicitly asks for it.
 
+## Never empty commits
+
+Never create an empty commit (`git commit --allow-empty` or a commit with no staged changes). If a task produces no actual changes to commit, say so and skip the commit — do not manufacture a placeholder commit to mark progress.
+
 ## Ask before every task
 
 Before touching git, for every task — even the second one in the same session, never reusing a previous answer:
