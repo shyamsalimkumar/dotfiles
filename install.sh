@@ -14,6 +14,8 @@ echo "==> Setting up dotfiles on $OS..."
 "$DOTFILES_DIR/scripts/setup-xcode.sh"
 "$DOTFILES_DIR/scripts/setup-brew.sh"
 "$DOTFILES_DIR/scripts/install-packages.sh"
+"$DOTFILES_DIR/scripts/setup-projects.sh"
+"$DOTFILES_DIR/scripts/setup-ai-tools.sh"
 "$DOTFILES_DIR/scripts/setup-symlinks.sh"
 
 echo ""

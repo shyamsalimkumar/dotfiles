@@ -57,7 +57,8 @@ config.font = wezterm.font_with_fallback {
   -- "Hack Nerd Font",
 }
 config.font_size = 18.0
-config.color_scheme = color_scheme_for_appearance(wezterm.gui.get_appearance())
+-- config.color_scheme = color_scheme_for_appearance(wezterm.gui.get_appearance())
+-- config.color_scheme = 'Google Dark (Gogh)'
 config.window_background_opacity = window_background_opacity
 config.macos_window_background_blur = 10
 config.window_decorations = "RESIZE"
@@ -67,7 +68,8 @@ config.use_fancy_tab_bar = false
 config.max_fps = 144
 config.animation_fps = 144
 
-config.color_scheme = "rose-pine-moon"
+-- config.color_scheme = "rose-pine-moon"
+config.color_scheme = 'Google Dark (Gogh)'
 -- Override the scheme's selection colors: the default selection background
 -- was too close to the pane background to tell selected text apart.
 config.colors = {
@@ -130,8 +132,8 @@ end
 if is_macos then
   config.window_background_opacity = 0.8
   config.macos_window_background_blur = 50
-  config.font_size = 15.0
-  config.window_frame.font_size = 13.0
+  config.font_size = 12.0
+  config.window_frame.font_size = 10.0
 end
 
 -- Return config to WezTerm

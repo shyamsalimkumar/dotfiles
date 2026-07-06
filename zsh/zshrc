@@ -134,7 +134,7 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
 
 # # keep at the end of the file
-# eval "$(direnv hook zsh)"
+eval "$(direnv hook zsh)"
 # keep at the end of the file
 eval "$(starship init zsh)"
 
