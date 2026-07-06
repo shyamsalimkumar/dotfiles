@@ -1,5 +1,9 @@
 " vim:foldmethod=marker:foldlevel=0
 
+" Dedicated venv for the Python 3 provider (deoplete etc.) — avoids PEP 668
+" "externally-managed-environment" errors from pip installing into system python.
+let g:python3_host_prog = expand('~/.local/share/nvim/venv/bin/python3')
+
 " plugins {{{
 call plug#begin('~/.config/nvim/plugged')
 
