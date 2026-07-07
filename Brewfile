@@ -5,7 +5,10 @@ tap "homeport/tap"
 tap "theboredteam/boring-notch"
 
 # Editors
+brew "fd"
+brew "lazygit"
 brew "neovim"
+brew "ripgrep"
 
 # Shell & core tools
 brew "bash"

@@ -47,13 +47,12 @@ It appends newly installed Homebrew taps/formulae to `Brewfile`, casks to `Brewf
 
 ## Neovim
 
-`neovim` is tracked in `Brewfile`, so `install.sh` installs the binary. `scripts/setup-editors.sh` then handles everything else, in order:
+`neovim`, `ripgrep`, `fd`, and `lazygit` are tracked in `Brewfile`, so `install.sh` installs them. `scripts/setup-editors.sh` then handles everything else, in order:
 
-1. Symlinks `nvim/.config/nvim` → `~/.config/nvim` (config uses [vim-plug](https://github.com/junegunn/vim-plug), vendored at `nvim/.config/nvim/autoload/plug.vim`).
-2. Creates a dedicated Python 3 venv at `~/.local/share/nvim/venv` and installs `pynvim` into it — needed for the `deoplete` plugin's remote-plugin host. Kept out of system Python deliberately: `pip install`-ing into Homebrew's Python fails with a PEP 668 "externally-managed-environment" error, and using `--break-system-packages` risks breaking the Homebrew Python install. `init.vim` points `g:python3_host_prog` at this venv.
-3. Runs `nvim --headless -c 'PlugInstall! --sync' -c 'UpdateRemotePlugins' -c 'qa'` to fetch/update plugins and register remote plugins non-interactively.
+1. Symlinks `nvim/.config/nvim` → `~/.config/nvim`. The config is a [LazyVim](https://www.lazyvim.org/) setup on top of [lazy.nvim](https://github.com/folke/lazy.nvim) — `lua/config/lazy.lua` bootstraps `lazy.nvim` itself (self-clones into `~/.local/share/nvim/lazy` on first run, nothing vendored in this repo), then imports LazyVim's default plugins plus our own specs in `lua/plugins/`: `go.lua` enables LazyVim's Go language extra (`gopls`, formatting, linting, debugging via `nvim-dap-go`, testing via `neotest-golang`), and `colorscheme.lua` sets the `vscode.nvim` theme to match `vscode/settings.json`'s Dark Modern look.
+2. Runs `nvim --headless "+Lazy! sync" +qa` to install/update plugins non-interactively. This also drives `mason.nvim`, which installs Go tooling (`gopls`, `delve`, `goimports`, `gofumpt`, `golangci-lint`, etc.) into `~/.local/share/nvim/mason` — no need to list those in `Brewfile`.
 
-Re-run `./scripts/setup-editors.sh` any time to update plugins or repair the venv.
+`lazy-lock.json` (tracked alongside the config) pins exact plugin commits for reproducible installs. Re-run `./scripts/setup-editors.sh` any time to sync plugins after pulling changes.
 
 ## Symlinks
 

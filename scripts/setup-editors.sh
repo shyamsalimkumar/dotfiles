@@ -30,18 +30,7 @@ link "starship/.config/starship.toml" "$HOME/.config/starship.toml"
 link "vscode/settings.json"           "$VSCODE_DIR/settings.json"
 link "vscode/keybindings.json"        "$VSCODE_DIR/keybindings.json"
 
-# Neovim's Python 3 provider (needed by deoplete etc.) — a dedicated venv avoids
-# PEP 668 "externally-managed-environment" errors from pip installing into system python.
-NVIM_VENV="$HOME/.local/share/nvim/venv"
-if command -v nvim >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
-  if [[ ! -x "$NVIM_VENV/bin/python3" ]]; then
-    echo "  Creating Neovim Python 3 provider venv..."
-    python3 -m venv "$NVIM_VENV"
-  fi
-  "$NVIM_VENV/bin/pip" install --upgrade --quiet pip pynvim
-fi
-
 if command -v nvim >/dev/null 2>&1; then
   echo "  Installing/updating Neovim plugins..."
-  nvim --headless -c 'PlugInstall! --sync' -c 'UpdateRemotePlugins' -c 'qa' 2>&1 | tail -5 || true
+  nvim --headless "+Lazy! sync" +qa 2>&1 | tail -5 || true
 fi

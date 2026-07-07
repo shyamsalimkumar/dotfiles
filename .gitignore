@@ -159,8 +159,8 @@ sftp-config.json
 !scripts/
 
 ### Vim/NeoVim ###
-# NeoVim
-nvim/.config/nvim/plugged/*
+# LazyVim's own bookkeeping (extras toggled via :LazyExtras, version/news markers) — local machine state, not config
+nvim/.config/nvim/lazyvim.json
 
 ### Helpers ###
 helpers/work/*
