@@ -8,17 +8,13 @@ Declarative system configuration for macOS using nix-darwin and home-manager.
 nix/
 ├── flake.nix              # Entry point - dependency wiring only
 ├── darwin.nix             # macOS system configuration
-├── home.nix               # User packages & basic configuration
+├── home.nix               # User packages & shell/git/direnv configuration
 ├── bootstrap.sh           # First-time setup script
 ├── rebuild.sh             # Daily rebuild script
 ├── modules/               # Modular configuration components
-│   ├── shell.nix          # zsh, starship, aliases
-│   ├── editors.nix        # neovim, vim, vscode
-│   ├── development.nix    # go, node, python, tools
-│   ├── kubernetes.nix     # k8s, docker, cloud tools
 │   └── work-profiles.nix  # Multi-company profile logic
 └── profiles/              # Work profile configurations
-    ├── personal.nix       # Always loaded
+    ├── personal.nix       # Placeholder for personal-specific config
     ├── company-a.nix      # Opt-in via local config
     └── company-b.nix      # Opt-in via local config
 ```
@@ -70,6 +66,8 @@ Live-editable configs that don't require rebuilds:
 - Neovim config: Edit `nvim/.config/nvim/` directly
 - Wezterm config: Edit `wezterm/.config/wezterm/` directly
 - Vim config: Edit `vim/vimrc` directly
+- Tmux config: Edit `tmux/.config/tmux/tmux.conf` directly
+- Starship config: Edit `starship/.config/starship.toml` directly (note: overridden by `home.nix` settings when using nix-darwin)
 
 ### macOS System Defaults
 All system preferences declared in `darwin.nix`:

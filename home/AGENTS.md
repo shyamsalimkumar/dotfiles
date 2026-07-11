@@ -152,9 +152,6 @@ Don't ask when:
 
 ---
 
-This file is symlinked to:
-- `~/.claude/CLAUDE.md`
-- `~/.codex/AGENTS.md`
-- `~/.config/opencode/AGENTS.md`
+This file is symlinked to `~/.claude/CLAUDE.md` (via `claude/CLAUDE.md` → `home/AGENTS.md`).
 
-All AI coding assistants read the same instructions for consistency.
+The nix-darwin setup also creates symlinks to `~/.codex/AGENTS.md` and `~/.config/opencode/AGENTS.md` for other AI coding assistants to read the same instructions for consistency.

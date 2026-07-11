@@ -4,17 +4,20 @@ dotfiles
 Personal dotfiles and machine setup for macOS and Linux. Two setup paths available:
 
 1. **Traditional setup** (Homebrew-based): Run `install.sh` for cross-platform dotfiles
-2. **NixOS Darwin setup** (macOS only): See [nix/README.md](nix/README.md) for declarative system configuration
+2. **nix-darwin setup** (macOS only): See [nix/README.md](nix/README.md) for declarative system configuration
 
 ## Quick start (Traditional)
 
 ```bash
 git clone git@github.com:shyamsalimkumar/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+# Copy and edit .gitconfig.local.example with your personal git information
+cp .gitconfig.local.example ~/.gitconfig.local
+# Edit ~/.gitconfig.local with your name and email
 ./install.sh
 ```
 
-For NixOS Darwin setup on macOS, see [nix/README.md](nix/README.md).
+For nix-darwin setup on macOS, see [nix/README.md](nix/README.md).
 
 ## What it does
 
@@ -59,6 +62,19 @@ It appends newly installed Homebrew taps/formulae to `Brewfile`, casks to `Brewf
 
 `lazy-lock.json` (tracked alongside the config) pins exact plugin commits for reproducible installs. Re-run `./scripts/setup-editors.sh` any time to sync plugins after pulling changes.
 
+## Shell configuration
+
+Zsh configuration is in `zsh/zshrc` with shell prompt provided by [Starship](https://starship.rs/). Configuration file: `starship/.config/starship.toml`.
+
+## Tmux
+
+Tmux configuration is in `tmux/.config/tmux/tmux.conf`. Key features:
+- **Prefix key**: `Ctrl+B` (default tmux prefix)
+- Vi-style copy mode
+- Pane splits preserve current path (`|` for horizontal, `-` for vertical)
+- Window list shows directory names for easier identification
+- Pane borders labeled with directory
+
 ## Symlinks
 
 | Repo path | Destination |
@@ -71,11 +87,12 @@ It appends newly installed Homebrew taps/formulae to `Brewfile`, casks to `Brewf
 | `nvim/.config/nvim` | `~/.config/nvim` |
 | `wezterm/.config/wezterm` | `~/.config/wezterm` |
 | `tmux/.config/tmux` | `~/.config/tmux` |
+| `starship/.config/starship.toml` | `~/.config/starship.toml` |
 | `vscode/settings.json` | `~/Library/Application Support/Code/User/settings.json` |
 | `vscode/keybindings.json` | `~/Library/Application Support/Code/User/keybindings.json` |
 | `helpers/personal` | `~/.local/bin/personal` |
 | `helpers/work` | `~/.local/bin/work` |
-| `claude/CLAUDE.md` | `~/.claude/CLAUDE.md` |
+| `home/AGENTS.md` | `~/.claude/CLAUDE.md` (via `claude/CLAUDE.md` symlink) |
 | `claude/settings.json` | `~/.claude/settings.json` |
 | `claude/settings.local.json` | `~/.claude/settings.local.json` (gitignored) |
 | `claude/keybindings.json` | `~/.claude/keybindings.json` |
@@ -97,6 +114,17 @@ Place executable scripts in `helpers/personal/` or `helpers/work/` — both are 
 ## Projects layout
 
 All cloned repos and Go workspace sources live under `~/Projects/<host>/<org>/<repo>` (e.g. `~/Projects/github.com/shyamsalimkumar/dotfiles`) — this is the one canonical checkout location. `scripts/setup-projects.sh` enforces this for Go by making `$GOPATH/src/github.com` a symlink to `~/Projects/github.com`, so `go get`/`go install` and manual clones land in the same place. It refuses to run (and tells you what to do) if it finds a name that exists in both locations already, rather than silently merging or overwriting.
+
+## AI assistant configuration
+
+Global instructions for AI coding assistants are in `home/AGENTS.md`, which is symlinked to `~/.claude/CLAUDE.md` (via `claude/CLAUDE.md`). This file provides workflow guidelines, development standards, and language-specific practices shared across all AI assistants.
+
+Claude-specific settings, keybindings, and skills are in the `claude/` directory:
+- `claude/settings.json`: Claude Code settings
+- `claude/keybindings.json`: Keyboard shortcuts
+- `claude/skills/`: Custom skills (18 skills including ai-review, tdd, security-review, etc.)
+
+All Claude configuration is symlinked to `~/.claude/` during setup.
 
 ## AI assistant tools
 
