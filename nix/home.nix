@@ -259,8 +259,8 @@
   # Git configuration
   programs.git = {
     enable = true;
-    userName = "Shyam Kumar";
-    userEmail = "shyam@example.com";  # TODO: Update from .gitconfig.local
+    # Note: userName and userEmail should be configured in ~/.gitconfig.local
+    # See README Prerequisites section for setup instructions
 
     extraConfig = {
       core = {
@@ -329,7 +329,8 @@
     ".codex/AGENTS.md".source = ../home/AGENTS.md;
     ".config/opencode/AGENTS.md".source = ../home/AGENTS.md;
 
-    # SSH config
+    # SSH config - generic host aliases only
+    # For host-specific settings, use ~/.ssh/config.local (not tracked)
     ".ssh/config".source = ../.ssh/config;
 
     # Git configuration examples (user creates .gitconfig.local)

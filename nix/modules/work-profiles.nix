@@ -32,17 +32,13 @@ in
     };
   };
 
-  config = mkMerge [
-    # Company A profile
-    (mkIf cfg.companyA.enable {
-      # Import Company A specific configuration
-      home-manager.users.${user} = import ../profiles/company-a.nix;
-    })
+  config = {
+    home-manager.users.${user} = mkMerge [
+      # Company A profile
+      (mkIf cfg.companyA.enable (import ../profiles/company-a.nix))
 
-    # Company B profile
-    (mkIf cfg.companyB.enable {
-      # Import Company B specific configuration
-      home-manager.users.${user} = import ../profiles/company-b.nix;
-    })
-  ];
+      # Company B profile
+      (mkIf cfg.companyB.enable (import ../profiles/company-b.nix))
+    ];
+  };
 }

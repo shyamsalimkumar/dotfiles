@@ -27,8 +27,9 @@ nix/
 
 Before running bootstrap, ensure you have:
 
-1. **Git configured locally**: Copy `.gitconfig.local.example` to `~/.gitconfig.local` and update with your personal information:
+1. **Git configured locally**: Copy `.gitconfig.local.example` (from the repo root) to `~/.gitconfig.local` and update with your personal information:
    ```bash
+   # From the dotfiles repo root:
    cp .gitconfig.local.example ~/.gitconfig.local
    # Edit ~/.gitconfig.local with your name and email
    ```
