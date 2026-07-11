@@ -23,6 +23,19 @@ nix/
     └── company-b.nix      # Opt-in via local config
 ```
 
+## Prerequisites
+
+Before running bootstrap, ensure you have:
+
+1. **Git configured locally**: Copy `.gitconfig.local.example` to `~/.gitconfig.local` and update with your personal information:
+   ```bash
+   cp .gitconfig.local.example ~/.gitconfig.local
+   # Edit ~/.gitconfig.local with your name and email
+   ```
+   The main `.gitconfig` includes this file via `[include] path = ~/.gitconfig.local`.
+
+2. **Xcode Command Line Tools** (macOS): Will be installed automatically by bootstrap if missing
+
 ## Quick Start
 
 ### First-time setup

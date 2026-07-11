@@ -1,3 +1,7 @@
+# Local Git configuration (gitignored)
+# Copy this file to ~/.gitconfig.local and customize with your personal information
+# The main .gitconfig includes this file via: [include] path = ~/.gitconfig.local
+
 [user]
 	name = Shyam S Kumar
 	email = shyam.salim.kumar@gmail.com

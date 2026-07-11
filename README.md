@@ -1,15 +1,20 @@
 dotfiles
 ========
 
-Personal dotfiles and machine setup for macOS and Linux. Clone and run `install.sh` to go from a fresh machine to a fully configured environment.
+Personal dotfiles and machine setup for macOS and Linux. Two setup paths available:
 
-## Quick start
+1. **Traditional setup** (Homebrew-based): Run `install.sh` for cross-platform dotfiles
+2. **NixOS Darwin setup** (macOS only): See [nix/README.md](nix/README.md) for declarative system configuration
+
+## Quick start (Traditional)
 
 ```bash
 git clone git@github.com:shyamsalimkumar/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./install.sh
 ```
+
+For NixOS Darwin setup on macOS, see [nix/README.md](nix/README.md).
 
 ## What it does
 
