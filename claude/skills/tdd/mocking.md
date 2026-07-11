@@ -19,7 +19,7 @@ At system boundaries, design interfaces that are easy to mock:
 
 **1. Use dependency injection**
 
-Pass external dependencies in rather than creating them internally.
+Pass external dependencies in rather than creating them internally:
 
 ### TypeScript
 
@@ -70,7 +70,7 @@ func (f *fakePaymentClient) Charge(amount int64) error {
 
 **2. Prefer SDK-style interfaces over generic fetchers**
 
-Create specific functions for each external operation instead of one generic function with conditional logic.
+Create specific functions for each external operation instead of one generic function with conditional logic:
 
 ### TypeScript
 
@@ -110,7 +110,7 @@ type Store interface {
 
 The SDK / narrow-interface approach means:
 
-- Each fake returns one specific shape
+- Each fake/mock returns one specific shape
 - No conditional logic in test setup
-- Easier to see which operations a test exercises
-- Compiler enforces the contract
+- Easier to see which operations/endpoints a test exercises
+- Compiler enforces the contract (Go) / type safety per endpoint (TypeScript)
