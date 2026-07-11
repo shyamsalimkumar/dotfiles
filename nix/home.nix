@@ -279,14 +279,8 @@
 
       # Multi-company work profile support via includeIf
       # Automatically switches git config based on directory
-      includeIf = {
-        "gitdir:~/work/company-a/" = {
-          path = "~/.gitconfig-company-a";
-        };
-        "gitdir:~/work/company-b/" = {
-          path = "~/.gitconfig-company-b";
-        };
-      };
+      includeIf."gitdir:~/work/company-a/".path = "~/.gitconfig-company-a";
+      includeIf."gitdir:~/work/company-b/".path = "~/.gitconfig-company-b";
     };
 
     # Git aliases

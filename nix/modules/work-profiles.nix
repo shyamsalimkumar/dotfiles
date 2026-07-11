@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, user, ... }:
 
 with lib;
 
@@ -8,10 +8,11 @@ in
 {
   # Import local configuration if it exists (gitignored)
   # This file allows enabling/disabling profiles without committing changes
-  imports = [
-    (mkIf (builtins.pathExists ~/.config/nix-darwin/local.nix)
-      ~/.config/nix-darwin/local.nix)
-  ];
+  imports =
+    let
+      localConfigPath = "/Users/${user}/.config/nix-darwin/local.nix";
+    in
+    lib.optional (builtins.pathExists localConfigPath) localConfigPath;
 
   options.profiles = {
     companyA = {
@@ -35,13 +36,13 @@ in
     # Company A profile
     (mkIf cfg.companyA.enable {
       # Import Company A specific configuration
-      home-manager.users.${config.user} = import ../profiles/company-a.nix;
+      home-manager.users.${user} = import ../profiles/company-a.nix;
     })
 
     # Company B profile
     (mkIf cfg.companyB.enable {
       # Import Company B specific configuration
-      home-manager.users.${config.user} = import ../profiles/company-b.nix;
+      home-manager.users.${user} = import ../profiles/company-b.nix;
     })
   ];
 }

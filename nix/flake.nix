@@ -22,6 +22,7 @@
         system = "aarch64-darwin";
         modules = [
           ./darwin.nix
+          ./modules/work-profiles.nix
           home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
