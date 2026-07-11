@@ -44,7 +44,6 @@
     # Custom taps
     taps = [
       "derailed/k9s"
-      "dewey/tbm"
       "homeport/tap"
       "theboredteam/boring-notch"
     ];
@@ -54,13 +53,9 @@
       # Version managers (shell-based, not suitable for Nix)
       "pyenv"
 
-      # Custom tap packages
-      "tbm"  # from dewey/tbm
-
       # Tools not in nixpkgs
       "transcrypt"  # Git encryption
       "trurl"       # URL tool
-      "pgsync"      # Database sync tool
 
       # macOS-specific formulae
       "colima"      # Docker runtime for macOS
@@ -83,20 +78,14 @@
 
       # Cloud & DevOps
       "google-cloud-cli"  # gcloud CLI (formerly gcloud-sdk)
-      "postico"           # PostgreSQL client
-      "tableplus"         # Database client
-      "postman"           # API testing
-      "rapidapi"          # API testing
 
       # Productivity
-      "linear"            # Project management
       "slack"             # Team communication
       "caffeine"          # Prevent sleep
       "boring-notch"      # Dynamic Island for macOS
 
       # Utilities
       "google-chrome"     # Web browser
-      "zoom"              # Video conferencing
       "basictex"          # Minimal TeX distribution
       "opensuperwhisper"  # Speech recognition
 

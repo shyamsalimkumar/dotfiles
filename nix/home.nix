@@ -64,9 +64,6 @@
 
     # Database Tools
     postgresql  # includes libpq
-    # Note: pgsync not in nixpkgs, using Homebrew
-    # Note: golang-migrate available as migrate
-    migrate
 
     # Utilities
     htop
@@ -91,48 +88,18 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
-    # Basic aliases (from zsh/aliases.personal)
-    shellAliases = {
-      # Navigation
-      ".." = "cd ..";
-      "..." = "cd ../..";
-      "...." = "cd ../../..";
-
-      # ls aliases
-      "ls" = "ls -G";
-      "ll" = "ls -lah";
-      "la" = "ls -A";
-      "l" = "ls -CF";
-
-      # Git shortcuts
-      "g" = "git";
-      "gs" = "git status";
-      "ga" = "git add";
-      "gc" = "git commit";
-      "gp" = "git push";
-      "gl" = "git pull";
-      "gd" = "git diff";
-      "gco" = "git checkout";
-      "gb" = "git branch";
-      "glog" = "git log --oneline --decorate --graph";
-
-      # Directory shortcuts
-      "projects" = "cd ~/Projects";
-      "github" = "cd ~/Projects/github.com";
-
-      # Safety
-      "rm" = "rm -i";
-      "cp" = "cp -i";
-      "mv" = "mv -i";
-
-      # Reference aliases from kunchenguid (commented for documentation):
-      # "cc" = "claude --dangerously-skip-permissions";
-      # "co" = "codex --full-auto";
-      # "m" = "git switch main";
-    };
-
     # Additional shell configuration
     initExtra = ''
+      # Load personal and work aliases
+      source ${../zsh/aliases.personal}
+      source ${../zsh/aliases.work}
+      [[ -f ${../zsh/aliases.work.local} ]] && source ${../zsh/aliases.work.local}
+
+      # Load personal and work functions
+      source ${../zsh/functions.personal}
+      source ${../zsh/functions.work}
+      [[ -f ${../zsh/functions.work.local} ]] && source ${../zsh/functions.work.local}
+
       # Starship prompt
       eval "$(starship init zsh)"
 
@@ -143,22 +110,6 @@
 
       # Auto-load .nvmrc if present
       autoload -U add-zsh-hook
-      load-nvmrc() {
-        local node_version="$(nvm version)"
-        local nvmrc_path="$(nvm_find_nvmrc)"
-
-        if [ -n "$nvmrc_path" ]; then
-          local nvmrc_node_version=$(nvm version "$(cat "''${nvmrc_path}")")
-
-          if [ "$nvmrc_node_version" = "N/A" ]; then
-            nvm install
-          elif [ "$nvmrc_node_version" != "$node_version" ]; then
-            nvm use
-          fi
-        elif [ "$node_version" != "$(nvm version default)" ]; then
-          nvm use default
-        fi
-      }
       add-zsh-hook chpwd load-nvmrc
       load-nvmrc
 
@@ -205,31 +156,6 @@
       export LESS_TERMCAP_so=$'\e[01;33m'
       export LESS_TERMCAP_ue=$'\e[0m'
       export LESS_TERMCAP_us=$'\e[1;4;31m'
-
-      # Work profile functions (explicit loading, never auto-load)
-      work-a() {
-        export AWS_PROFILE=company-a
-        export GCP_PROJECT=company-a-project
-        export SSH_AUTH_SOCK=~/.ssh/company-a-agent.sock
-        echo "✓ Company A environment loaded"
-      }
-
-      work-b() {
-        export AWS_PROFILE=company-b
-        export GCP_PROJECT=company-b-project
-        export SSH_AUTH_SOCK=~/.ssh/company-b-agent.sock
-        echo "✓ Company B environment loaded"
-      }
-
-      work-clear() {
-        unset AWS_PROFILE GCP_PROJECT SSH_AUTH_SOCK
-        echo "✓ Work environments cleared"
-      }
-
-      # Helper function for sorting JSON
-      sort_json() {
-        jq -S '.' "$1"
-      }
     '';
   };
 

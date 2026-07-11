@@ -167,7 +167,9 @@ helpers/work/*
 !helpers/work/.gitkeep
 
 ### Zsh ###
-zsh/aliases.work
+# Company-specific work configurations (use .example files as templates)
+zsh/aliases.work.local
+zsh/functions.work.local
 
 ### Homebrew ###
 Brewfile*.lock.json

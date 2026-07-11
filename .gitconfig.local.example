@@ -3,5 +3,5 @@
 # The main .gitconfig includes this file via: [include] path = ~/.gitconfig.local
 
 [user]
-	name = Your Name
+	name = Your Full Name
 	email = your.email@example.com
