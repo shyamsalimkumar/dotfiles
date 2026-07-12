@@ -109,6 +109,30 @@ config.mouse_bindings = {
   },
 }
 
+-- Cmd+V: WezTerm only speaks the text-only OSC 52 clipboard protocol, so a
+-- plain paste can't hand image bytes to apps like Claude Code that want to
+-- read an image from the clipboard (github.com/wezterm/wezterm/issues/7272).
+-- Shell out to `pngpaste` (brew install pngpaste) first: if the clipboard
+-- holds an image, save it to a temp file and paste the file path as text
+-- instead; otherwise fall through to a normal text paste.
+local function paste_image_or_clipboard(window, pane)
+  local image_dir = "/tmp/wezterm-clipboard-images"
+  os.execute("mkdir -p " .. image_dir)
+  local path = image_dir .. "/paste-" .. os.time() .. ".png"
+  -- WezTerm.app is launched by macOS (not a login shell), so os.execute's
+  -- PATH won't include Homebrew's /opt/homebrew/bin -- use the absolute
+  -- path so this doesn't silently no-op as "command not found".
+  local ok = os.execute("/opt/homebrew/bin/pngpaste " .. path .. " >/dev/null 2>&1")
+  if ok then
+    window:perform_action(wezterm.action.SendString(path), pane)
+    window:toast_notification("WezTerm", "Image pasted: " .. path, nil, 4000)
+  else
+    os.remove(path)
+    window:perform_action(wezterm.action.PasteFrom("Clipboard"), pane)
+    window:toast_notification("WezTerm", "No image on clipboard, pasted text instead", nil, 4000)
+  end
+end
+
 config.keys = {
   -- Cmd+/: open the full key-binding reference (`wezterm show-keys`) in a
   -- new tab. Complements the built-in command palette (Cmd+Shift+P), which
@@ -120,6 +144,11 @@ config.keys = {
       domain = "CurrentPaneDomain",
       args = { "/bin/zsh", "-l", "-c", "wezterm show-keys | less" },
     },
+  },
+  {
+    key = "v",
+    mods = "CMD",
+    action = wezterm.action_callback(paste_image_or_clipboard),
   },
 }
 
