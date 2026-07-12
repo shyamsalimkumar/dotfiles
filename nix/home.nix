@@ -52,6 +52,8 @@
     gh
     git
     git-lfs
+    delta           # Syntax-highlighting pager for git diff
+    difftastic      # Structural diff tool
     # Note: transcrypt not in nixpkgs, using Homebrew
 
     # Data & APIs
@@ -202,6 +204,18 @@
       push = {
         default = "simple";
       };
+
+      # Delta - syntax-highlighting pager for git diff
+      core.pager = "delta";
+      interactive.diffFilter = "delta --color-only";
+      delta = {
+        navigate = true;
+        light = false;
+        side-by-side = true;
+        line-numbers = true;
+      };
+      merge.conflictstyle = "diff3";
+      diff.colorMoved = "default";
 
       # Multi-company work profile support via includeIf
       # Automatically switches git config based on directory

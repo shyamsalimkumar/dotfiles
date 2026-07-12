@@ -70,27 +70,26 @@
 
       # Development Tools
       "visual-studio-code"
-      "iterm2"
       # Note: wezterm IS in nixpkgs, but using cask for now for consistency
       "wezterm"
-      "meld"              # Visual diff tool
       "claude-code"       # AI coding assistant
 
       # Cloud & DevOps
       "google-cloud-cli"  # gcloud CLI (formerly gcloud-sdk)
 
       # Productivity
-      "slack"             # Team communication
       "caffeine"          # Prevent sleep
       "boring-notch"      # Dynamic Island for macOS
 
       # Utilities
       "google-chrome"     # Web browser
-      "basictex"          # Minimal TeX distribution
       "opensuperwhisper"  # Speech recognition
 
       # Fonts
       "font-hack-nerd-font"
+
+      # Work-optional applications (install manually if needed):
+      # "slack"           # Team communication (work-specific)
     ];
   };
 
