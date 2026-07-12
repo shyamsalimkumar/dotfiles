@@ -208,16 +208,6 @@
       includeIf."gitdir:~/work/company-a/".path = "~/.gitconfig-company-a";
       includeIf."gitdir:~/work/company-b/".path = "~/.gitconfig-company-b";
     };
-
-    # Git aliases
-    aliases = {
-      st = "status";
-      ci = "commit";
-      br = "branch";
-      co = "checkout";
-      df = "diff";
-      lg = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
-    };
   };
 
   # Direnv configuration

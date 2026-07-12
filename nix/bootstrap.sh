@@ -38,4 +38,7 @@ echo -e "${YELLOW}Running first darwin-rebuild...${NC}"
 nix run nix-darwin -- switch --flake "$SCRIPT_DIR#mac"
 
 echo -e "${GREEN}Bootstrap complete!${NC}"
-echo -e "${YELLOW}Please restart your terminal or run: source ~/.zshrc${NC}"
+echo ""
+echo -e "${YELLOW}Next steps:${NC}"
+echo "  1. Run: $DOTFILES_DIR/scripts/post-install.sh"
+echo "  2. Restart your terminal to load the new configuration"
