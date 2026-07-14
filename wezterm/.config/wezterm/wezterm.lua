@@ -150,6 +150,14 @@ config.keys = {
     mods = "CMD",
     action = wezterm.action_callback(paste_image_or_clipboard),
   },
+  -- Shift+Enter: WezTerm doesn't distinguish this from plain Enter by
+  -- default. Send ESC+CR, which Claude Code (and other readline-style
+  -- apps) interpret as a soft newline instead of submitting.
+  {
+    key = "Enter",
+    mods = "SHIFT",
+    action = wezterm.action.SendString "\x1b\r",
+  },
 }
 
 if is_windows then
@@ -164,6 +172,19 @@ if is_macos then
   config.font_size = 12.0
   config.window_frame.font_size = 10.0
 end
+
+-- Open the initial window sized to leave a fixed pixel gap around the
+-- screen edges (20px left/right, 100px top/bottom) instead of a
+-- percentage-of-screen size, so the gap stays constant across monitors.
+wezterm.on("gui-startup", function(cmd)
+  local screen = wezterm.gui.screens().active
+  local gap_x, gap_y = 20, 100
+
+  local tab, pane, window = wezterm.mux.spawn_window(cmd or {})
+  local gui_window = window:gui_window()
+  gui_window:set_inner_size(screen.width - gap_x * 2, screen.height - gap_y * 2)
+  gui_window:set_position(screen.x + gap_x, screen.y + gap_y)
+end)
 
 -- Return config to WezTerm
 return config
