@@ -173,5 +173,18 @@ if is_macos then
   config.window_frame.font_size = 10.0
 end
 
+-- Open the initial window sized to leave a fixed pixel gap around the
+-- screen edges (20px left/right, 100px top/bottom) instead of a
+-- percentage-of-screen size, so the gap stays constant across monitors.
+wezterm.on("gui-startup", function(cmd)
+  local screen = wezterm.gui.screens().active
+  local gap_x, gap_y = 20, 100
+
+  local tab, pane, window = wezterm.mux.spawn_window(cmd or {})
+  local gui_window = window:gui_window()
+  gui_window:set_inner_size(screen.width - gap_x * 2, screen.height - gap_y * 2)
+  gui_window:set_position(screen.x + gap_x, screen.y + gap_y)
+end)
+
 -- Return config to WezTerm
 return config
