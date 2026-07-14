@@ -150,6 +150,14 @@ config.keys = {
     mods = "CMD",
     action = wezterm.action_callback(paste_image_or_clipboard),
   },
+  -- Shift+Enter: WezTerm doesn't distinguish this from plain Enter by
+  -- default. Send ESC+CR, which Claude Code (and other readline-style
+  -- apps) interpret as a soft newline instead of submitting.
+  {
+    key = "Enter",
+    mods = "SHIFT",
+    action = wezterm.action.SendString "\x1b\r",
+  },
 }
 
 if is_windows then
