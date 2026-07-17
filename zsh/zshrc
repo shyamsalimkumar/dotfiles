@@ -20,6 +20,8 @@ export CLOUDSDK_PYTHON=/opt/homebrew/bin/python3
 # export GOPRIVATE=
 
 alias docker_start='colima start --profile default --activate --arch aarch64 --cpu 10 --disk 48 --memory 8 --mount ${HOME}:w --mount-inotify --ssh-agent --vm-type vz --vz-rosetta -v'
+alias docker_prune='docker image prune -a -f'
+alias docker_prune_hard='docker system prune -a --volumes -f'
 
 load-nvmrc() {
   local node_version="$(nvm version)"
