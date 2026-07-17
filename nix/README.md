@@ -1,6 +1,10 @@
-# NixOS Darwin Configuration
+# Nix Configuration (macOS + Linux/WSL)
 
-Declarative system configuration for macOS using nix-darwin and home-manager.
+Declarative system configuration using nix-darwin + home-manager on macOS, and
+standalone home-manager on native Linux or any WSL2 distro. `home.nix` (packages,
+shell, git, direnv config) is shared between both platforms; only the handful of
+macOS-only bits (Homebrew paths, Colima, VSCode config path) are guarded per
+platform.
 
 ## Structure
 
@@ -8,11 +12,13 @@ Declarative system configuration for macOS using nix-darwin and home-manager.
 nix/
 ├── flake.nix              # Entry point - dependency wiring only
 ├── darwin.nix             # macOS system configuration
-├── home.nix               # User packages & shell/git/direnv configuration
-├── bootstrap.sh           # First-time setup script
-├── rebuild.sh             # Daily rebuild script
+├── home.nix               # User packages & shell/git/direnv configuration (shared)
+├── bootstrap.sh           # First-time setup script (macOS)
+├── rebuild.sh             # Daily rebuild script (macOS)
+├── bootstrap-linux.sh     # First-time setup script (Linux/WSL)
+├── rebuild-linux.sh       # Daily rebuild script (Linux/WSL)
 ├── modules/               # Modular configuration components
-│   └── work-profiles.nix  # Multi-company profile logic
+│   └── work-profiles.nix  # Multi-company profile logic (macOS only, see below)
 └── profiles/              # Work profile configurations
     ├── personal.nix       # Placeholder for personal-specific config
     ├── company-a.nix      # Opt-in via local config
@@ -35,8 +41,9 @@ Before running bootstrap, ensure you have:
 
 ## Quick Start
 
-### First-time setup
+### macOS
 
+First-time setup:
 ```bash
 cd nix
 ./bootstrap.sh
@@ -47,8 +54,7 @@ This will:
 2. Create symlink: `~/.config/nix-darwin` → `nix/`
 3. Run first `darwin-rebuild switch`
 
-### Daily rebuild
-
+Daily rebuild:
 ```bash
 cd nix
 ./rebuild.sh
@@ -58,6 +64,49 @@ Or from anywhere:
 ```bash
 darwin-rebuild switch --flake ~/.config/nix-darwin#mac
 ```
+
+### Linux / WSL
+
+This targets **home-manager only** — it manages your shell, dotfiles, and CLI
+tools, not the whole system. Works the same whether it's a native Linux box or
+a WSL2 distro (Ubuntu, Debian, etc.) — WSL2 is just a Linux userland, there's
+nothing Windows-side to configure. Just make sure Nix can be installed inside
+that Linux environment (true for any standard WSL2 distro).
+
+First-time setup:
+```bash
+cd nix
+./bootstrap-linux.sh
+```
+
+This will:
+1. Install Determinate Nix (if not already installed)
+2. Create symlink: `~/.config/home-manager` → `nix/`
+3. Run first `home-manager switch --flake .#linux`
+
+Daily rebuild:
+```bash
+cd nix
+./rebuild-linux.sh
+```
+
+Or from anywhere:
+```bash
+home-manager switch --flake ~/.config/home-manager#linux
+```
+
+**Known gaps on Linux/WSL** (not covered by this branch):
+- Multi-company work profiles (`modules/work-profiles.nix`) are wired through
+  nix-darwin's `home-manager.users.<user>` option and a hardcoded `/Users/...`
+  local-config path — they only apply to the macOS output for now.
+- Only `x86_64-linux` is wired up in `flake.nix`. Add `aarch64-linux` the same
+  way if you ever need it on ARM.
+- This does not manage the Linux system itself (packages outside your home
+  directory, services, etc.). If you want the whole WSL2 distro declaratively
+  managed the way `darwin.nix` manages macOS, look into
+  [NixOS-WSL](https://github.com/nix-community/NixOS-WSL) — that replaces your
+  WSL distro with actual NixOS and lets you write a real `configuration.nix`
+  for it. That's a bigger, separate step from what's set up here.
 
 ## Key Features
 
@@ -79,8 +128,9 @@ All system preferences declared in `darwin.nix`:
 - Desktop icons hidden
 - Trackpad tap-to-click
 
-### Multi-Company Work Profiles
+### Multi-Company Work Profiles (macOS only)
 Supports working with multiple companies simultaneously with isolated configurations.
+Not yet available on the Linux/WSL output — see "Known gaps" above.
 
 #### Setup
 
@@ -166,14 +216,20 @@ Homebrew is used only for packages unavailable in nixpkgs:
 ## Validation
 
 ```bash
-# Check flake validity
+# Check flake validity (evaluates both platforms)
 nix flake check
 
-# Build without switching
+# macOS: build without switching
 nix build .#darwinConfigurations.mac.system
 
-# Preview changes
+# macOS: preview changes
 darwin-rebuild build --flake ~/.config/nix-darwin#mac
+
+# Linux/WSL: build without switching
+nix build .#homeConfigurations.linux.activationPackage
+
+# Linux/WSL: preview changes
+home-manager build --flake ~/.config/home-manager#linux
 ```
 
 ## Rollback
@@ -192,4 +248,5 @@ darwin-rebuild --rollback
 - nix-darwin: https://github.com/LnL7/nix-darwin
 - home-manager: https://github.com/nix-community/home-manager
 - nixpkgs: https://search.nixos.org/packages
+- NixOS-WSL (full system-level alternative for WSL2): https://github.com/nix-community/NixOS-WSL
 - Reference implementation: kunchenguid/dotfiles

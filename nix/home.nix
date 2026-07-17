@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   # Home Manager state version
@@ -129,22 +129,26 @@
       # Local bin directories
       export PATH="$HOME/.local/bin:$HOME/.local/bin/personal:$HOME/.local/bin/work:$PATH"
 
-      # Homebrew path (for packages not in Nix)
-      export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        # Homebrew path (for packages not in Nix)
+        export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
-      # gcloud SDK path (if installed via Homebrew)
-      if [ -f "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc" ]; then
-        source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
-      fi
-      if [ -f "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc" ]; then
-        source "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc"
-      fi
+        # gcloud SDK path (if installed via Homebrew)
+        if [ -f "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc" ]; then
+          source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
+        fi
+        if [ -f "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc" ]; then
+          source "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc"
+        fi
+      ''}
 
       # kubectl completion
       command -v kubectl &> /dev/null && source <(kubectl completion zsh)
 
-      # Colima Docker configuration
-      export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        # Colima Docker configuration
+        export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+      ''}
 
       # Colorize output
       export CLICOLOR=1
@@ -245,10 +249,6 @@
     # Tmux config
     ".config/tmux".source = ../tmux/.config/tmux;
 
-    # VSCode settings (NAVS plugins)
-    "Library/Application Support/Code/User/settings.json".source = ../vscode/settings.json;
-    "Library/Application Support/Code/User/keybindings.json".source = ../vscode/keybindings.json;
-
     # Claude settings and skills
     ".claude/settings.json".source = ../claude/settings.json;
     ".claude/keybindings.json".source = ../claude/keybindings.json;
@@ -265,5 +265,14 @@
 
     # Git configuration examples (user creates .gitconfig.local)
     ".gitconfig.local.example".source = ../.gitconfig.local.example;
+  }
+  # VSCode settings (NAVS plugins) - path differs between macOS and Linux
+  // lib.optionalAttrs pkgs.stdenv.isDarwin {
+    "Library/Application Support/Code/User/settings.json".source = ../vscode/settings.json;
+    "Library/Application Support/Code/User/keybindings.json".source = ../vscode/keybindings.json;
+  }
+  // lib.optionalAttrs pkgs.stdenv.isLinux {
+    ".config/Code/User/settings.json".source = ../vscode/settings.json;
+    ".config/Code/User/keybindings.json".source = ../vscode/keybindings.json;
   };
 }
