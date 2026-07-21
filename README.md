@@ -121,4 +121,7 @@ npx skills add vercel-labs/agent-skills
 # npx skills add vercel-labs/skills@find-skills
 npx skills add anthropics/skills --skill skill-creator -g
 npx skills add kunchenguid/lavish-axi --skill lavish -g
+npx skills add mattpocock/skills --skill codebase-design -g
+npx skills add mattpocock/skills --skill teach -g
+npx skills add multica-ai/andrej-karpathy-skills --skill karpathy-guidelines -g
 ```
