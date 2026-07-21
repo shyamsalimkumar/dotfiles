@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Post-installation tasks for Nix-based dotfiles
-# Run this after: darwin-rebuild switch --flake ~/.config/nix-darwin
+# Run this after: darwin-rebuild switch --flake ~/.config/nix-darwin (macOS)
+# or: home-manager switch --flake ~/.config/home-manager (Linux/WSL)
 
 set -euo pipefail
 
+OS="$(uname -s)"
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "==> Running post-installation tasks..."
@@ -80,10 +82,17 @@ echo "==> Post-installation complete!"
 echo ""
 echo "Next steps:"
 echo "  1. Restart your terminal to load the new configuration"
-echo "  2. Run 'darwin-rebuild switch --flake ~/.config/nix-darwin' to apply Nix changes"
+if [[ "$OS" == "Darwin" ]]; then
+  echo "  2. Run 'darwin-rebuild switch --flake ~/.config/nix-darwin' to apply Nix changes"
+else
+  echo "  2. Run 'home-manager switch --flake ~/.config/home-manager' to apply Nix changes"
+fi
 echo "  3. For work profiles, copy zsh/functions.work.local.example to zsh/functions.work.local"
-echo ""
-echo "NOTE: If you see Homebrew tap trust warnings, you may need to manually trust taps:"
-echo "  brew trust --tap derailed/k9s"
-echo "  brew trust --tap homeport/tap"
-echo "  brew trust --tap theboredteam/boring-notch"
+
+if [[ "$OS" == "Darwin" ]]; then
+  echo ""
+  echo "NOTE: If you see Homebrew tap trust warnings, you may need to manually trust taps:"
+  echo "  brew trust --tap derailed/k9s"
+  echo "  brew trust --tap homeport/tap"
+  echo "  brew trust --tap theboredteam/boring-notch"
+fi

@@ -5,24 +5,31 @@ set -euo pipefail
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OS="$(uname -s)"
 
-if [[ "$OS" != "Darwin" ]]; then
-  echo "Error: This Nix-based setup currently only supports macOS."
-  echo "For Linux support, adapt nix/flake.nix to use NixOS modules instead of nix-darwin."
+if [[ "$OS" != "Darwin" && "$OS" != "Linux" ]]; then
+  echo "Error: Unsupported OS: $OS. This setup supports macOS and Linux (including WSL2)."
   exit 1
 fi
 
-echo "==> Installing dotfiles on macOS with Nix..."
+echo "==> Installing dotfiles with Nix..."
 echo ""
 
 # Step 1: Prerequisites
-echo "Step 1/5: Installing prerequisites (Xcode CLI tools, Homebrew)..."
-"$DOTFILES_DIR/scripts/setup-xcode.sh"
-"$DOTFILES_DIR/scripts/setup-brew.sh"
+echo "Step 1/5: Installing prerequisites..."
+if [[ "$OS" == "Darwin" ]]; then
+  "$DOTFILES_DIR/scripts/setup-xcode.sh"
+  "$DOTFILES_DIR/scripts/setup-brew.sh"
+else
+  echo "  Nothing to do on Linux/WSL — Nix itself is installed in the next step."
+fi
 echo ""
 
-# Step 2: Bootstrap Nix and nix-darwin
+# Step 2: Bootstrap Nix and the system configuration
 echo "Step 2/5: Installing Nix and building system configuration..."
-"$DOTFILES_DIR/nix/bootstrap.sh"
+if [[ "$OS" == "Darwin" ]]; then
+  "$DOTFILES_DIR/nix/bootstrap.sh"
+else
+  "$DOTFILES_DIR/nix/bootstrap-linux.sh"
+fi
 echo ""
 
 # Step 3: One-time project setup
