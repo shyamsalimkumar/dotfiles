@@ -65,9 +65,7 @@ Place executable scripts in `helpers/personal/` or `helpers/work/`.
 | `helpers/personal/` | Yes | Personal utilities |
 | `helpers/work/` | Directory only (contents gitignored) | Work-specific scripts |
 
-**Known gap:** these folders aren't currently symlinked or added to `$PATH` by
-`nix/home.nix` — that wiring existed in the old (pre-Nix) `setup-shell.sh` and was
-dropped during the migration to Nix without a replacement.
+`nix/home.nix` symlinks both into `~/.local/bin/`, which is on `$PATH`.
 
 ## Projects layout
 
@@ -81,12 +79,9 @@ Claude-specific settings, keybindings, and skills are in the `claude/` directory
 - `claude/settings.json`: Claude Code settings
 - `claude/keybindings.json`: Keyboard shortcuts
 - `claude/skills/`: Custom skills (18 skills including ai-review, tdd, security-review, etc.)
+- `claude/agents/`, `claude/commands/`, `claude/hooks/`, `claude/rules/`: Custom agents, slash commands, hooks, and rules
 
-`nix/home.nix` symlinks these three into `~/.claude/` during setup.
-
-**Known gap:** `claude/agents/`, `claude/commands/`, `claude/hooks/`, and `claude/rules/`
-also exist in this repo but aren't in `nix/home.nix`'s symlink list yet, so they aren't
-applied to `~/.claude/` by `install.sh` today.
+`nix/home.nix` symlinks all of these into `~/.claude/` during setup.
 
 ## AI assistant tools
 

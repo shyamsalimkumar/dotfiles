@@ -253,6 +253,10 @@
     ".claude/settings.json".source = ../claude/settings.json;
     ".claude/keybindings.json".source = ../claude/keybindings.json;
     ".claude/skills".source = ../claude/skills;
+    ".claude/agents".source = ../claude/agents;
+    ".claude/commands".source = ../claude/commands;
+    ".claude/hooks".source = ../claude/hooks;
+    ".claude/rules".source = ../claude/rules;
 
     # Global AGENTS.md (shared instructions for all AI assistants)
     ".claude/CLAUDE.md".source = ../home/AGENTS.md;
@@ -265,6 +269,10 @@
 
     # Git configuration examples (user creates .gitconfig.local)
     ".gitconfig.local.example".source = ../.gitconfig.local.example;
+
+    # Helper scripts (PATH for these is set in initExtra above)
+    ".local/bin/personal".source = ../helpers/personal;
+    ".local/bin/work".source = ../helpers/work;
   }
   # VSCode settings (NAVS plugins) - path differs between macOS and Linux
   // lib.optionalAttrs pkgs.stdenv.isDarwin {
