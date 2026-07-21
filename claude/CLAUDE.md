@@ -50,6 +50,9 @@
   - `~/worktrees/<project-name>-<branch-name>` in the home directory
 - Prefer `./worktrees/` when the repo's `.gitignore` covers it; use `~/worktrees/` otherwise
 
+## Writing Style
+- Never use em dashes (—). Use a single dash (-), a comma, or a semicolon instead, whichever fits the sentence.
+
 ## Core Principles
 - **Simplicity First**: Make every change as simple as possible. Impact minimal code. Don't introduce unnecessary complexity.
 - **No Laziness**: Don't cut corners. No temporary fixes. Senior developer standards apply.
