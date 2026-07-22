@@ -29,6 +29,18 @@
     # Note: claude-code is added below, Linux/WSL only - already installed via
     # Homebrew cask on macOS (see darwin.nix)
 
+    # Composio (https://composio.dev) - no nixpkgs package or flake exists yet,
+    # so this wraps its npm CLI (`@composio/cli`, no local install required).
+    # nodejs is scoped to this wrapper only, not exposed on $PATH - Node itself
+    # is managed via nvm (see programs.zsh below), not Nix.
+    (writeShellApplication {
+      name = "composio";
+      runtimeInputs = [ nodejs ];
+      text = ''
+        exec npx --yes @composio/cli@latest "$@"
+      '';
+    })
+
     # Version Managers
     mise
     # Note: nvm is shell-based, will be handled in shell config
