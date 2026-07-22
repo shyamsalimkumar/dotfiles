@@ -83,6 +83,8 @@ Claude-specific settings, keybindings, and skills are in the `claude/` directory
 
 `nix/home.nix` symlinks all of these into `~/.claude/` during setup.
 
+The coding-assistant CLIs themselves — `claude` ([Claude Code](https://github.com/anthropics/claude-code)), `codex` ([OpenAI Codex CLI](https://github.com/openai/codex)), and `gemini` ([Gemini CLI](https://github.com/google-gemini/gemini-cli)) — are Nix packages in `nix/home.nix`'s `home.packages`. `claude-code` is Linux/WSL-only there since macOS already gets it via the Homebrew cask in `darwin.nix`.
+
 ## AI assistant tools
 
 `scripts/setup-ai-tools.sh` installs a few CLI tools built around coding agents (each check is idempotent — already-installed tools are skipped). It pipes each project's own install script from GitHub into `sh`/`npm`, so review `scripts/setup-ai-tools.sh` and each tool's install script if you want to audit what runs before you `./install.sh` on a new machine.

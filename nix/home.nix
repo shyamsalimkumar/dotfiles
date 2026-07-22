@@ -23,6 +23,12 @@
     tree
     watchexec
 
+    # AI Coding Assistants
+    codex
+    gemini-cli
+    # Note: claude-code is added below, Linux/WSL only - already installed via
+    # Homebrew cask on macOS (see darwin.nix)
+
     # Version Managers
     mise
     # Note: nvm is shell-based, will be handled in shell config
@@ -81,6 +87,9 @@
     curl
     gnupg
     openssh
+  ]
+  ++ lib.optionals pkgs.stdenv.isLinux [
+    claude-code
   ];
 
   # Shell configuration
