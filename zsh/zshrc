@@ -3,20 +3,26 @@ export GOPATH=$HOME/go
 export GOBIN=$GOPATH/bin
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
+if [[ -f /opt/homebrew/bin/brew ]]; then
+  export HOMEBREW_PREFIX=/opt/homebrew
+elif [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+  export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+fi
+
 # gcloud binaries
-export PATH=/opt/homebrew/share/google-cloud-sdk/bin:$PATH
+export PATH=$HOMEBREW_PREFIX/share/google-cloud-sdk/bin:$PATH
 
 
 autoload -Uz compinit && compinit
 
 # load nvm
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+[ -s "$HOMEBREW_PREFIX/opt/nvm/nvm.sh" ] && \. "$HOMEBREW_PREFIX/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "$HOMEBREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm" ] && \. "$HOMEBREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 # export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
-export CLOUDSDK_PYTHON=/opt/homebrew/bin/python3
+export CLOUDSDK_PYTHON=$HOMEBREW_PREFIX/bin/python3
 # export GOPRIVATE=
 
 alias docker_start='colima start --profile default --activate --arch aarch64 --cpu 10 --disk 48 --memory 8 --mount ${HOME}:w --mount-inotify --ssh-agent --vm-type vz --vz-rosetta -v'
@@ -57,7 +63,7 @@ function sort_json() {
 load-nvmrc
 
 # gcloud completion
-source /opt/homebrew/share//google-cloud-sdk/completion.zsh.inc
+[ -s "$HOMEBREW_PREFIX/share/google-cloud-sdk/completion.zsh.inc" ] && \. "$HOMEBREW_PREFIX/share/google-cloud-sdk/completion.zsh.inc"
 
 # kubectl completion
 source <(kubectl completion zsh)
@@ -65,9 +71,11 @@ export PATH="/usr/local/sbin:$PATH"
 export PATH="/usr/local/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
 
-export COLIMA_VM="default"
-export COLIMA_VM_SOCKET="${HOME}/.colima/${COLIMA_VM}/docker.sock"
-export DOCKER_HOST="unix://${COLIMA_VM_SOCKET}"
+if [[ "$(uname)" == "Darwin" ]]; then
+  export COLIMA_VM="default"
+  export COLIMA_VM_SOCKET="${HOME}/.colima/${COLIMA_VM}/docker.sock"
+  export DOCKER_HOST="unix://${COLIMA_VM_SOCKET}"
+fi
 
 autoload -Uz colors && colors
 
@@ -125,15 +133,15 @@ add-zsh-hook precmd set_prompt
 set_prompt   # set immediately for the first prompt
 
 # basictex
-export PATH="/usr/local/texlive/2026basic/bin/universal-darwin:$PATH"
+[[ -d /usr/local/texlive/2026basic/bin/universal-darwin ]] && export PATH="/usr/local/texlive/2026basic/bin/universal-darwin:$PATH"
 
 [[ -f ~/.aliases.personal ]] && source ~/.aliases.personal
 [[ -f ~/.aliases.work ]] && source ~/.aliases.work
 
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+[ -s "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ] && \. "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+[ -s "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ] && \. "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 # [!NOTE] If you receive the “highlighters directory not found” error message, you may need to add the following to your ~/.zshenv:
-# export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
+# export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/highlighters
 
 # # keep at the end of the file
 eval "$(direnv hook zsh)"
@@ -141,4 +149,4 @@ eval "$(direnv hook zsh)"
 eval "$(starship init zsh)"
 
 export PATH="$HOME/.local/bin:$HOME/.local/bin/personal:$HOME/.local/bin/work:$PATH"
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+export PATH="$HOMEBREW_PREFIX/opt/libpq/bin:$PATH"
