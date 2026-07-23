@@ -1,6 +1,5 @@
 # Taps
 tap "derailed/k9s"
-tap "dewey/tbm"
 tap "homeport/tap"
 tap "theboredteam/boring-notch"
 
@@ -38,7 +37,6 @@ brew "cloud-sql-proxy"
 brew "docker"
 brew "docker-compose"
 brew "k9s"
-brew "tbm"
 
 # gRPC & Protobuf
 brew "buf"
