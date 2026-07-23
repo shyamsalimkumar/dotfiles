@@ -59,7 +59,6 @@
     docker
     docker-compose
     k9s
-    # Note: tbm from custom tap, using Homebrew
 
     # gRPC & Protobuf
     buf
