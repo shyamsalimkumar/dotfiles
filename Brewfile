@@ -1,7 +1,7 @@
 # Taps
 tap "derailed/k9s"
 tap "homeport/tap"
-tap "theboredteam/boring-notch"
+tap "vishvavariya/notchy"
 
 # Editors
 brew "fd"

@@ -94,5 +94,5 @@ if [[ "$OS" == "Darwin" ]]; then
   echo "NOTE: If you see Homebrew tap trust warnings, you may need to manually trust taps:"
   echo "  brew trust --tap derailed/k9s"
   echo "  brew trust --tap homeport/tap"
-  echo "  brew trust --tap theboredteam/boring-notch"
+  echo "  brew trust --tap vishvavariya/notchy"
 fi
