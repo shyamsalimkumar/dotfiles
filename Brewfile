@@ -24,6 +24,7 @@ brew "zsh-syntax-highlighting"
 brew "mise"
 brew "nvm"
 brew "pyenv"
+brew "uv"
 
 # Go
 brew "go"
