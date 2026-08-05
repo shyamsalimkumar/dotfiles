@@ -45,7 +45,7 @@
     taps = [
       "derailed/k9s"
       "homeport/tap"
-      "theboredteam/boring-notch"
+      "vishvavariya/notchy"
     ];
 
     # Homebrew packages (formulae) not available in nixpkgs
@@ -79,7 +79,7 @@
 
       # Productivity
       "caffeine"          # Prevent sleep
-      "boring-notch"      # Dynamic Island for macOS
+      "notchy"            # Dynamic Island for macOS
 
       # Utilities
       "google-chrome"     # Web browser
