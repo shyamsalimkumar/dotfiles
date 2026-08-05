@@ -78,7 +78,6 @@
       "google-cloud-cli"  # gcloud CLI (formerly gcloud-sdk)
 
       # Productivity
-      "caffeine"          # Prevent sleep
       "notchy"            # Dynamic Island for macOS
 
       # Utilities
