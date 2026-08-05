@@ -43,6 +43,7 @@
 
     # Version Managers
     mise
+    uv
     # Note: nvm is shell-based, will be handled in shell config
     # Note: pyenv not in nixpkgs, using Homebrew
 
