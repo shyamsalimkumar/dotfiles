@@ -176,9 +176,10 @@ Brewfile*.lock.json
 claude/settings.local.json
 
 # Skills imported locally via `npx skills add` (see README "Manual step") land
-# as symlinks in claude/skills/ — don't track them; re-run the command to
-# recreate them on a fresh machine. .gitignore has no symlink-type matcher,
-# so add each new one's name here.
+# as symlinks in claude/skills/ — don't track them. .gitignore has no
+# symlink-type matcher, so scripts/setup-claude.sh appends an entry here
+# automatically for each one it finds under ~/.agents/skills; the names
+# below were added that way and don't need manual upkeep.
 claude/skills/skill-creator
 claude/skills/web-design-guidelines
 claude/skills/writing-guidelines
