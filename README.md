@@ -78,7 +78,7 @@ Global instructions for AI coding assistants are in `home/AGENTS.md`. `nix/home.
 Claude-specific settings, keybindings, and skills are in the `claude/` directory:
 - `claude/settings.json`: Claude Code settings
 - `claude/keybindings.json`: Keyboard shortcuts
-- `claude/skills/`: Custom skills (18 skills including ai-review, tdd, security-review, etc.)
+- `claude/skills/`: Custom skills (ai-review, security-review, etc.) plus the `mattpocock-skills` plugin (see [Manual step](#manual-step) below)
 - `claude/agents/`, `claude/commands/`, `claude/hooks/`, `claude/rules/`: Custom agents, slash commands, hooks, and rules
 
 `nix/home.nix` symlinks all of these into `~/.claude/` during setup.
@@ -109,3 +109,9 @@ npx skills add anthropics/skills --skill skill-creator -g
 npx skills add kunchenguid/lavish-axi --skill lavish -g
 npx skills add multica-ai/andrej-karpathy-skills --skill karpathy-guidelines -g
 ```
+
+Matt Pocock's skills (grill-me, grill-with-docs, handoff, implement,
+improve-codebase-architecture, tdd, to-tickets, wayfinder, codebase-design,
+teach, and more) come from the `mattpocock-skills` Claude Code plugin instead
+of `npx skills add` — see `enabledPlugins` in `claude/settings.json`, installed
+automatically by `scripts/setup-claude.sh` / `scripts/post-install.sh`.
