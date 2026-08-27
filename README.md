@@ -121,11 +121,11 @@ npx skills add vercel-labs/agent-skills
 # npx skills add vercel-labs/skills@find-skills
 npx skills add anthropics/skills --skill skill-creator -g
 npx skills add kunchenguid/lavish-axi --skill lavish -g
-npx skills add multica-ai/andrej-karpathy-skills --skill karpathy-guidelines -g
 ```
 
 Matt Pocock's skills (grill-me, grill-with-docs, handoff, implement,
 improve-codebase-architecture, tdd, to-tickets, wayfinder, codebase-design,
-teach, and more) come from the `mattpocock-skills` Claude Code plugin instead
-of `npx skills add` — see `enabledPlugins` in `claude/settings.json`, installed
-automatically by `scripts/setup-claude.sh` / `scripts/post-install.sh`.
+teach, and more) and karpathy-guidelines come from the `mattpocock-skills` and
+`andrej-karpathy-skills` Claude Code plugins instead of `npx skills add` — see
+`enabledPlugins` in `claude/settings.json`, installed automatically by
+`scripts/setup-claude.sh` / `scripts/post-install.sh`.

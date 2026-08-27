@@ -7,7 +7,9 @@
   },
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
-    "mattpocock-skills@mattpocock": true
+    "typescript-lsp@claude-plugins-official": true,
+    "mattpocock-skills@mattpocock": true,
+    "andrej-karpathy-skills@karpathy-skills": true
   },
   "alwaysThinkingEnabled": true,
   "attribution": {
