@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   # Home Manager state version
@@ -22,6 +22,24 @@
     direnv
     tree
     watchexec
+
+    # AI Coding Assistants
+    codex
+    gemini-cli
+    # Note: claude-code is added below, Linux/WSL only - already installed via
+    # Homebrew cask on macOS (see darwin.nix)
+
+    # Composio (https://composio.dev) - no nixpkgs package or flake exists yet,
+    # so this wraps its npm CLI (`@composio/cli`, no local install required).
+    # nodejs is scoped to this wrapper only, not exposed on $PATH - Node itself
+    # is managed via nvm (see programs.zsh below), not Nix.
+    (writeShellApplication {
+      name = "composio";
+      runtimeInputs = [ nodejs ];
+      text = ''
+        exec npx --yes @composio/cli@latest "$@"
+      '';
+    })
 
     # Version Managers
     mise
@@ -81,6 +99,9 @@
     curl
     gnupg
     openssh
+  ]
+  ++ lib.optionals pkgs.stdenv.isLinux [
+    claude-code
   ];
 
   # Shell configuration
@@ -129,22 +150,26 @@
       # Local bin directories
       export PATH="$HOME/.local/bin:$HOME/.local/bin/personal:$HOME/.local/bin/work:$PATH"
 
-      # Homebrew path (for packages not in Nix)
-      export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        # Homebrew path (for packages not in Nix)
+        export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
-      # gcloud SDK path (if installed via Homebrew)
-      if [ -f "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc" ]; then
-        source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
-      fi
-      if [ -f "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc" ]; then
-        source "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc"
-      fi
+        # gcloud SDK path (if installed via Homebrew)
+        if [ -f "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc" ]; then
+          source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
+        fi
+        if [ -f "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc" ]; then
+          source "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc"
+        fi
+      ''}
 
       # kubectl completion
       command -v kubectl &> /dev/null && source <(kubectl completion zsh)
 
-      # Colima Docker configuration
-      export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        # Colima Docker configuration
+        export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+      ''}
 
       # Colorize output
       export CLICOLOR=1
@@ -245,14 +270,14 @@
     # Tmux config
     ".config/tmux".source = ../tmux/.config/tmux;
 
-    # VSCode settings (NAVS plugins)
-    "Library/Application Support/Code/User/settings.json".source = ../vscode/settings.json;
-    "Library/Application Support/Code/User/keybindings.json".source = ../vscode/keybindings.json;
-
     # Claude settings and skills
     ".claude/settings.json".source = ../claude/settings.json;
     ".claude/keybindings.json".source = ../claude/keybindings.json;
     ".claude/skills".source = ../claude/skills;
+    ".claude/agents".source = ../claude/agents;
+    ".claude/commands".source = ../claude/commands;
+    ".claude/hooks".source = ../claude/hooks;
+    ".claude/rules".source = ../claude/rules;
 
     # Global AGENTS.md (shared instructions for all AI assistants)
     ".claude/CLAUDE.md".source = ../home/AGENTS.md;
@@ -265,5 +290,18 @@
 
     # Git configuration examples (user creates .gitconfig.local)
     ".gitconfig.local.example".source = ../.gitconfig.local.example;
+
+    # Helper scripts (PATH for these is set in initExtra above)
+    ".local/bin/personal".source = ../helpers/personal;
+    ".local/bin/work".source = ../helpers/work;
+  }
+  # VSCode settings (NAVS plugins) - path differs between macOS and Linux
+  // lib.optionalAttrs pkgs.stdenv.isDarwin {
+    "Library/Application Support/Code/User/settings.json".source = ../vscode/settings.json;
+    "Library/Application Support/Code/User/keybindings.json".source = ../vscode/keybindings.json;
+  }
+  // lib.optionalAttrs pkgs.stdenv.isLinux {
+    ".config/Code/User/settings.json".source = ../vscode/settings.json;
+    ".config/Code/User/keybindings.json".source = ../vscode/keybindings.json;
   };
 }
