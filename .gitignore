@@ -185,8 +185,6 @@ claude/skills/skill-creator
 claude/skills/web-design-guidelines
 claude/skills/writing-guidelines
 claude/skills/lavish
-claude/skills/codebase-design
-claude/skills/teach
 claude/skills/karpathy-guidelines
 
 # Dropped by no-mistakes's own installer (see scripts/setup-ai-tools.sh) —
