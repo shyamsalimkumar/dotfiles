@@ -52,11 +52,14 @@ if command -v claude &>/dev/null; then
   echo ""
   echo "==> Installing Claude plugins..."
 
-  # mattpocock-skills lives in a third-party marketplace, not the default
-  # claude-plugins-official one — make sure it's registered before the
-  # install loop below tries to resolve it.
+  # mattpocock-skills and andrej-karpathy-skills live in third-party
+  # marketplaces, not the default claude-plugins-official one — make sure
+  # both are registered before the install loop below tries to resolve them.
   if ! claude plugin marketplace list 2>/dev/null | grep -q "mattpocock"; then
     claude plugin marketplace add mattpocock/skills 2>&1 || true
+  fi
+  if ! claude plugin marketplace list 2>/dev/null | grep -q "karpathy-skills"; then
+    claude plugin marketplace add multica-ai/andrej-karpathy-skills 2>&1 || true
   fi
 
   plugins=$(jq -r '.enabledPlugins | to_entries[] | select(.value == true) | .key' \
