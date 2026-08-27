@@ -54,6 +54,13 @@ if ! command -v claude &>/dev/null; then
   exit 0
 fi
 
+# mattpocock-skills lives in a third-party marketplace, not the default
+# claude-plugins-official one — make sure it's registered before the
+# install loop below tries to resolve it.
+if ! claude plugin marketplace list 2>/dev/null | grep -q "mattpocock"; then
+  claude plugin marketplace add mattpocock/skills 2>&1 || true
+fi
+
 plugins=$(jq -r '.enabledPlugins | to_entries[] | select(.value == true) | .key' \
   "$DOTFILES_DIR/claude/settings.json" 2>/dev/null || true)
 
