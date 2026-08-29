@@ -104,6 +104,28 @@ All cloned repos and Go workspace sources live under `~/Projects/<host>/<org>/<r
 | [gnhf](https://github.com/kunchenguid/gnhf) ("Good Night, Have Fun") | Autonomous agent runner — give it an objective and it drives Claude Code/Codex/etc. through iterative commits unattended, with rollback on failure. | `npm install -g gnhf` | `gnhf "reduce complexity of the codebase without changing functionality"` inside a git repo with a clean working tree. |
 | [firstmate](https://github.com/kunchenguid/firstmate) | **Not a global binary and not per-project.** It's a single repo you clone once, then `cd` into and launch your agent harness (`claude`, `codex`, etc.) inside — `AGENTS.md` takes over from there. There is no separate "app" to install. When you ask it about a GitHub project, *it* clones that project under its own `projects/` subdirectory and spawns supervised sub-agents ("crewmates") in worktrees/tmux to work on it and open a PR. | `setup-ai-tools.sh` clones it once to `~/Projects/github.com/kunchenguid/firstmate` (consistent with the [Projects layout](#projects-layout) above). Requires `gh auth login` first. | `cd ~/Projects/github.com/kunchenguid/firstmate && claude`, then talk to it: `> look at my github project xyz, fix the flaky login test`; approve with `> merge it`. |
 
+## Web search
+
+Claude Code's built-in `WebSearch` tool is disabled (`permissions.deny` in
+`claude/settings.json`) in favor of
+[Agent Reach](https://github.com/Panniantong/agent-reach) — an open-source,
+free CLI/MCP toolkit that gives the agent broader internet access (web
+search, arbitrary webpages, YouTube, RSS, and more) than the built-in tool
+alone.
+
+```bash
+brew install pipx
+pipx install https://github.com/Panniantong/agent-reach/archive/main.zip
+agent-reach install --env=auto
+npm install -g mcporter
+mcporter config add exa https://mcp.exa.ai/mcp --scope home
+```
+
+The last two lines register Exa's MCP server, which is what actually backs
+web search once `WebSearch` is off — run `agent-reach doctor` to check
+channel status. This is a per-machine setup step, not automated by
+`install.sh`.
+
 ## Symlinks only
 
 To re-run just the symlink step without installing packages:
