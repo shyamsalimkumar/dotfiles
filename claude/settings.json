@@ -15,5 +15,6 @@
     "typescript-lsp@claude-plugins-official": true,
     "andrej-karpathy-skills@karpathy-skills": true
   },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": true,
+  "disableClaudeAiConnectors": true
 }
