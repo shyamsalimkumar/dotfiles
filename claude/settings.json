@@ -15,5 +15,6 @@
   "attribution": {
     "commit": "",
     "pr": ""
-  }
+  },
+  "disableClaudeAiConnectors": true
 }
