@@ -28,7 +28,15 @@ link "claude/rules"               "$HOME/.claude/rules"
 # Reconcile skills installed via `npx skills add ... -g` (see README "Manual
 # step") against claude/skills/ — that installer isn't reliably leaving the
 # symlink in place, so treat ~/.agents/skills as the source of truth and
-# self-heal here on every run instead of trusting it to persist.
+# self-heal here on every run instead of trusting it to persist. Skills
+# already provided by a Claude Code plugin (mattpocock-skills,
+# andrej-karpathy-skills) are skipped here — claude/skills/ is this repo's
+# working tree, and duplicating a plugin skill there both fights the plugin
+# and (since it's a real directory, not gitignored) risks clobbering a
+# tracked file if the name happens to collide with one.
+plugin_skill_names=$(find "$HOME/.claude/plugins/marketplaces"/*/skills -iname "SKILL.md" 2>/dev/null \
+  | xargs -n1 dirname 2>/dev/null | xargs -n1 basename 2>/dev/null | sort -u)
+
 agents_skills_dir="$HOME/.agents/skills"
 if [[ -d "$agents_skills_dir" ]]; then
   for skill_src in "$agents_skills_dir"/*/; do
@@ -36,16 +44,31 @@ if [[ -d "$agents_skills_dir" ]]; then
     # no-mistakes is dropped directly by its own installer (see
     # scripts/setup-ai-tools.sh), not by `npx skills add` — leave it alone
     # even though a same-named copy also happens to exist here.
-    [[ "$name" == "no-mistakes" ]] && continue
-    target="$HOME/.claude/skills/$name"
-    if [[ -e "$target" && ! -L "$target" ]]; then
-      echo "  Backing up existing $target → ${target}.bak"
-      mv "$target" "${target}.bak"
+    if [[ "$name" != "no-mistakes" ]] && ! grep -qxF "$name" <<< "$plugin_skill_names"; then
+      target="$HOME/.claude/skills/$name"
+      if [[ -e "$target" && ! -L "$target" ]]; then
+        echo "  Backing up existing $target → ${target}.bak"
+        mv "$target" "${target}.bak"
+      fi
+      ln -sfn "$skill_src" "$target"
+      echo "  Linked global skill: $name"
+      ignore_line="claude/skills/$name"
+      grep -qxF "$ignore_line" "$DOTFILES_DIR/.gitignore" || echo "$ignore_line" >> "$DOTFILES_DIR/.gitignore"
     fi
-    ln -sfn "$skill_src" "$target"
-    echo "  Linked global skill: $name"
-    ignore_line="claude/skills/$name"
-    grep -qxF "$ignore_line" "$DOTFILES_DIR/.gitignore" || echo "$ignore_line" >> "$DOTFILES_DIR/.gitignore"
+
+    # Pi has no plugin/marketplace system, so it needs every skill
+    # (including mattpocock's and karpathy-guidelines) linked directly —
+    # its skills dir isn't part of this repo, so there's no clobbering risk.
+    if [[ "$name" != "no-mistakes" ]] && command -v pi &>/dev/null; then
+      pi_target="$HOME/.pi/agent/skills/$name"
+      mkdir -p "$HOME/.pi/agent/skills"
+      if [[ -e "$pi_target" && ! -L "$pi_target" ]]; then
+        echo "  Backing up existing $pi_target → ${pi_target}.bak"
+        mv "$pi_target" "${pi_target}.bak"
+      fi
+      ln -sfn "$skill_src" "$pi_target"
+      echo "  Linked global skill for Pi: $name"
+    fi
   done
 fi
 
