@@ -129,3 +129,9 @@ teach, and more) and karpathy-guidelines come from the `mattpocock-skills` and
 `andrej-karpathy-skills` Claude Code plugins instead of `npx skills add` — see
 `enabledPlugins` in `claude/settings.json`, installed automatically by
 `scripts/setup-claude.sh` / `scripts/post-install.sh`.
+
+[Pi](https://github.com/earendil-works/pi-coding-agent) (`npm-globals.txt`)
+has no plugin/marketplace system, so those same skills are still installed
+there via `npx skills add ... -g` — `scripts/setup-claude.sh` /
+`scripts/post-install.sh` mirror every skill under `~/.agents/skills` into
+`~/.pi/agent/skills` on every run.
