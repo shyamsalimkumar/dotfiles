@@ -87,6 +87,34 @@ else
   echo "    Install claude-code first, then re-run this script"
 fi
 
+# ============================================================================
+# Pi skills
+# ============================================================================
+# Pi (npm-globals.txt) has no plugin/marketplace system like Claude Code
+# does, so skills installed via `npx skills add ... -g` (see README "Manual
+# step") need to be mirrored into its skills directory directly. Treats
+# ~/.agents/skills as the source of truth and self-heals here on every run,
+# same as Claude Code's skill reconciliation in scripts/setup-claude.sh.
+if command -v pi &>/dev/null; then
+  echo ""
+  echo "==> Linking global skills for Pi..."
+  agents_skills_dir="$HOME/.agents/skills"
+  if [[ -d "$agents_skills_dir" ]]; then
+    mkdir -p "$HOME/.pi/agent/skills"
+    for skill_src in "$agents_skills_dir"/*/; do
+      name="$(basename "$skill_src")"
+      [[ "$name" == "no-mistakes" ]] && continue
+      pi_target="$HOME/.pi/agent/skills/$name"
+      if [[ -e "$pi_target" && ! -L "$pi_target" ]]; then
+        echo "  Backing up existing $pi_target → ${pi_target}.bak"
+        mv "$pi_target" "${pi_target}.bak"
+      fi
+      ln -sfn "$skill_src" "$pi_target"
+      echo "  ✓ Linked global skill for Pi: $name"
+    done
+  fi
+fi
+
 echo ""
 echo "==> Post-installation complete!"
 echo ""
