@@ -278,6 +278,7 @@
     ".claude/commands".source = ../claude/commands;
     ".claude/hooks".source = ../claude/hooks;
     ".claude/rules".source = ../claude/rules;
+    ".claude/output-styles".source = ../claude/output-styles;
 
     # Global AGENTS.md (shared instructions for all AI assistants)
     ".claude/CLAUDE.md".source = ../home/AGENTS.md;
