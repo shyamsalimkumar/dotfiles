@@ -24,6 +24,7 @@ link "claude/commands"            "$HOME/.claude/commands"
 link "claude/hooks"               "$HOME/.claude/hooks"
 link "claude/agents"              "$HOME/.claude/agents"
 link "claude/rules"               "$HOME/.claude/rules"
+link "claude/output-styles"       "$HOME/.claude/output-styles"
 
 # Reconcile skills installed via `npx skills add ... -g` (see README "Manual
 # step") against claude/skills/ — that installer isn't reliably leaving the
