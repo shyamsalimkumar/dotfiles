@@ -1,0 +1,33 @@
+# Personal aliases
+
+# Navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+
+# ls aliases
+alias ls="ls -G"
+alias ll="ls -lah"
+alias la="ls -A"
+alias l="ls -CF"
+
+# Git shortcuts
+alias g="git"
+alias gs="git status"
+alias ga="git add"
+alias gc="git commit"
+alias gp="git push"
+alias gl="git pull"
+alias gd="git diff"
+alias gco="git checkout"
+alias gb="git branch"
+alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+
+# Directory shortcuts
+alias Projects="cd ~/Projects"
+alias github="cd ~/Projects/github.com"
+
+# Safety
+alias rm="rm -i"
+alias cp="cp -i"
+alias mv="mv -i"

@@ -27,17 +27,11 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 " Add all of your Plugins here
 Plugin 'altercation/vim-colors-solarized' "T-H-E colorscheme
-Plugin 'https://github.com/tpope/vim-fugitive' "So awesome, it should be illegal 
-Plugin 'https://github.com/scrooloose/nerdtree' "THE NERD TREE
-Plugin 'kien/ctrlp.vim' "Fuzzy searcher
 Plugin 'scrooloose/nerdcommenter' "NERD Commenter
 Plugin 'airblade/vim-gitgutter' "GitGutter
 Plugin 'fatih/vim-go' "Go support
 Plugin 'ervandew/supertab' "Tab completion insertion
-Plugin 'derekwyatt/vim-scala' "Scala support
 Plugin 'https://github.com/bling/vim-airline' "Light weight status bar
-Plugin 'ensime/ensime-vim'
-Plugin 'derekwyatt/vim-scala'
 Plugin 'scrooloose/syntastic'
 Plugin 'scrooloose/nerdtree'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
@@ -45,10 +39,8 @@ Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'tpope/vim-fugitive'
 Plugin 'luochen1990/rainbow'
 Plugin 'Shougo/neocomplete.vim'
-Plugin 'scrooloose/nerdcommenter'
 Plugin 'Shougo/neosnippet'
 Plugin 'Shougo/neosnippet-snippets'
-Plugin 'fatih/vim-go'
 
 
 " All of your Plugins must be added before the following line
@@ -65,10 +57,6 @@ filetype plugin indent on    " required
 "
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
-
-" Ensime settings
-autocmd BufWritePost *.scala silent :EnTypeCheck 
-nnoremap <localleader>t :EnTypeCheck<CR> 
 
 " NERDTree settings
 silent! nmap <C-p> :NERDTreeToggle<CR>
