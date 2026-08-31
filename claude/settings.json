@@ -13,6 +13,7 @@
     "mattpocock-skills@mattpocock": true,
     "andrej-karpathy-skills@karpathy-skills": true
   },
+  "outputStyle": "ELI5",
   "alwaysThinkingEnabled": true,
   "attribution": {
     "commit": "",
