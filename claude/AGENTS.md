@@ -57,6 +57,7 @@
 - **Simplicity First**: Make every change as simple as possible. Impact minimal code. Don't introduce unnecessary complexity.
 - **No Laziness**: Don't cut corners. No temporary fixes. Senior developer standards apply.
 - **Minimal Changes**: Must touch only what's necessary. Avoid introducing bugs.
+- Do not write overly verbose doc-blocs in the code files when you could write clean, self documenting code instead. Assume all code you write is reviewed by a human.
 
 ## Go
 - Always format edited files. Especially Go files
