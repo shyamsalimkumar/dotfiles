@@ -1,0 +1,20 @@
+# Work profile functions (explicit loading, never auto-load)
+
+work-a() {
+  export AWS_PROFILE=company-a
+  export GCP_PROJECT=company-a-project
+  export SSH_AUTH_SOCK=~/.ssh/company-a-agent.sock
+  echo "✓ Company A environment loaded"
+}
+
+work-b() {
+  export AWS_PROFILE=company-b
+  export GCP_PROJECT=company-b-project
+  export SSH_AUTH_SOCK=~/.ssh/company-b-agent.sock
+  echo "✓ Company B environment loaded"
+}
+
+work-clear() {
+  unset AWS_PROFILE GCP_PROJECT SSH_AUTH_SOCK
+  echo "✓ Work environments cleared"
+}
