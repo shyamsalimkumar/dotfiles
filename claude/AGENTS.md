@@ -44,6 +44,9 @@
 5. Surface blockers as soon as identified
 6. Capture learnings after corrections
 
+## Git
+- Never add Co-Authored-By, "Generated with", or any AI attribution lines to commit messages or PR descriptions.
+
 ## Git Worktrees
 - Always create worktrees in one of two locations:
   - `./worktrees/<branch-name>` inside the project repo, OR

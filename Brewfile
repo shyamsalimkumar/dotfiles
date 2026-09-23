@@ -63,6 +63,10 @@ brew "libpq"
 brew "pgsync"
 brew "golang-migrate"
 
+# AI
+brew "ollama"
+brew "opencode"
+
 # Utilities
 brew "htop"
 brew "imagemagick"

@@ -1,23 +1,63 @@
 {
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "permissions": {
-    "allow": [],
+    "allow": [
+      "Bash(npx -y lavish-axi *)"
+    ],
     "deny": [
       "WebSearch"
     ],
     "ask": [],
     "defaultMode": "plan"
   },
+  "disableClaudeAiConnectors": true,
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "chrome-devtools-axi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "lavish-axi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "gh-axi",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "mattpocock-skills@mattpocock": true,
     "andrej-karpathy-skills@karpathy-skills": true
   },
   "outputStyle": "ELI5",
   "alwaysThinkingEnabled": true,
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
-  "disableClaudeAiConnectors": true
+  "remoteControlAtStartup": false,
+  "agentPushNotifEnabled": true,
+  "skipDangerousModePermissionPrompt": true
 }
