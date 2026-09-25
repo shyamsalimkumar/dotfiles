@@ -24,8 +24,15 @@ if command -v npm >/dev/null 2>&1; then
     echo "  Installing gnhf..."
     npm install -g gnhf
   fi
+
+  if command -v pi >/dev/null 2>&1; then
+    echo "  pi already installed"
+  else
+    echo "  Installing pi (@earendil-works/pi-coding-agent)..."
+    npm install -g @earendil-works/pi-coding-agent
+  fi
 else
-  echo "  WARNING: npm not found, skipping gnhf install"
+  echo "  WARNING: npm not found, skipping gnhf and pi install"
 fi
 
 # firstmate isn't a global binary — it's a repo you clone once and launch your
