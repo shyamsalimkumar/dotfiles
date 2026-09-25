@@ -1,1 +1,7 @@
 # Personal aliases
+
+# pi needs Node's zstd support in zlib (missing before ~v22.15/v23.x), so pin it
+# to a known-good install instead of whatever `nvm alias default` happens to be.
+pi() {
+  "$HOME/.nvm/versions/node/v23.11.0/bin/pi" "$@"
+}
