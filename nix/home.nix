@@ -284,6 +284,12 @@
     ".claude/CLAUDE.md".source = ../home/AGENTS.md;
     ".codex/AGENTS.md".source = ../home/AGENTS.md;
     ".config/opencode/AGENTS.md".source = ../home/AGENTS.md;
+    ".pi/agent/AGENTS.md".source = ../home/AGENTS.md;
+
+    # Pi settings and extensions
+    ".pi/agent/settings.json".source = ../pi/settings.json;
+    ".pi/agent/keybindings.json".source = ../pi/keybindings.json;
+    ".pi/agent/extensions/custom-footer".source = ../pi/extensions/custom-footer;
 
     # SSH config - generic host aliases only
     # For host-specific settings, use ~/.ssh/config.local (not tracked)
