@@ -3,5 +3,11 @@
 # pi needs Node's zstd support in zlib (missing before ~v22.15/v23.x), so pin it
 # to a known-good install instead of whatever `nvm alias default` happens to be.
 pi() {
-  "$HOME/.nvm/versions/node/v23.11.0/bin/pi" "$@"
+  local pi_node="$HOME/.nvm/versions/node/v23.11.0/bin/pi"
+  if [[ -x "$pi_node" ]]; then
+    "$pi_node" "$@"
+  else
+    echo "pi: pinned node v23.11.0 not found under nvm on this machine - update the version in zsh/aliases.personal, falling back to PATH" >&2
+    command pi "$@"
+  fi
 }
