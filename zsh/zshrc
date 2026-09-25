@@ -93,37 +93,6 @@ export LESS_TERMCAP_so=$'\e[01;33m'
 export LESS_TERMCAP_ue=$'\e[0m'
 export LESS_TERMCAP_us=$'\e[1;4;31m'
 
-autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable git
-zstyle ':vcs_info:git:*' check-for-changes true
-zstyle ':vcs_info:git:*' unstagedstr '*'
-zstyle ':vcs_info:git:*' stagedstr '+'
-zstyle ':vcs_info:git:*' formats ' %F{green}(%b%u%c)%f'
-zstyle ':vcs_info:git:*' actionformats ' %F{green}(%b|%a%u%c)%f'
-
-set_prompt() {
-  local dt="%D{%d/%m/%y %H:%M:%S}"
-  local userhost="%n@%m"
-  local cwd="%~"
-  local sym="%#"
-
-  vcs_info
-
-  # Add virtual environment indicator
-  local venv_indicator=""
-  if [[ -n "$VIRTUAL_ENV" ]]; then
-    venv_indicator=" %F{cyan}($(basename $VIRTUAL_ENV))%f"
-  fi
-
-  PROMPT="%F{blue}[$dt]%f %F{magenta}${userhost}%f %F{yellow}${cwd}%f${vcs_info_msg_0_}${venv_indicator}
-%B${sym}%b "
-  RPROMPT=""  # keep right prompt empty like your original
-}
-
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd set_prompt
-set_prompt   # set immediately for the first prompt
-
 # basictex
 export PATH="/usr/local/texlive/2026basic/bin/universal-darwin:$PATH"
 
