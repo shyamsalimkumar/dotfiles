@@ -12,31 +12,25 @@
 - For complex problems, throw more compute at it via subagents
 - One task per subagent for focused execution
 
-### #3 Self-Improvement Loop
-- After each session, update `tasks/issues.md` with the pattern
-- Write rules for yourself that prevent the same mistake
-- Iterate on these lessons until mistake rate drops
-- Review lessons at session start for relevant project context
-
-### #4 Verification Before Done
+### #3 Verification Before Done
 - Don't mark a task complete without proof it works
 - Diff behavior between main and your changes when relevant
 - Ask yourself "Would a staff engineer accept this?"
 - Run tests, check logs, demonstrate correctness
 
-### #5 Demand Elegance (Balanced)
+### #4 Demand Elegance (Balanced)
 - For non-trivial changes pause and ask "is there a more elegant way?"
 - If a fix feels hacky, however fast, ask "now, implement the elegant solution"
 - Skip this for simple, obvious fixes
 - Challenge your own work before presenting to the engineer
 
-### #6 Autonomous Bug Fixing
+### #5 Autonomous Bug Fixing
 - When given a bug report: just fix it. Don't ask for hand-holding
 - Focus on logs, errors, failing tests — then resolve them
 - Zero context switching required from the user
 - Write failing CI tests without being told how
 
-### #7 Task Management
+### #6 Task Management
 1. Write plan to `tasks/todo.md` with checkable items
 2. Check in before starting implementation
 3. Mark items complete as you go
@@ -52,6 +46,10 @@
   - `./worktrees/<branch-name>` inside the project repo, OR
   - `~/worktrees/<project-name>-<branch-name>` in the home directory
 - Prefer `./worktrees/` when the repo's `.gitignore` covers it; use `~/worktrees/` otherwise
+
+## Dotfiles Branches
+- This repo tracks platform-specific branches: `master` (macOS), `nix-os-config` (NixOS), `nix-os-config-linux-wsl` (WSL). Port any change made here (installs, configs, skills, settings.json) to the other branches too, without being asked, or explain why it's branch-specific.
+- Before calling a fix done, check that tracked config (e.g. `claude/settings.json`) actually matches the runtime state you just changed.
 
 ## Writing Style
 - Never use em dashes (—). Use a single dash (-), a comma, or a semicolon instead, whichever fits the sentence.
@@ -69,4 +67,4 @@
 - Always cleanup after the operation is over. Cleanup any unused variables, methods, params (convert to _ unless they can be removed completely), files and similar resources.
 - Making changes to crud_gen.go is pointless since it's a generated file. Create a new struct instead if you need to edit one in crud. You can place it in crud.go if you desire.
 - Remove any unused variables, files, methods, etc once done. Clean up after yourself.
-- After doing a task that involves editing Go files, format, test, golangci lint, and build the project.
+- After doing a task that involves editing Go files, run `/go-check` (formats, vets, builds, tests, and lints in one step).
