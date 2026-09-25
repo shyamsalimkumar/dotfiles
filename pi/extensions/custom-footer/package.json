@@ -1,0 +1,10 @@
+{
+  "name": "pi-custom-footer",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  }
+}
