@@ -7,7 +7,7 @@ pi() {
   if [[ -x "$pi_node" ]]; then
     "$pi_node" "$@"
   else
-    echo "pi: pinned node v23.11.0 not found under nvm on this machine - update the version in zsh/aliases.personal, falling back to PATH" >&2
+    echo "pi: pinned node v23.11.0 not found under nvm on this machine - falling back to PATH, run 'pi update' if it fails" >&2
     command pi "$@"
   fi
 }
