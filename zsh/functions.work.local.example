@@ -1,0 +1,13 @@
+# Company-specific work functions (gitignored)
+# Copy this file to zsh/functions.work.local and customize with company-specific functions
+# The home.nix configuration will source this file if it exists
+
+# Example company-specific functions (commented out):
+# company-vpn-connect() {
+#   echo "Connecting to company VPN..."
+#   # Add VPN connection logic here
+# }
+#
+# company-ssh() {
+#   ssh -i ~/.ssh/company-key user@company-server
+# }

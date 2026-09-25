@@ -1,0 +1,27 @@
+# macOS-only formulae
+brew "colima"
+brew "dockutil"
+
+# Fonts
+cask "font-hack-nerd-font"
+
+# macOS Apps
+cask "1password"
+cask "1password-cli"
+cask "basictex"
+cask "notchy"
+cask "google-chrome"
+cask "gcloud-cli"
+cask "iterm2"
+cask "linear"
+cask "meld"
+cask "postico"
+cask "postman"
+cask "rapidapi"
+cask "slack"
+cask "tableplus"
+cask "visual-studio-code"
+cask "wezterm"
+cask "zoom"
+cask "claude-code"
+cask "opensuperwhisper"
