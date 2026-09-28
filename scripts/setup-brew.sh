@@ -49,18 +49,17 @@ if [[ "$OS" == "Darwin" ]]; then
     brew install --cask whatsapp --force
   fi
 
-  # Check for AI tool cask updates (claude-code, claude desktop app, etc).
-  # --greedy is needed because these are auto_updates casks, which brew
-  # skips by default on the assumption the app updates itself silently.
-  outdated_ai_casks="$(brew outdated --cask --greedy 2>/dev/null | grep -i claude || true)"
-  if [[ -n "$outdated_ai_casks" ]]; then
+  # Check for updates to every Homebrew-managed app/tool (casks and
+  # formulae). --greedy also checks self-updating casks (Zoom, etc), which
+  # brew skips by default on the assumption the app updates itself silently.
+  outdated="$(brew outdated --greedy 2>/dev/null || true)"
+  if [[ -n "$outdated" ]]; then
     echo ""
     echo "  Updates available:"
-    echo "$outdated_ai_casks" | sed 's/^/    /'
-    read -rp "  Install these updates now? [y/N]: " update_ai_casks
-    if [[ "$update_ai_casks" =~ ^[Yy] ]]; then
-      # shellcheck disable=SC2046
-      brew upgrade --cask --greedy $(echo "$outdated_ai_casks" | awk '{print $1}') || true
+    echo "$outdated" | sed 's/^/    /'
+    read -rp "  Install these updates now? [y/N]: " update_outdated
+    if [[ "$update_outdated" =~ ^[Yy] ]]; then
+      brew upgrade --greedy || true
     fi
   fi
 fi
