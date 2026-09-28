@@ -184,8 +184,37 @@ if command -v gh &>/dev/null; then
   # per-machine (here, not in the tracked Nix config) so a machine that
   # skips this doesn't have every commit start failing to sign.
   # ==========================================================================
-  if grep -q "^\s*signingkey" "$HOME/.gitconfig.local" 2>/dev/null; then
+  # A key can be configured locally (signingkey set) but not actually
+  # registered with GitHub yet - e.g. gh was already logged in from the SSH
+  # step above without the admin:gpg_key scope, so registration failed there.
+  # Only treat this as "done" once the key is confirmed on GitHub's side too;
+  # otherwise retry registration alone, without re-prompting or regenerating.
+  local_signingkey="$(git config --file "$HOME/.gitconfig.local" --get user.signingkey 2>/dev/null || true)"
+  gpg_confirmed_on_github=false
+  if [[ -n "$local_signingkey" ]]; then
+    if ! command -v gh &>/dev/null || ! gh auth status &>/dev/null; then
+      gpg_confirmed_on_github=true # can't check right now - trust local config
+    elif gh gpg-key list 2>/dev/null | grep -q "$local_signingkey"; then
+      gpg_confirmed_on_github=true
+    fi
+  fi
+
+  if [[ "$gpg_confirmed_on_github" == "true" ]]; then
     echo "  ✓ GPG signing already configured in ~/.gitconfig.local"
+  elif [[ -n "$local_signingkey" ]]; then
+    echo -e "  ${YELLOW}⚠ Key $local_signingkey is set locally but wasn't found on GitHub - retrying registration${NC}"
+    if ! gh auth status &>/dev/null; then
+      gh auth login --hostname github.com --git-protocol https --scopes admin:gpg_key --web || true
+    fi
+    gpg_key_file="$(mktemp)"
+    gpg --armor --export "$local_signingkey" > "$gpg_key_file"
+    if gh gpg-key add "$gpg_key_file" --title "$(hostname -s) (dotfiles)" 2>&1; then
+      echo "  ✓ Key added to your GitHub account"
+    else
+      echo -e "  ${YELLOW}⚠ Failed to add key to GitHub - you may need broader auth scope:${NC}"
+      echo "    gh auth refresh -h github.com -s admin:gpg_key"
+    fi
+    rm -f "$gpg_key_file"
   else
     read -rp "  Configure GPG commit signing now? [Y/n]: " configure_gpg
     if [[ "$configure_gpg" =~ ^[Nn] ]]; then
