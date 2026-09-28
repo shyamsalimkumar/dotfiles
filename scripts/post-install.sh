@@ -277,13 +277,51 @@ else
 fi
 
 # ============================================================================
+# Claude skills - reconcile skills installed via `npx skills add ... -g` (see
+# README "Manual step") into claude/skills/. That installer isn't reliably
+# leaving the symlink in place, so treat ~/.agents/skills as the source of
+# truth and self-heal here on every run. claude/skills/ is Nix-managed as a
+# single directory symlink (see nix/home.nix), so linking happens inside the
+# repo itself, not directly under ~/.claude/skills. Skills already provided
+# by a Claude Code plugin (mattpocock-skills, andrej-karpathy-skills) are
+# skipped - claude/skills/ is a tracked working tree, and duplicating a
+# plugin skill there both fights the plugin and risks clobbering a tracked
+# file if the name collides.
+# ============================================================================
+plugin_skill_names="$(find "$HOME/.claude/plugins/marketplaces"/*/skills -iname "SKILL.md" 2>/dev/null \
+  | xargs -n1 dirname 2>/dev/null | xargs -n1 basename 2>/dev/null | sort -u)"
+
+claude_agents_skills_dir="$HOME/.agents/skills"
+if [[ -d "$claude_agents_skills_dir" ]]; then
+  echo ""
+  echo "==> Linking global skills for Claude..."
+  for skill_src in "$claude_agents_skills_dir"/*/; do
+    name="$(basename "$skill_src")"
+    # no-mistakes is dropped directly by its own installer (see
+    # scripts/setup-ai-tools.sh), not by `npx skills add` - leave it alone
+    # even though a same-named copy also happens to exist here.
+    [[ "$name" == "no-mistakes" ]] && continue
+    grep -qxF "$name" <<< "$plugin_skill_names" && continue
+    target="$DOTFILES_DIR/claude/skills/$name"
+    if [[ -e "$target" && ! -L "$target" ]]; then
+      echo "  Backing up existing $target → ${target}.bak"
+      mv "$target" "${target}.bak"
+    fi
+    ln -sfn "$skill_src" "$target"
+    echo "  ✓ Linked global skill for Claude: $name"
+    ignore_line="claude/skills/$name"
+    grep -qxF "$ignore_line" "$DOTFILES_DIR/.gitignore" || echo "$ignore_line" >> "$DOTFILES_DIR/.gitignore"
+  done
+fi
+
+# ============================================================================
 # Pi skills
 # ============================================================================
 # Pi (npm-globals.txt) has no plugin/marketplace system like Claude Code
 # does, so skills installed via `npx skills add ... -g` (see README "Manual
 # step") need to be mirrored into its skills directory directly. Treats
 # ~/.agents/skills as the source of truth and self-heals here on every run,
-# same as Claude Code's skill reconciliation in scripts/setup-claude.sh.
+# same as the Claude skill reconciliation above.
 if command -v pi &>/dev/null; then
   echo ""
   echo "==> Linking global skills for Pi..."

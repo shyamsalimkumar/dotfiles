@@ -48,6 +48,9 @@ Global instructions for all AI coding assistants (Claude, Codex, OpenCode, etc.)
 5. Surface blockers as soon as identified
 6. Capture learnings after corrections
 
+## Git
+- Never add Co-Authored-By, "Generated with", or any AI attribution lines to commit messages or PR descriptions.
+
 ## Git Worktrees
 - Always create worktrees in one of two locations:
   - `./worktrees/<branch-name>` inside the project repo, OR
@@ -62,6 +65,15 @@ Global instructions for all AI coding assistants (Claude, Codex, OpenCode, etc.)
 - **No Laziness**: Don't cut corners. No temporary fixes. Senior developer standards apply.
 - **Minimal Changes**: Must touch only what's necessary. Avoid introducing bugs.
 - Do not write overly verbose doc-blocs in the code files when you could write clean, self documenting code instead. Assume all code you write is reviewed by a human.
+
+## Go
+- Always format edited files. Especially Go files
+- Remove unused Go variables, parameters and methods that you'd generated at the end. Also if variables are unneeded and can be directly used instead prefer that when the value isn't reused.
+- If you're generating builds be sure to cleanup after.
+- Always cleanup after the operation is over. Cleanup any unused variables, methods, params (convert to _ unless they can be removed completely), files and similar resources.
+- Making changes to crud_gen.go is pointless since it's a generated file. Create a new struct instead if you need to edit one in crud. You can place it in crud.go if you desire.
+- Remove any unused variables, files, methods, etc once done. Clean up after yourself.
+- After doing a task that involves editing Go files, run `/go-check` (formats, vets, builds, tests, and lints in one step).
 
 ## Development Workflow
 

@@ -25,6 +25,8 @@
 
     # AI Coding Assistants
     codex
+    opencode
+    ollama
     # Note: gemini-cli is deprecated (Google discontinued it in favor of
     # Antigravity) - see antigravity-cli cask in darwin.nix instead.
     # Note: claude-code is added below, Linux/WSL only - already installed via
@@ -152,6 +154,14 @@
 
       # Local bin directories
       export PATH="$HOME/.local/bin:$HOME/.local/bin/personal:$HOME/.local/bin/work:$PATH"
+
+      # pnpm
+      export PNPM_HOME="$HOME/Library/pnpm"
+      case ":$PATH:" in
+        *":$PNPM_HOME/bin:"*) ;;
+        *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+      esac
+      # pnpm end
 
       ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         # Homebrew path (for packages not in Nix)
