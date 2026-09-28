@@ -244,6 +244,15 @@
       merge.conflictstyle = "diff3";
       diff.colorMoved = "default";
 
+      alias = {
+        pretty-graph = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%w(0,4,4)%+b' --abbrev-commit";
+      };
+
+      # ~/.gitconfig.local (created by scripts/post-install.sh, not tracked in
+      # git) holds userName/userEmail - without this include, git never
+      # actually reads it and every commit falls back to no identity at all.
+      include.path = "~/.gitconfig.local";
+
       # Multi-company work profile support via includeIf
       # Automatically switches git config based on directory
       includeIf."gitdir:~/work/company-a/".path = "~/.gitconfig-company-a";
