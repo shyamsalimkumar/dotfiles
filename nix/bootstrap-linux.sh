@@ -33,7 +33,7 @@ fi
 
 # Run first build
 echo -e "${YELLOW}Running first home-manager switch...${NC}"
-nix run home-manager -- switch --flake "$SCRIPT_DIR#linux"
+nix run home-manager -- switch -b backup --flake "$SCRIPT_DIR#linux"
 
 echo -e "${GREEN}Bootstrap complete!${NC}"
 echo ""

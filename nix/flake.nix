@@ -28,6 +28,9 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.${user} = import ./home.nix;
+            # Back up any pre-existing dotfile (e.g. a hand-written ~/.ssh/config on a
+            # machine that predates this setup) instead of refusing to activate.
+            home-manager.backupFileExtension = "backup";
             users.users.${user}.home = "/Users/${user}";
           }
         ];

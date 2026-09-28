@@ -12,6 +12,6 @@ echo -e "${YELLOW}Rebuilding home-manager configuration...${NC}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Rebuild
-home-manager switch --flake "$SCRIPT_DIR#linux"
+home-manager switch -b backup --flake "$SCRIPT_DIR#linux"
 
 echo -e "${GREEN}Rebuild complete!${NC}"
