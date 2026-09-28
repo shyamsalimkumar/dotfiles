@@ -116,12 +116,14 @@
       # Load personal and work aliases
       source ${../zsh/aliases.personal}
       source ${../zsh/aliases.work}
-      [[ -f ${../zsh/aliases.work.local} ]] && source ${../zsh/aliases.work.local}
+      # .local files are gitignored (machine-specific), so they can't be referenced via
+      # Nix store paths (flakes only see git-tracked files) - source them at runtime instead.
+      [[ -f "$HOME/Projects/github.com/shyamsalimkumar/dotfiles/zsh/aliases.work.local" ]] && source "$HOME/Projects/github.com/shyamsalimkumar/dotfiles/zsh/aliases.work.local"
 
       # Load personal and work functions
       source ${../zsh/functions.personal}
       source ${../zsh/functions.work}
-      [[ -f ${../zsh/functions.work.local} ]] && source ${../zsh/functions.work.local}
+      [[ -f "$HOME/Projects/github.com/shyamsalimkumar/dotfiles/zsh/functions.work.local" ]] && source "$HOME/Projects/github.com/shyamsalimkumar/dotfiles/zsh/functions.work.local"
 
       # Starship prompt
       eval "$(starship init zsh)"
