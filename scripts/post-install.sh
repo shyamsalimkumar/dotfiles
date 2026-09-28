@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
 OS="$(uname -s)"
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -112,7 +115,7 @@ if command -v gh &>/dev/null; then
         gh auth login --hostname github.com --git-protocol https --scopes admin:public_key --web || true
       fi
       if ! gh auth status &>/dev/null; then
-        echo "  ⚠ Still not logged in - skipping GitHub SSH key setup. Run 'gh auth login', then re-run this script"
+        echo -e "  ${YELLOW}⚠ Still not logged in - skipping GitHub SSH key setup. Run 'gh auth login', then re-run this script${NC}"
         configure_github_ssh_do=false
       fi
     fi
@@ -158,7 +161,7 @@ if command -v gh &>/dev/null; then
     elif gh ssh-key add "${GITHUB_KEY}.pub" --title "$(hostname -s) (dotfiles)" 2>&1; then
       echo "  ✓ Key added to your GitHub account"
     else
-      echo "  ⚠ Failed to add key to GitHub - you may need broader auth scope:"
+      echo -e "  ${YELLOW}⚠ Failed to add key to GitHub - you may need broader auth scope:${NC}"
       echo "    gh auth refresh -h github.com -s admin:public_key"
     fi
 
@@ -176,7 +179,7 @@ if command -v gh &>/dev/null; then
   fi
 else
   echo ""
-  echo "  ⚠ gh CLI not found, skipping GitHub SSH key setup"
+  echo -e "  ${YELLOW}⚠ gh CLI not found, skipping GitHub SSH key setup${NC}"
 fi
 
 # ============================================================================
@@ -188,11 +191,11 @@ if command -v nvim >/dev/null 2>&1; then
   if nvim --headless "+Lazy! sync" +qa 2>&1 | tail -5; then
     echo "  ✓ Neovim plugins synced"
   else
-    echo "  ⚠ Neovim plugin sync had warnings (this is often normal)"
+    echo -e "  ${YELLOW}⚠ Neovim plugin sync had warnings (this is often normal)${NC}"
   fi
 else
   echo ""
-  echo "  ⚠ Neovim not found, skipping plugin sync"
+  echo -e "  ${YELLOW}⚠ Neovim not found, skipping plugin sync${NC}"
 fi
 
 # ============================================================================
@@ -208,12 +211,12 @@ if command -v code &>/dev/null; then
       echo "  ✓ Already installed: $extension"
     else
       echo "  Installing: $extension"
-      code --install-extension "$extension" 2>&1 || echo "  ⚠ Failed to install $extension"
+      code --install-extension "$extension" 2>&1 || echo -e "  ${YELLOW}⚠ Failed to install $extension${NC}"
     fi
   done < "$DOTFILES_DIR/vscode/extensions.txt"
 else
   echo ""
-  echo "  ⚠ VS Code 'code' command not found, skipping extension install"
+  echo -e "  ${YELLOW}⚠ VS Code 'code' command not found, skipping extension install${NC}"
 fi
 
 # ============================================================================
@@ -255,7 +258,7 @@ if command -v claude &>/dev/null; then
     "$DOTFILES_DIR/claude/settings.json" 2>/dev/null || true)
 
   if [[ -z "$plugins" ]]; then
-    echo "  ⚠ No plugins defined in claude/settings.json"
+    echo -e "  ${YELLOW}⚠ No plugins defined in claude/settings.json${NC}"
   else
     installed_json="$HOME/.claude/plugins/installed_plugins.json"
 
@@ -266,13 +269,13 @@ if command -v claude &>/dev/null; then
       fi
       echo "  Installing plugin: $plugin"
       if ! claude plugin install "$plugin" --yes 2>&1; then
-        echo "  ⚠ Failed to install $plugin"
+        echo -e "  ${YELLOW}⚠ Failed to install $plugin${NC}"
       fi
     done <<< "$plugins"
   fi
 else
   echo ""
-  echo "  ⚠ Claude CLI not found, skipping plugin installation"
+  echo -e "  ${YELLOW}⚠ Claude CLI not found, skipping plugin installation${NC}"
   echo "    Install claude-code first, then re-run this script"
 fi
 
@@ -356,8 +359,8 @@ echo "  3. For work profiles, copy zsh/functions.work.local.example to zsh/funct
 
 if [[ "$OS" == "Darwin" ]]; then
   echo ""
-  echo "NOTE: If you see Homebrew tap trust warnings, you may need to manually trust taps:"
-  echo "  brew trust --tap derailed/k9s"
-  echo "  brew trust --tap homeport/tap"
-  echo "  brew trust --tap vishvavariya/notchy"
+  echo -e "${YELLOW}NOTE: If you see Homebrew tap trust warnings, you may need to manually trust taps:${NC}"
+  echo -e "${YELLOW}  brew trust --tap derailed/k9s${NC}"
+  echo -e "${YELLOW}  brew trust --tap homeport/tap${NC}"
+  echo -e "${YELLOW}  brew trust --tap vishvavariya/notchy${NC}"
 fi
