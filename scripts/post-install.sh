@@ -373,4 +373,17 @@ if [[ "$OS" == "Darwin" ]]; then
     echo -e "${YELLOW}  install it yourself from the App Store, or download it from${NC}"
     echo -e "${YELLOW}  https://developer.apple.com/download/all/?q=Xcode${NC}"
   fi
+
+  # This script already offers to check/update every Homebrew app on every
+  # run (see scripts/setup-brew.sh) - this is just a manual reference for
+  # updating a single self-updating app (Zoom, etc.) without going through
+  # that whole prompt, or checking outside of a full install.sh run.
+  echo ""
+  echo "TIP: Some apps (Zoom, and other Homebrew casks) auto-update in the"
+  echo "  background, so a plain 'brew outdated' won't show them as behind."
+  echo "  Force-check/update one manually with:"
+  echo "    brew upgrade --cask --greedy zoom"
+  echo "  Or check/update everything Homebrew manages at once:"
+  echo "    brew outdated --greedy"
+  echo "    brew upgrade --greedy"
 fi
