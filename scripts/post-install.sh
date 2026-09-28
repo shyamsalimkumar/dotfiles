@@ -363,4 +363,27 @@ if [[ "$OS" == "Darwin" ]]; then
   echo -e "${YELLOW}  brew trust --tap derailed/k9s${NC}"
   echo -e "${YELLOW}  brew trust --tap homeport/tap${NC}"
   echo -e "${YELLOW}  brew trust --tap vishvavariya/notchy${NC}"
+
+  # Xcode has no cask and can't be installed via Nix - Apple only distributes
+  # it via the App Store / developer.apple.com and doesn't allow third-party
+  # redistribution. Silent if already present; only warn when it's missing.
+  if [[ ! -d "/Applications/Xcode.app" ]]; then
+    echo ""
+    echo -e "${YELLOW}NOTE: Xcode is not installed. Nix/Homebrew can't install it for you -${NC}"
+    echo -e "${YELLOW}  install it yourself from the App Store, or download it from${NC}"
+    echo -e "${YELLOW}  https://developer.apple.com/download/all/?q=Xcode${NC}"
+  fi
+
+  # This script already offers to check/update every Homebrew app on every
+  # run (see scripts/setup-brew.sh) - this is just a manual reference for
+  # updating a single self-updating app (Zoom, etc.) without going through
+  # that whole prompt, or checking outside of a full install.sh run.
+  echo ""
+  echo -e "${YELLOW}TIP: Some apps (Zoom, and other Homebrew casks) auto-update in the${NC}"
+  echo -e "${YELLOW}  background, so a plain 'brew outdated' won't show them as behind.${NC}"
+  echo -e "${YELLOW}  Force-check/update one manually with:${NC}"
+  echo -e "${YELLOW}    brew upgrade --cask --greedy zoom${NC}"
+  echo -e "${YELLOW}  Or check/update everything Homebrew manages at once:${NC}"
+  echo -e "${YELLOW}    brew outdated --greedy${NC}"
+  echo -e "${YELLOW}    brew upgrade --greedy${NC}"
 fi
