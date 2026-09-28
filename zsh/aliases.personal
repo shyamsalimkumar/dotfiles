@@ -1,0 +1,45 @@
+# Personal aliases
+
+# Navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+
+# ls aliases
+alias ls="ls -G"
+alias ll="ls -lah"
+alias la="ls -A"
+alias l="ls -CF"
+
+# Git shortcuts
+alias g="git"
+alias gs="git status"
+alias ga="git add"
+alias gc="git commit"
+alias gp="git push"
+alias gl="git pull"
+alias gd="git diff"
+alias gco="git checkout"
+alias gb="git branch"
+alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+
+# Directory shortcuts
+alias Projects="cd ~/Projects"
+alias github="cd ~/Projects/github.com"
+
+# Safety
+alias rm="rm -i"
+alias cp="cp -i"
+alias mv="mv -i"
+
+# pi needs Node's zstd support in zlib (missing before ~v22.15/v23.x), so pin it
+# to a known-good install instead of whatever `nvm alias default` happens to be.
+pi() {
+  local pi_node="$HOME/.nvm/versions/node/v23.11.0/bin/pi"
+  if [[ -x "$pi_node" ]]; then
+    "$pi_node" "$@"
+  else
+    echo "pi: pinned node v23.11.0 not found under nvm on this machine - falling back to PATH, run 'pi update' if it fails" >&2
+    command pi "$@"
+  fi
+}

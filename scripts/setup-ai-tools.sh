@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "==> Installing AI assistant tools..."
+
+# Re-running each tool's own installer is how you update it (they always
+# fetch latest) - ask once instead of silently skipping already-installed
+# tools forever, or silently re-downloading them on every single run.
+update_ai_tools=false
+if command -v no-mistakes >/dev/null 2>&1 || command -v treehouse >/dev/null 2>&1 \
+  || command -v omp >/dev/null 2>&1 || command -v gnhf >/dev/null 2>&1 \
+  || command -v pi >/dev/null 2>&1; then
+  read -rp "  Check for updates to already-installed AI tools? [y/N]: " check_updates
+  [[ "$check_updates" =~ ^[Yy] ]] && update_ai_tools=true
+fi
+
+# Compares an installed vX.Y.Z-style --version against a repo's latest
+# GitHub release tag, so "update" only actually reinstalls when there's a
+# real newer version - not on every run just because the user opted in.
+github_latest_tag() {
+  curl -fsSL "https://api.github.com/repos/$1/releases/latest" 2>/dev/null | grep '"tag_name"' | cut -d'"' -f4
+}
+
+no_mistakes_install=true
+if command -v no-mistakes >/dev/null 2>&1; then
+  no_mistakes_install=false
+  if [[ "$update_ai_tools" == "true" ]]; then
+    current="$(no-mistakes --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+    latest="$(github_latest_tag kunchenguid/no-mistakes)"
+    if [[ -n "$latest" && "$current" != "$latest" ]]; then
+      echo "  no-mistakes: $current -> $latest"
+      no_mistakes_install=true
+    else
+      echo "  ✓ no-mistakes already up to date ($current)"
+    fi
+  else
+    echo "  no-mistakes already installed"
+  fi
+fi
+if [[ "$no_mistakes_install" == "true" ]]; then
+  echo "  Installing/updating no-mistakes..."
+  curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh | sh
+fi
+
+treehouse_install=true
+if command -v treehouse >/dev/null 2>&1; then
+  treehouse_install=false
+  if [[ "$update_ai_tools" == "true" ]]; then
+    current="$(treehouse --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+    latest="$(github_latest_tag kunchenguid/treehouse)"
+    if [[ -n "$latest" && "$current" != "$latest" ]]; then
+      echo "  treehouse: $current -> $latest"
+      treehouse_install=true
+    else
+      echo "  ✓ treehouse already up to date ($current)"
+    fi
+  else
+    echo "  treehouse already installed"
+  fi
+fi
+if [[ "$treehouse_install" == "true" ]]; then
+  echo "  Installing/updating treehouse..."
+  curl -fsSL https://kunchenguid.github.io/treehouse/install.sh | sh
+fi
+
+# nvm itself is never installed anywhere else - home.nix's zshrc only sources
+# it if already present. Install it here (official installer, matches the
+# ~/.nvm/nvm.sh path zshrc expects) so npm actually exists for gnhf/pi below.
+export NVM_DIR="$HOME/.nvm"
+if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+  echo "  Installing nvm..."
+  nvm_latest="$(curl -fsSL https://api.github.com/repos/nvm-sh/nvm/releases/latest | grep '"tag_name"' | cut -d '"' -f4)"
+  curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/${nvm_latest}/install.sh" | bash
+fi
+# nvm's script and shell functions aren't written to be safe under `set -u` -
+# relax it for sourcing and for any nvm calls below.
+set +u
+# shellcheck disable=SC1091
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+if command -v npm >/dev/null 2>&1; then
+  echo "  npm already available"
+elif command -v nvm >/dev/null 2>&1; then
+  echo "  Installing latest LTS Node via nvm..."
+  nvm install --lts
+  nvm alias default 'lts/*'
+fi
+set -u
+
+# `npm outdated -g <pkg>` exits 0 with no output when a global package is
+# already at latest, and exits 1 with a version table when it isn't - a
+# real comparison instead of blindly reinstalling every opted-in run.
+if command -v npm >/dev/null 2>&1; then
+  gnhf_install=true
+  if command -v gnhf >/dev/null 2>&1; then
+    gnhf_install=false
+    if [[ "$update_ai_tools" == "true" ]]; then
+      if npm outdated -g gnhf >/dev/null 2>&1; then
+        echo "  ✓ gnhf already up to date"
+      else
+        echo "  gnhf: update available"
+        gnhf_install=true
+      fi
+    else
+      echo "  gnhf already installed"
+    fi
+  fi
+  if [[ "$gnhf_install" == "true" ]]; then
+    echo "  Installing/updating gnhf..."
+    npm install -g gnhf
+  fi
+
+  pi_install=true
+  if command -v pi >/dev/null 2>&1; then
+    pi_install=false
+    if [[ "$update_ai_tools" == "true" ]]; then
+      if npm outdated -g @earendil-works/pi-coding-agent >/dev/null 2>&1; then
+        echo "  ✓ pi already up to date"
+      else
+        echo "  pi: update available"
+        pi_install=true
+      fi
+    else
+      echo "  pi already installed"
+    fi
+  fi
+  if [[ "$pi_install" == "true" ]]; then
+    echo "  Installing/updating pi (@earendil-works/pi-coding-agent)..."
+    npm install -g @earendil-works/pi-coding-agent
+  fi
+else
+  echo "  WARNING: npm not found, skipping gnhf and pi install"
+fi
+
+# omp.sh has no public releases API to compare against, so this still
+# reinstalls on every opted-in run rather than checking a real version diff.
+if command -v omp >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
+  echo "  omp (Oh My Pi) already installed"
+else
+  echo "  Installing/updating omp (Oh My Pi)..."
+  curl -fsSL https://omp.sh/install | sh
+fi
+
+# firstmate isn't a global binary — it's a repo you clone once and launch your
+# agent harness inside; it clones the projects you ask it about into its own
+# projects/ subdirectory. Keep the one clone under ~/Projects like everything else.
+FIRSTMATE_DIR="$HOME/Projects/github.com/kunchenguid/firstmate"
+if [[ -d "$FIRSTMATE_DIR" ]]; then
+  if [[ "$update_ai_tools" == "true" ]]; then
+    echo "  Updating firstmate..."
+    git -C "$FIRSTMATE_DIR" pull || true
+  else
+    echo "  firstmate already cloned at $FIRSTMATE_DIR"
+  fi
+else
+  echo "  Cloning firstmate to $FIRSTMATE_DIR..."
+  mkdir -p "$(dirname "$FIRSTMATE_DIR")"
+  git clone https://github.com/kunchenguid/firstmate "$FIRSTMATE_DIR"
+fi

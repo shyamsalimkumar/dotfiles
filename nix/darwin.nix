@@ -1,0 +1,120 @@
+{ pkgs, user, ... }:
+
+{
+  # Nix is installed and managed by Determinate (see nix/bootstrap.sh), not nix-darwin.
+  # nix.settings below has no effect while this is false, but Determinate already
+  # configures flakes and trusted users on its own.
+  nix.enable = false;
+
+  # Allow unfree packages (needed for some applications)
+  nixpkgs.config.allowUnfree = true;
+
+  # Required by nix-darwin: user-scoped options (homebrew, system.defaults) apply to this user
+  system.primaryUser = user;
+
+  # macOS system defaults (adopted from reference)
+  system.defaults = {
+    NSGlobalDomain = {
+      AppleInterfaceStyle = "Dark";
+      KeyRepeat = 2;
+      InitialKeyRepeat = 15;
+      _HIHideMenuBar = true;
+      AppleShowAllExtensions = true;
+    };
+    dock = {
+      autohide = true;
+    };
+    finder = {
+      FXPreferredViewStyle = "Nlsv";
+      CreateDesktop = false;
+    };
+    trackpad = {
+      Clicking = true;
+    };
+  };
+
+  # Homebrew configuration
+  # Used only for packages not available in nixpkgs
+  homebrew = {
+    enable = true;
+
+    # Cleanup strategy
+    # Current: "uninstall" (safe during migration - only removes undeclared packages)
+    # Future: "zap" (strict declarative mode - removes all undeclared packages and data)
+    onActivation.cleanup = "uninstall";
+
+    # Custom taps
+    taps = [
+      "derailed/k9s"
+      "homeport/tap"
+      "vishvavariya/notchy"
+    ];
+
+    # Homebrew packages (formulae) not available in nixpkgs
+    brews = [
+      # Version managers (shell-based, not suitable for Nix)
+      "pyenv"
+
+      # Tools not in nixpkgs
+      "transcrypt"  # Git encryption
+      "trurl"       # URL tool
+
+      # macOS-specific formulae
+      "colima"      # Docker runtime for macOS
+      "dockutil"    # Dock management
+    ];
+
+    # macOS Applications (Casks)
+    casks = [
+      # Security & Password Management
+      "1password"
+      "1password-cli"
+      "tailscale-app"     # Mesh VPN
+      "nordvpn"
+      "ausweisapp"        # German ID card authentication
+
+      # Development Tools
+      "visual-studio-code"
+      # Note: wezterm IS in nixpkgs, but using cask for now for consistency
+      "wezterm"
+      "claude-code"       # AI coding assistant (CLI)
+      "claude"            # AI coding assistant (desktop app)
+      "chatgpt"           # AI assistant (desktop app)
+      "antigravity-cli"   # AI coding assistant (CLI) - replaces deprecated gemini-cli
+      "meld"              # Diff/merge tool
+      "xcodes-app"        # Manages Xcode installs/versions (Xcode itself has no cask - see note)
+      # "ghostpepper"     # Speech-to-text/meeting transcription (https://github.com/matthartman/ghost-pepper)
+                          # - not installed automatically, uncomment to enable
+
+      # Cloud & DevOps
+      "gcloud-cli"        # gcloud CLI (formerly google-cloud-sdk / google-cloud-cli)
+
+      # Productivity
+      "notchy"            # Dynamic Island for macOS
+
+      # Utilities
+      "google-chrome"     # Web browser
+      "firefox"           # Web browser
+      "handy"             # Speech recognition
+      "shottr"            # Screenshot tool
+
+      # Fonts
+      "font-hack-nerd-font"
+
+      # Communication
+      "slack"
+      "whatsapp"
+      "zoom"
+
+      # Media & Creative
+      "blender"
+      "spotify"
+    ];
+  };
+
+  # Used for backwards compatibility
+  system.stateVersion = 4;
+
+  # Platform-specific
+  nixpkgs.hostPlatform = "aarch64-darwin";
+}
