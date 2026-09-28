@@ -70,6 +70,8 @@
       "1password"
       "1password-cli"
       "tailscale-app"     # Mesh VPN
+      "nordvpn"
+      "ausweisapp"        # German ID card authentication
 
       # Development Tools
       "visual-studio-code"
@@ -77,8 +79,11 @@
       "wezterm"
       "claude-code"       # AI coding assistant (CLI)
       "claude"            # AI coding assistant (desktop app)
+      "chatgpt"           # AI assistant (desktop app)
       "meld"              # Diff/merge tool
       "xcodes-app"        # Manages Xcode installs/versions (Xcode itself has no cask - see note)
+      # "ghostpepper"     # Speech-to-text/meeting transcription (https://github.com/matthartman/ghost-pepper)
+                          # - not installed automatically, uncomment to enable
 
       # Cloud & DevOps
       "gcloud-cli"        # gcloud CLI (formerly google-cloud-sdk / google-cloud-cli)
