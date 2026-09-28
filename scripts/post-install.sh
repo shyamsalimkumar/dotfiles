@@ -66,10 +66,12 @@ if command -v gh &>/dev/null; then
       configure_github_ssh_do=true
       if ! gh auth status &>/dev/null; then
         echo "  Not logged into GitHub - launching 'gh auth login' (opens your browser)..."
-        # No --git-protocol ssh here on purpose: that flag makes gh auth login
-        # ask its own "upload an SSH key?" question mid-login, which duplicates
-        # (and confuses with) the key selection this script does further below.
-        gh auth login --hostname github.com --scopes admin:public_key --web || true
+        # --git-protocol https (not ssh) on purpose: gh's own "preferred protocol"
+        # setting is unrelated to which SSH key actually gets used for git@github.com
+        # (that's config.local, set up below) - it just decides whether *gh itself*
+        # defaults to HTTPS or SSH remotes. Picking ssh here would make gh ask its
+        # own "upload an SSH key?" question too, duplicating the selection below.
+        gh auth login --hostname github.com --git-protocol https --scopes admin:public_key --web || true
       fi
       if ! gh auth status &>/dev/null; then
         echo "  ⚠ Still not logged in - skipping GitHub SSH key setup. Run 'gh auth login', then re-run this script"
