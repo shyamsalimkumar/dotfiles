@@ -14,16 +14,51 @@ if command -v no-mistakes >/dev/null 2>&1 || command -v treehouse >/dev/null 2>&
   [[ "$check_updates" =~ ^[Yy] ]] && update_ai_tools=true
 fi
 
-if command -v no-mistakes >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
-  echo "  no-mistakes already installed"
-else
+# Compares an installed vX.Y.Z-style --version against a repo's latest
+# GitHub release tag, so "update" only actually reinstalls when there's a
+# real newer version - not on every run just because the user opted in.
+github_latest_tag() {
+  curl -fsSL "https://api.github.com/repos/$1/releases/latest" 2>/dev/null | grep '"tag_name"' | cut -d'"' -f4
+}
+
+no_mistakes_install=true
+if command -v no-mistakes >/dev/null 2>&1; then
+  no_mistakes_install=false
+  if [[ "$update_ai_tools" == "true" ]]; then
+    current="$(no-mistakes --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+    latest="$(github_latest_tag kunchenguid/no-mistakes)"
+    if [[ -n "$latest" && "$current" != "$latest" ]]; then
+      echo "  no-mistakes: $current -> $latest"
+      no_mistakes_install=true
+    else
+      echo "  ✓ no-mistakes already up to date ($current)"
+    fi
+  else
+    echo "  no-mistakes already installed"
+  fi
+fi
+if [[ "$no_mistakes_install" == "true" ]]; then
   echo "  Installing/updating no-mistakes..."
   curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh | sh
 fi
 
-if command -v treehouse >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
-  echo "  treehouse already installed"
-else
+treehouse_install=true
+if command -v treehouse >/dev/null 2>&1; then
+  treehouse_install=false
+  if [[ "$update_ai_tools" == "true" ]]; then
+    current="$(treehouse --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+    latest="$(github_latest_tag kunchenguid/treehouse)"
+    if [[ -n "$latest" && "$current" != "$latest" ]]; then
+      echo "  treehouse: $current -> $latest"
+      treehouse_install=true
+    else
+      echo "  ✓ treehouse already up to date ($current)"
+    fi
+  else
+    echo "  treehouse already installed"
+  fi
+fi
+if [[ "$treehouse_install" == "true" ]]; then
   echo "  Installing/updating treehouse..."
   curl -fsSL https://kunchenguid.github.io/treehouse/install.sh | sh
 fi
@@ -52,17 +87,44 @@ elif command -v nvm >/dev/null 2>&1; then
 fi
 set -u
 
+# `npm outdated -g <pkg>` exits 0 with no output when a global package is
+# already at latest, and exits 1 with a version table when it isn't - a
+# real comparison instead of blindly reinstalling every opted-in run.
 if command -v npm >/dev/null 2>&1; then
-  if command -v gnhf >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
-    echo "  gnhf already installed"
-  else
+  gnhf_install=true
+  if command -v gnhf >/dev/null 2>&1; then
+    gnhf_install=false
+    if [[ "$update_ai_tools" == "true" ]]; then
+      if npm outdated -g gnhf >/dev/null 2>&1; then
+        echo "  ✓ gnhf already up to date"
+      else
+        echo "  gnhf: update available"
+        gnhf_install=true
+      fi
+    else
+      echo "  gnhf already installed"
+    fi
+  fi
+  if [[ "$gnhf_install" == "true" ]]; then
     echo "  Installing/updating gnhf..."
     npm install -g gnhf
   fi
 
-  if command -v pi >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
-    echo "  pi already installed"
-  else
+  pi_install=true
+  if command -v pi >/dev/null 2>&1; then
+    pi_install=false
+    if [[ "$update_ai_tools" == "true" ]]; then
+      if npm outdated -g @earendil-works/pi-coding-agent >/dev/null 2>&1; then
+        echo "  ✓ pi already up to date"
+      else
+        echo "  pi: update available"
+        pi_install=true
+      fi
+    else
+      echo "  pi already installed"
+    fi
+  fi
+  if [[ "$pi_install" == "true" ]]; then
     echo "  Installing/updating pi (@earendil-works/pi-coding-agent)..."
     npm install -g @earendil-works/pi-coding-agent
   fi
@@ -70,6 +132,8 @@ else
   echo "  WARNING: npm not found, skipping gnhf and pi install"
 fi
 
+# omp.sh has no public releases API to compare against, so this still
+# reinstalls on every opted-in run rather than checking a real version diff.
 if command -v omp >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
   echo "  omp (Oh My Pi) already installed"
 else
