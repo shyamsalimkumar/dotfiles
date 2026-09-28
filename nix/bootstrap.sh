@@ -25,12 +25,15 @@ fi
 # Get the directory containing this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Create symlink to dotfiles nix directory in ~/.config
+# Create/refresh symlink to dotfiles nix directory in ~/.config. ln -sfn
+# unconditionally keeps this current even if the dotfiles checkout has moved
+# since the symlink was first created - a plain existence check would leave
+# it silently pointing at the old, now-wrong location.
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 mkdir -p ~/.config
-if [ ! -L ~/.config/nix-darwin ]; then
-    ln -sf "$SCRIPT_DIR" ~/.config/nix-darwin
-    echo -e "${GREEN}Created symlink: ~/.config/nix-darwin -> $SCRIPT_DIR${NC}"
+if [ ! -L ~/.config/nix-darwin ] || [ "$(readlink ~/.config/nix-darwin)" != "$SCRIPT_DIR" ]; then
+    ln -sfn "$SCRIPT_DIR" ~/.config/nix-darwin
+    echo -e "${GREEN}Linked: ~/.config/nix-darwin -> $SCRIPT_DIR${NC}"
 fi
 
 # Run first build
