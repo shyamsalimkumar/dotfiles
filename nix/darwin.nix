@@ -74,7 +74,10 @@
       "visual-studio-code"
       # Note: wezterm IS in nixpkgs, but using cask for now for consistency
       "wezterm"
-      "claude-code"       # AI coding assistant
+      "claude-code"       # AI coding assistant (CLI)
+      "claude"            # AI coding assistant (desktop app)
+      "meld"              # Diff/merge tool
+      "xcodes-app"        # Manages Xcode installs/versions (Xcode itself has no cask - see note)
 
       # Cloud & DevOps
       "gcloud-cli"        # gcloud CLI (formerly google-cloud-sdk / google-cloud-cli)
@@ -84,13 +87,21 @@
 
       # Utilities
       "google-chrome"     # Web browser
+      "firefox"           # Web browser
       "handy"             # Speech recognition
+      "shottr"            # Screenshot tool
 
       # Fonts
       "font-hack-nerd-font"
 
-      # Work-optional applications (install manually if needed):
-      # "slack"           # Team communication (work-specific)
+      # Communication
+      "slack"
+      "whatsapp"
+      "zoom"
+
+      # Media & Creative
+      "blender"
+      "spotify"
     ];
   };
 
