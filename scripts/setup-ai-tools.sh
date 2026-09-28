@@ -132,11 +132,26 @@ else
   echo "  WARNING: npm not found, skipping gnhf and pi install"
 fi
 
-# omp.sh has no public releases API to compare against, so this still
-# reinstalls on every opted-in run rather than checking a real version diff.
-if command -v omp >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
-  echo "  omp (Oh My Pi) already installed"
-else
+# omp.sh/install is fetched from can1357/oh-my-pi on GitHub (found by
+# reading the installer script itself), so it gets the same real version
+# comparison as no-mistakes/treehouse instead of blindly reinstalling.
+omp_install=true
+if command -v omp >/dev/null 2>&1; then
+  omp_install=false
+  if [[ "$update_ai_tools" == "true" ]]; then
+    current="$(omp --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+    latest="$(github_latest_tag can1357/oh-my-pi)"
+    if [[ -n "$latest" && "$current" != "$latest" ]]; then
+      echo "  omp (Oh My Pi): $current -> $latest"
+      omp_install=true
+    else
+      echo "  ✓ omp (Oh My Pi) already up to date ($current)"
+    fi
+  else
+    echo "  omp (Oh My Pi) already installed"
+  fi
+fi
+if [[ "$omp_install" == "true" ]]; then
   echo "  Installing/updating omp (Oh My Pi)..."
   curl -fsSL https://omp.sh/install | sh
 fi
