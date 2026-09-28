@@ -145,8 +145,11 @@ omp_install=true
 if command -v omp >/dev/null 2>&1; then
   omp_install=false
   if [[ "$update_ai_tools" == "true" ]]; then
-    current="$(omp --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
-    latest="$(github_latest_tag can1357/oh-my-pi)"
+    # omp --version prints "omp/X.Y.Z" - no "v" prefix, unlike no-mistakes/
+    # treehouse - so strip the "v" from the release tag to compare like for like.
+    current="$(omp --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
+    latest_tag="$(github_latest_tag can1357/oh-my-pi)"
+    latest="${latest_tag#v}"
     if [[ -n "$latest" && "$current" != "$latest" ]]; then
       echo "  omp (Oh My Pi): $current -> $latest"
       omp_install=true
