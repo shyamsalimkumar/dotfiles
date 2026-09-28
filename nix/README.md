@@ -62,7 +62,7 @@ cd nix
 
 Or from anywhere:
 ```bash
-darwin-rebuild switch --flake ~/.config/nix-darwin#mac
+sudo darwin-rebuild switch --flake ~/.config/nix-darwin#mac
 ```
 
 ### Linux / WSL
@@ -151,7 +151,7 @@ cp ~/.config/nix-darwin/local.nix.example ~/.config/nix-darwin/local.nix
 
 3. **Rebuild** to apply changes:
 ```bash
-darwin-rebuild switch --flake ~/.config/nix-darwin#mac
+sudo darwin-rebuild switch --flake ~/.config/nix-darwin#mac
 ```
 
 #### Profile Structure

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Post-installation tasks for Nix-based dotfiles
-# Run this after: darwin-rebuild switch --flake ~/.config/nix-darwin (macOS)
+# Run this after: sudo darwin-rebuild switch --flake ~/.config/nix-darwin (macOS)
 # or: home-manager switch --flake ~/.config/home-manager (Linux/WSL)
 
 set -euo pipefail
@@ -121,7 +121,7 @@ echo ""
 echo "Next steps:"
 echo "  1. Restart your terminal to load the new configuration"
 if [[ "$OS" == "Darwin" ]]; then
-  echo "  2. Run 'darwin-rebuild switch --flake ~/.config/nix-darwin' to apply Nix changes"
+  echo "  2. Run 'sudo darwin-rebuild switch --flake ~/.config/nix-darwin' to apply Nix changes"
 else
   echo "  2. Run 'home-manager switch --flake ~/.config/home-manager' to apply Nix changes"
 fi

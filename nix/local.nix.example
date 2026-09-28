@@ -6,7 +6,7 @@
   profiles = {
     # Enable/disable company profiles
     # Set to true to load company-specific packages and configurations
-    # After changing, run: darwin-rebuild switch --flake ~/.config/nix-darwin#mac
+    # After changing, run: sudo darwin-rebuild switch --flake ~/.config/nix-darwin#mac
 
     companyA.enable = false;  # Change to true to enable Company A profile
     companyB.enable = false;  # Change to true to enable Company B profile
