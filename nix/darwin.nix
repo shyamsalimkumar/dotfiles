@@ -80,6 +80,7 @@
       "claude-code"       # AI coding assistant (CLI)
       "claude"            # AI coding assistant (desktop app)
       "chatgpt"           # AI assistant (desktop app)
+      "antigravity-cli"   # AI coding assistant (CLI) - replaces deprecated gemini-cli
       "meld"              # Diff/merge tool
       "xcodes-app"        # Manages Xcode installs/versions (Xcode itself has no cask - see note)
       # "ghostpepper"     # Speech-to-text/meeting transcription (https://github.com/matthartman/ghost-pepper)

@@ -25,7 +25,8 @@
 
     # AI Coding Assistants
     codex
-    gemini-cli
+    # Note: gemini-cli is deprecated (Google discontinued it in favor of
+    # Antigravity) - see antigravity-cli cask in darwin.nix instead.
     # Note: claude-code is added below, Linux/WSL only - already installed via
     # Homebrew cask on macOS (see darwin.nix)
 
