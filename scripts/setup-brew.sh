@@ -30,4 +30,12 @@ if [[ "$OS" == "Darwin" ]]; then
   # so trust it here before nix-darwin's activation tries to install its cask.
   brew tap vishvavariya/notchy
   brew trust --taps vishvavariya/notchy
+
+  # If WhatsApp was already installed by hand (not via Homebrew), brew bundle
+  # refuses to overwrite it and darwin-rebuild fails. Force it to take over here,
+  # while we're still running interactively and can prompt for a password.
+  if [[ -d "/Applications/WhatsApp.app" ]] && ! brew list --cask whatsapp &>/dev/null; then
+    echo "  WhatsApp.app exists but isn't managed by Homebrew - reinstalling it via brew..."
+    brew install --cask whatsapp --force
+  fi
 fi
