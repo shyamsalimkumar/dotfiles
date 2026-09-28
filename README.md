@@ -69,7 +69,11 @@ Place executable scripts in `helpers/personal/` or `helpers/work/`.
 
 ## Projects layout
 
-All cloned repos and Go workspace sources live under `~/Projects/<host>/<org>/<repo>` (e.g. `~/Projects/github.com/shyamsalimkumar/dotfiles`) — this is the one canonical checkout location. `scripts/setup-projects.sh` enforces this for Go by making `$GOPATH/src/github.com` a symlink to `~/Projects/github.com`, so `go get`/`go install` and manual clones land in the same place. It refuses to run (and tells you what to do) if it finds a name that exists in both locations already, rather than silently merging or overwriting.
+All cloned repos, for every language, live under `~/Projects/<host>/<org>/<repo>` (e.g. `~/Projects/github.com/shyamsalimkumar/dotfiles`) — this is the one canonical checkout location.
+
+Go's own tooling doesn't know about that convention, though: `go get`, `go install`, and GOPATH-aware code expect source to live at the very specific path `$GOPATH/src/<import-path>` (e.g. `~/go/src/github.com/someuser/somerepo`). Without a bridge between the two, every Go repo would need two separate copies - one for Go's tools, one for everything else - which would drift out of sync. `scripts/setup-projects.sh` avoids that by making `$GOPATH/src/github.com` a *symlink* to `~/Projects/github.com` instead: there's really only one copy of anything on disk, but Go's tools still find it exactly where they expect to look, and manual clones land in the same place either way.
+
+If it finds a repo name that already exists in *both* locations as separate real directories (not yet merged), it refuses to auto-merge that one (and tells you what to do), rather than silently overwriting - everything else gets merged into `~/Projects/github.com` automatically.
 
 ## AI assistant configuration
 
