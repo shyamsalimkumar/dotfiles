@@ -35,7 +35,7 @@ fi
 
 # Run first build
 echo -e "${YELLOW}Running first darwin-rebuild...${NC}"
-nix run nix-darwin -- switch --flake "$SCRIPT_DIR#mac"
+sudo nix run nix-darwin -- switch --flake "$SCRIPT_DIR#mac"
 
 echo -e "${GREEN}Bootstrap complete!${NC}"
 echo ""
