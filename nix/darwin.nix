@@ -69,6 +69,7 @@
       # Security & Password Management
       "1password"
       "1password-cli"
+      "tailscale-app"     # Mesh VPN
 
       # Development Tools
       "visual-studio-code"
