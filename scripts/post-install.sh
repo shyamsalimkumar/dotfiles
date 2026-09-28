@@ -53,18 +53,29 @@ fi
 # ============================================================================
 if command -v gh &>/dev/null; then
   echo ""
-  echo "==> Setting up GitHub SSH key..."
+  echo "==> GitHub SSH key..."
 
-  if ! gh auth status &>/dev/null; then
-    echo "  Not logged into GitHub - launching 'gh auth login' (opens your browser)..."
-    gh auth login --hostname github.com --git-protocol ssh --scopes admin:public_key --web || true
-  fi
-
-  if ! gh auth status &>/dev/null; then
-    echo "  ⚠ Still not logged in - skipping GitHub SSH key setup. Run 'gh auth login', then re-run this script"
-  elif grep -q "^Host github\.com$" "$HOME/.ssh/config.local" 2>/dev/null; then
+  if grep -q "^Host github\.com$" "$HOME/.ssh/config.local" 2>/dev/null; then
     echo "  ✓ github.com already configured in ~/.ssh/config.local"
   else
+    read -rp "  Configure a GitHub SSH key now? [Y/n]: " configure_github_ssh
+    if [[ "$configure_github_ssh" =~ ^[Nn] ]]; then
+      echo "  Skipping GitHub SSH key setup"
+      configure_github_ssh_do=false
+    else
+      configure_github_ssh_do=true
+      if ! gh auth status &>/dev/null; then
+        echo "  Not logged into GitHub - launching 'gh auth login' (opens your browser)..."
+        gh auth login --hostname github.com --git-protocol ssh --scopes admin:public_key --web || true
+      fi
+      if ! gh auth status &>/dev/null; then
+        echo "  ⚠ Still not logged in - skipping GitHub SSH key setup. Run 'gh auth login', then re-run this script"
+        configure_github_ssh_do=false
+      fi
+    fi
+  fi
+
+  if [[ "${configure_github_ssh_do:-false}" == "true" ]]; then
     GITHUB_KEY=""
     mapfile -t existing_keys < <(find "$HOME/.ssh" -maxdepth 1 -type f -name "*.pub" 2>/dev/null | sed 's/\.pub$//')
     if [[ ${#existing_keys[@]} -gt 0 ]]; then
