@@ -35,9 +35,7 @@ fi
 
 # Run first build
 echo -e "${YELLOW}Running first darwin-rebuild...${NC}"
-# Activation runs brew as root, which can't see the tap trust recorded under this
-# user's home (see scripts/setup-brew.sh) - skip that check for this run instead.
-sudo HOMEBREW_NO_REQUIRE_TAP_TRUST=1 nix run nix-darwin -- switch --flake "$SCRIPT_DIR#mac"
+sudo nix run nix-darwin -- switch --flake "$SCRIPT_DIR#mac"
 
 echo -e "${GREEN}Bootstrap complete!${NC}"
 echo ""

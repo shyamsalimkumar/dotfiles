@@ -31,6 +31,16 @@ if [[ "$OS" == "Darwin" ]]; then
   brew tap vishvavariya/notchy
   brew trust --taps vishvavariya/notchy
 
+  # nix-darwin's activation runs brew as root, and that root context does not
+  # reliably inherit HOMEBREW_NO_REQUIRE_TAP_TRUST passed via `sudo VAR=1 cmd`
+  # (nix-darwin's own internal re-exec appears to strip it). /etc/homebrew/brew.env
+  # is read directly off disk by brew's launcher on every invocation regardless
+  # of caller environment, so persist the setting there instead.
+  sudo mkdir -p /etc/homebrew
+  if ! grep -q "^HOMEBREW_NO_REQUIRE_TAP_TRUST=" /etc/homebrew/brew.env 2>/dev/null; then
+    echo "HOMEBREW_NO_REQUIRE_TAP_TRUST=1" | sudo tee -a /etc/homebrew/brew.env >/dev/null
+  fi
+
   # If WhatsApp was already installed by hand (not via Homebrew), brew bundle
   # refuses to overwrite it and darwin-rebuild fails. Force it to take over here,
   # while we're still running interactively and can prompt for a password.
