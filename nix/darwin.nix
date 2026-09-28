@@ -1,11 +1,10 @@
 { pkgs, user, ... }:
 
 {
-  # Nix configuration
-  nix.settings = {
-    experimental-features = "nix-command flakes";
-    trusted-users = [ user ];
-  };
+  # Nix is installed and managed by Determinate (see nix/bootstrap.sh), not nix-darwin.
+  # nix.settings below has no effect while this is false, but Determinate already
+  # configures flakes and trusted users on its own.
+  nix.enable = false;
 
   # Allow unfree packages (needed for some applications)
   nixpkgs.config.allowUnfree = true;
