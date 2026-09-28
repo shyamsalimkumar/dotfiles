@@ -217,7 +217,7 @@
     # Note: userName and userEmail should be configured in ~/.gitconfig.local
     # See README Prerequisites section for setup instructions
 
-    extraConfig = {
+    settings = {
       core = {
         editor = "nvim";
         autocrlf = "input";
