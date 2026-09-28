@@ -35,6 +35,13 @@ else
   echo "  WARNING: npm not found, skipping gnhf and pi install"
 fi
 
+if command -v omp >/dev/null 2>&1; then
+  echo "  omp (Oh My Pi) already installed"
+else
+  echo "  Installing omp (Oh My Pi)..."
+  curl -fsSL https://omp.sh/install | sh
+fi
+
 # firstmate isn't a global binary — it's a repo you clone once and launch your
 # agent harness inside; it clones the projects you ask it about into its own
 # projects/ subdirectory. Keep the one clone under ~/Projects like everything else.
