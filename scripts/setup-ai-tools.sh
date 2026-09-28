@@ -3,17 +3,28 @@ set -euo pipefail
 
 echo "==> Installing AI assistant tools..."
 
-if command -v no-mistakes >/dev/null 2>&1; then
+# Re-running each tool's own installer is how you update it (they always
+# fetch latest) - ask once instead of silently skipping already-installed
+# tools forever, or silently re-downloading them on every single run.
+update_ai_tools=false
+if command -v no-mistakes >/dev/null 2>&1 || command -v treehouse >/dev/null 2>&1 \
+  || command -v omp >/dev/null 2>&1 || command -v gnhf >/dev/null 2>&1 \
+  || command -v pi >/dev/null 2>&1; then
+  read -rp "  Check for updates to already-installed AI tools? [y/N]: " check_updates
+  [[ "$check_updates" =~ ^[Yy] ]] && update_ai_tools=true
+fi
+
+if command -v no-mistakes >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
   echo "  no-mistakes already installed"
 else
-  echo "  Installing no-mistakes..."
+  echo "  Installing/updating no-mistakes..."
   curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh | sh
 fi
 
-if command -v treehouse >/dev/null 2>&1; then
+if command -v treehouse >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
   echo "  treehouse already installed"
 else
-  echo "  Installing treehouse..."
+  echo "  Installing/updating treehouse..."
   curl -fsSL https://kunchenguid.github.io/treehouse/install.sh | sh
 fi
 
@@ -42,27 +53,27 @@ fi
 set -u
 
 if command -v npm >/dev/null 2>&1; then
-  if command -v gnhf >/dev/null 2>&1; then
+  if command -v gnhf >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
     echo "  gnhf already installed"
   else
-    echo "  Installing gnhf..."
+    echo "  Installing/updating gnhf..."
     npm install -g gnhf
   fi
 
-  if command -v pi >/dev/null 2>&1; then
+  if command -v pi >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
     echo "  pi already installed"
   else
-    echo "  Installing pi (@earendil-works/pi-coding-agent)..."
+    echo "  Installing/updating pi (@earendil-works/pi-coding-agent)..."
     npm install -g @earendil-works/pi-coding-agent
   fi
 else
   echo "  WARNING: npm not found, skipping gnhf and pi install"
 fi
 
-if command -v omp >/dev/null 2>&1; then
+if command -v omp >/dev/null 2>&1 && [[ "$update_ai_tools" != "true" ]]; then
   echo "  omp (Oh My Pi) already installed"
 else
-  echo "  Installing omp (Oh My Pi)..."
+  echo "  Installing/updating omp (Oh My Pi)..."
   curl -fsSL https://omp.sh/install | sh
 fi
 
@@ -71,7 +82,12 @@ fi
 # projects/ subdirectory. Keep the one clone under ~/Projects like everything else.
 FIRSTMATE_DIR="$HOME/Projects/github.com/kunchenguid/firstmate"
 if [[ -d "$FIRSTMATE_DIR" ]]; then
-  echo "  firstmate already cloned at $FIRSTMATE_DIR"
+  if [[ "$update_ai_tools" == "true" ]]; then
+    echo "  Updating firstmate..."
+    git -C "$FIRSTMATE_DIR" pull || true
+  else
+    echo "  firstmate already cloned at $FIRSTMATE_DIR"
+  fi
 else
   echo "  Cloning firstmate to $FIRSTMATE_DIR..."
   mkdir -p "$(dirname "$FIRSTMATE_DIR")"

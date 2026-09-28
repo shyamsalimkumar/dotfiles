@@ -48,4 +48,19 @@ if [[ "$OS" == "Darwin" ]]; then
     echo "  WhatsApp.app exists but isn't managed by Homebrew - reinstalling it via brew..."
     brew install --cask whatsapp --force
   fi
+
+  # Check for AI tool cask updates (claude-code, claude desktop app, etc).
+  # --greedy is needed because these are auto_updates casks, which brew
+  # skips by default on the assumption the app updates itself silently.
+  outdated_ai_casks="$(brew outdated --cask --greedy 2>/dev/null | grep -i claude || true)"
+  if [[ -n "$outdated_ai_casks" ]]; then
+    echo ""
+    echo "  Updates available:"
+    echo "$outdated_ai_casks" | sed 's/^/    /'
+    read -rp "  Install these updates now? [y/N]: " update_ai_casks
+    if [[ "$update_ai_casks" =~ ^[Yy] ]]; then
+      # shellcheck disable=SC2046
+      brew upgrade --cask --greedy $(echo "$outdated_ai_casks" | awk '{print $1}') || true
+    fi
+  fi
 fi
