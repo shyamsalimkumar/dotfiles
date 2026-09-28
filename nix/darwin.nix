@@ -10,6 +10,9 @@
   # Allow unfree packages (needed for some applications)
   nixpkgs.config.allowUnfree = true;
 
+  # Required by nix-darwin: user-scoped options (homebrew, system.defaults) apply to this user
+  system.primaryUser = user;
+
   # macOS system defaults (adopted from reference)
   system.defaults = {
     NSGlobalDomain = {
@@ -91,9 +94,6 @@
       # "slack"           # Team communication (work-specific)
     ];
   };
-
-  # Auto upgrade nix package and the daemon service
-  services.nix-daemon.enable = true;
 
   # Used for backwards compatibility
   system.stateVersion = 4;
