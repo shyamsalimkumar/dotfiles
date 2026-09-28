@@ -179,19 +179,18 @@ if command -v claude &>/dev/null; then
   echo ""
   echo "==> Installing Claude plugins..."
 
-  # mattpocock-skills and andrej-karpathy-skills live in third-party
-  # marketplaces, not the default claude-plugins-official one — make sure
-  # both are registered before the install loop below tries to resolve them.
+  # None of these marketplaces - including the official one - are registered
+  # by default on a fresh install. Register whichever are missing before the
+  # install loop below tries to resolve plugins from them.
+  if ! claude plugin marketplace list 2>/dev/null | grep -q "claude-plugins-official"; then
+    claude plugin marketplace add anthropics/claude-plugins-official 2>&1 || true
+  fi
   if ! claude plugin marketplace list 2>/dev/null | grep -q "mattpocock"; then
     claude plugin marketplace add mattpocock/skills 2>&1 || true
   fi
   if ! claude plugin marketplace list 2>/dev/null | grep -q "karpathy-skills"; then
     claude plugin marketplace add multica-ai/andrej-karpathy-skills 2>&1 || true
   fi
-
-  # Refresh the official marketplace's local listing - a stale cache is why
-  # a plugin that genuinely exists can still fail with "not found".
-  claude plugin marketplace update claude-plugins-official 2>&1 || true
 
   plugins=$(jq -r '.enabledPlugins | to_entries[] | select(.value == true) | .key' \
     "$DOTFILES_DIR/claude/settings.json" 2>/dev/null || true)
