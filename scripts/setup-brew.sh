@@ -23,3 +23,11 @@ elif [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
 fi
 
 echo "Homebrew ready: $(brew --version)"
+
+if [[ "$OS" == "Darwin" ]]; then
+  # Homebrew refuses to install casks from third-party taps until they're
+  # explicitly trusted. Darwin.nix's homebrew.taps installs vishvavariya/notchy,
+  # so trust it here before nix-darwin's activation tries to install its cask.
+  brew tap vishvavariya/notchy
+  brew trust --taps vishvavariya/notchy
+fi

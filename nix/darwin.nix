@@ -77,7 +77,7 @@
       "claude-code"       # AI coding assistant
 
       # Cloud & DevOps
-      "google-cloud-cli"  # gcloud CLI (formerly gcloud-sdk)
+      "gcloud-cli"        # gcloud CLI (formerly google-cloud-sdk / google-cloud-cli)
 
       # Productivity
       "notchy"            # Dynamic Island for macOS
