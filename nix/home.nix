@@ -100,7 +100,7 @@
     gnupg
     openssh
   ]
-  ++ lib.optionals pkgs.stdenv.isLinux [
+  ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     claude-code
   ];
 
@@ -112,7 +112,7 @@
     syntaxHighlighting.enable = true;
 
     # Additional shell configuration
-    initExtra = ''
+    initContent = ''
       # Load personal and work aliases
       source ${../zsh/aliases.personal}
       source ${../zsh/aliases.work}
@@ -152,7 +152,7 @@
       # Local bin directories
       export PATH="$HOME/.local/bin:$HOME/.local/bin/personal:$HOME/.local/bin/work:$PATH"
 
-      ${lib.optionalString pkgs.stdenv.isDarwin ''
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         # Homebrew path (for packages not in Nix)
         export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
@@ -168,7 +168,7 @@
       # kubectl completion
       command -v kubectl &> /dev/null && source <(kubectl completion zsh)
 
-      ${lib.optionalString pkgs.stdenv.isDarwin ''
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         # Colima Docker configuration
         export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
       ''}
@@ -300,16 +300,16 @@
     # Git configuration examples (user creates .gitconfig.local)
     ".gitconfig.local.example".source = ../.gitconfig.local.example;
 
-    # Helper scripts (PATH for these is set in initExtra above)
+    # Helper scripts (PATH for these is set in initContent above)
     ".local/bin/personal".source = ../helpers/personal;
     ".local/bin/work".source = ../helpers/work;
   }
   # VSCode settings (NAVS plugins) - path differs between macOS and Linux
-  // lib.optionalAttrs pkgs.stdenv.isDarwin {
+  // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
     "Library/Application Support/Code/User/settings.json".source = ../vscode/settings.json;
     "Library/Application Support/Code/User/keybindings.json".source = ../vscode/keybindings.json;
   }
-  // lib.optionalAttrs pkgs.stdenv.isLinux {
+  // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
     ".config/Code/User/settings.json".source = ../vscode/settings.json;
     ".config/Code/User/keybindings.json".source = ../vscode/keybindings.json;
   };
