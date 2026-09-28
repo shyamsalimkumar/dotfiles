@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
 echo "==> Installing AI assistant tools..."
 
 # Re-running each tool's own installer is how you update it (they always
@@ -129,7 +132,7 @@ if command -v npm >/dev/null 2>&1; then
     npm install -g @earendil-works/pi-coding-agent
   fi
 else
-  echo "  WARNING: npm not found, skipping gnhf and pi install"
+  echo -e "  ${YELLOW}WARNING: npm not found, skipping gnhf and pi install${NC}"
 fi
 
 # omp.sh/install is fetched from can1357/oh-my-pi on GitHub (found by
