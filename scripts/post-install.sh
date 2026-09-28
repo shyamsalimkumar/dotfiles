@@ -158,6 +158,27 @@ else
 fi
 
 # ============================================================================
+# VS Code extensions
+# ============================================================================
+if command -v code &>/dev/null; then
+  echo ""
+  echo "==> Installing VS Code extensions..."
+  installed_extensions="$(code --list-extensions 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+  while IFS= read -r extension; do
+    [[ -z "$extension" ]] && continue
+    if grep -qix "$extension" <<< "$installed_extensions"; then
+      echo "  ✓ Already installed: $extension"
+    else
+      echo "  Installing: $extension"
+      code --install-extension "$extension" 2>&1 || echo "  ⚠ Failed to install $extension"
+    fi
+  done < "$DOTFILES_DIR/vscode/extensions.txt"
+else
+  echo ""
+  echo "  ⚠ VS Code 'code' command not found, skipping extension install"
+fi
+
+# ============================================================================
 # Claude settings.json (real writable file, not a Nix-managed symlink -
 # the claude CLI needs to write to it for plugin/marketplace state)
 # ============================================================================
