@@ -48,6 +48,63 @@ else
 fi
 
 # ============================================================================
+# GitHub SSH key - generate a dedicated key, register it with GitHub via the
+# gh CLI, and wire it into config.local. Idempotent: safe to re-run.
+# ============================================================================
+if command -v gh &>/dev/null; then
+  echo ""
+  echo "==> Setting up GitHub SSH key..."
+
+  if ! gh auth status &>/dev/null; then
+    echo "  ⚠ gh is not logged in - run 'gh auth login', then re-run this script"
+  else
+    GITHUB_KEY="$HOME/.ssh/github"
+    if [[ ! -f "$GITHUB_KEY" ]]; then
+      echo "  Generating a new ed25519 key at $GITHUB_KEY..."
+      key_email="$(git config --get user.email 2>/dev/null || echo "$(whoami)@$(hostname -s)")"
+      ssh-keygen -t ed25519 -f "$GITHUB_KEY" -N "" -C "$key_email"
+    else
+      echo "  ✓ $GITHUB_KEY already exists, reusing it"
+    fi
+    chmod 600 "$GITHUB_KEY"
+
+    if [[ "$OS" == "Darwin" ]]; then
+      ssh-add --apple-use-keychain "$GITHUB_KEY" 2>&1 || true
+    else
+      eval "$(ssh-agent -s)" >/dev/null 2>&1 || true
+      ssh-add "$GITHUB_KEY" 2>&1 || true
+    fi
+
+    fingerprint="$(ssh-keygen -lf "${GITHUB_KEY}.pub" | awk '{print $2}')"
+    if gh ssh-key list 2>/dev/null | grep -q "$fingerprint"; then
+      echo "  ✓ Key already registered with GitHub"
+    elif gh ssh-key add "${GITHUB_KEY}.pub" --title "$(hostname -s) (dotfiles)" 2>&1; then
+      echo "  ✓ Key added to your GitHub account"
+    else
+      echo "  ⚠ Failed to add key to GitHub - you may need broader auth scope:"
+      echo "    gh auth refresh -h github.com -s admin:public_key"
+    fi
+
+    if ! grep -q "^Host github\.com$" "$HOME/.ssh/config.local" 2>/dev/null; then
+      {
+        echo ""
+        echo "Host github.com"
+        echo "    HostName github.com"
+        echo "    User git"
+        echo "    IdentityFile $GITHUB_KEY"
+        echo "    IdentitiesOnly yes"
+        [[ "$OS" == "Darwin" ]] && echo "    UseKeychain yes"
+        echo "    AddKeysToAgent yes"
+      } >> "$HOME/.ssh/config.local"
+      echo "  ✓ Added github.com entry to ~/.ssh/config.local"
+    fi
+  fi
+else
+  echo ""
+  echo "  ⚠ gh CLI not found, skipping GitHub SSH key setup"
+fi
+
+# ============================================================================
 # Neovim plugin sync
 # ============================================================================
 if command -v nvim >/dev/null 2>&1; then
