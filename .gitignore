@@ -171,6 +171,11 @@ helpers/work/*
 zsh/aliases.work.local
 zsh/functions.work.local
 
+### SSH ###
+# Host-specific settings (hostnames, usernames, key paths) - created per-machine
+# by scripts/post-install.sh, included by .ssh/config
+.ssh/config.local
+
 ### Homebrew ###
 Brewfile*.lock.json
 

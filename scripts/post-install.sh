@@ -30,6 +30,24 @@ else
 fi
 
 # ============================================================================
+# SSH local configuration
+# ============================================================================
+mkdir -p "$HOME/.ssh"
+chmod 700 "$HOME/.ssh"
+if [[ ! -f "$HOME/.ssh/config.local" ]]; then
+  echo ""
+  echo "==> Creating ~/.ssh/config.local for host-specific settings..."
+  cat > "$HOME/.ssh/config.local" <<EOF
+# Host-specific SSH settings (hostnames, usernames, key paths) - not tracked in git.
+# ~/.ssh/config (tracked, generic aliases only) includes this file.
+EOF
+  chmod 600 "$HOME/.ssh/config.local"
+  echo "  ✓ Created ~/.ssh/config.local"
+else
+  echo "  ✓ ~/.ssh/config.local already exists"
+fi
+
+# ============================================================================
 # Neovim plugin sync
 # ============================================================================
 if command -v nvim >/dev/null 2>&1; then
