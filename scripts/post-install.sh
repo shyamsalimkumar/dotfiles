@@ -189,6 +189,10 @@ if command -v claude &>/dev/null; then
     claude plugin marketplace add multica-ai/andrej-karpathy-skills 2>&1 || true
   fi
 
+  # Refresh the official marketplace's local listing - a stale cache is why
+  # a plugin that genuinely exists can still fail with "not found".
+  claude plugin marketplace update claude-plugins-official 2>&1 || true
+
   plugins=$(jq -r '.enabledPlugins | to_entries[] | select(.value == true) | .key' \
     "$DOTFILES_DIR/claude/settings.json" 2>/dev/null || true)
 
