@@ -66,7 +66,10 @@ if command -v gh &>/dev/null; then
       configure_github_ssh_do=true
       if ! gh auth status &>/dev/null; then
         echo "  Not logged into GitHub - launching 'gh auth login' (opens your browser)..."
-        gh auth login --hostname github.com --git-protocol ssh --scopes admin:public_key --web || true
+        # No --git-protocol ssh here on purpose: that flag makes gh auth login
+        # ask its own "upload an SSH key?" question mid-login, which duplicates
+        # (and confuses with) the key selection this script does further below.
+        gh auth login --hostname github.com --scopes admin:public_key --web || true
       fi
       if ! gh auth status &>/dev/null; then
         echo "  ⚠ Still not logged in - skipping GitHub SSH key setup. Run 'gh auth login', then re-run this script"

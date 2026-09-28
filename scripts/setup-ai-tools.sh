@@ -17,6 +17,30 @@ else
   curl -fsSL https://kunchenguid.github.io/treehouse/install.sh | sh
 fi
 
+# nvm itself is never installed anywhere else - home.nix's zshrc only sources
+# it if already present. Install it here (official installer, matches the
+# ~/.nvm/nvm.sh path zshrc expects) so npm actually exists for gnhf/pi below.
+export NVM_DIR="$HOME/.nvm"
+if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+  echo "  Installing nvm..."
+  nvm_latest="$(curl -fsSL https://api.github.com/repos/nvm-sh/nvm/releases/latest | grep '"tag_name"' | cut -d '"' -f4)"
+  curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/${nvm_latest}/install.sh" | bash
+fi
+# nvm's script and shell functions aren't written to be safe under `set -u` -
+# relax it for sourcing and for any nvm calls below.
+set +u
+# shellcheck disable=SC1091
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+if command -v npm >/dev/null 2>&1; then
+  echo "  npm already available"
+elif command -v nvm >/dev/null 2>&1; then
+  echo "  Installing latest LTS Node via nvm..."
+  nvm install --lts
+  nvm alias default 'lts/*'
+fi
+set -u
+
 if command -v npm >/dev/null 2>&1; then
   if command -v gnhf >/dev/null 2>&1; then
     echo "  gnhf already installed"
