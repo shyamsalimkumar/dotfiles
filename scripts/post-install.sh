@@ -64,6 +64,21 @@ else
 fi
 
 # ============================================================================
+# Claude settings.json (real writable file, not a Nix-managed symlink -
+# the claude CLI needs to write to it for plugin/marketplace state)
+# ============================================================================
+mkdir -p "$HOME/.claude"
+# Remove a leftover read-only Nix-managed symlink from before this file was
+# excluded from home.nix's home.file, if one is still there.
+[[ -L "$HOME/.claude/settings.json" ]] && rm "$HOME/.claude/settings.json"
+if [[ ! -e "$HOME/.claude/settings.json" ]]; then
+  echo ""
+  echo "==> Seeding ~/.claude/settings.json..."
+  cp "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json"
+  echo "  ✓ Created ~/.claude/settings.json"
+fi
+
+# ============================================================================
 # Claude plugin installation
 # ============================================================================
 if command -v claude &>/dev/null; then

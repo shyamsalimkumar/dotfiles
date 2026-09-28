@@ -273,7 +273,10 @@
     ".config/tmux".source = ../tmux/.config/tmux;
 
     # Claude settings and skills
-    ".claude/settings.json".source = ../claude/settings.json;
+    # Note: settings.json is NOT symlinked here - the `claude` CLI itself
+    # writes to it at runtime (installed plugins, marketplaces), which a
+    # read-only Nix store symlink would block. scripts/post-install.sh
+    # seeds it once as a real, writable file instead.
     ".claude/keybindings.json".source = ../claude/keybindings.json;
     ".claude/skills".source = ../claude/skills;
     ".claude/agents".source = ../claude/agents;
