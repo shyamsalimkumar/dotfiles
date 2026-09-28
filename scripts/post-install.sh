@@ -177,9 +177,86 @@ if command -v gh &>/dev/null; then
     } >> "$HOME/.ssh/config.local"
     echo "  ✓ Added github.com entry to ~/.ssh/config.local"
   fi
+
+  # ==========================================================================
+  # GitHub GPG key - generate a commit-signing key, register it with GitHub
+  # via gh, and wire it into config.local. commit.gpgsign itself stays
+  # per-machine (here, not in the tracked Nix config) so a machine that
+  # skips this doesn't have every commit start failing to sign.
+  # ==========================================================================
+  if grep -q "^\s*signingkey" "$HOME/.gitconfig.local" 2>/dev/null; then
+    echo "  ✓ GPG signing already configured in ~/.gitconfig.local"
+  else
+    read -rp "  Configure GPG commit signing now? [Y/n]: " configure_gpg
+    if [[ "$configure_gpg" =~ ^[Nn] ]]; then
+      echo "  Skipping GPG key setup"
+    else
+      if ! gh auth status &>/dev/null; then
+        echo "  Not logged into GitHub - launching 'gh auth login' (opens your browser)..."
+        gh auth login --hostname github.com --git-protocol https --scopes admin:gpg_key --web || true
+      fi
+
+      if ! gh auth status &>/dev/null; then
+        echo -e "  ${YELLOW}⚠ Still not logged in - skipping GPG key setup. Run 'gh auth login', then re-run this script${NC}"
+      else
+        git_email="$(git config --get user.email 2>/dev/null || true)"
+        git_name="$(git config --get user.name 2>/dev/null || echo "$(whoami)")"
+
+        mapfile -t existing_gpg_keys < <(gpg --list-secret-keys --with-colons 2>/dev/null | awk -F: '/^sec/ {print $5}')
+        GPG_KEY_ID=""
+        if [[ ${#existing_gpg_keys[@]} -gt 0 ]]; then
+          echo "  Use an existing GPG key for signing, or generate a dedicated one?"
+          select choice in "${existing_gpg_keys[@]}" "Generate a new dedicated key"; do
+            if [[ "$REPLY" -ge 1 && "$REPLY" -le ${#existing_gpg_keys[@]} ]]; then
+              GPG_KEY_ID="$choice"
+            fi
+            break
+          done
+        fi
+
+        if [[ -z "$GPG_KEY_ID" ]]; then
+          if [[ -z "$git_email" ]]; then
+            echo -e "  ${YELLOW}⚠ No git user.email set - skipping GPG key generation${NC}"
+          else
+            echo "  Generating a new ed25519 signing key for $git_name <$git_email>..."
+            gpg --batch --passphrase '' --quick-generate-key "$git_name <$git_email>" ed25519 sign 0
+            GPG_KEY_ID="$(gpg --list-secret-keys --with-colons "$git_email" 2>/dev/null | awk -F: '/^sec/ {print $5; exit}')"
+          fi
+        else
+          echo "  ✓ Reusing existing GPG key: $GPG_KEY_ID"
+        fi
+
+        if [[ -n "$GPG_KEY_ID" ]]; then
+          if gh gpg-key list 2>/dev/null | grep -q "$GPG_KEY_ID"; then
+            echo "  ✓ Key already registered with GitHub"
+          else
+            gpg_key_file="$(mktemp)"
+            gpg --armor --export "$GPG_KEY_ID" > "$gpg_key_file"
+            if gh gpg-key add "$gpg_key_file" --title "$(hostname -s) (dotfiles)" 2>&1; then
+              echo "  ✓ Key added to your GitHub account"
+            else
+              echo -e "  ${YELLOW}⚠ Failed to add key to GitHub - you may need broader auth scope:${NC}"
+              echo "    gh auth refresh -h github.com -s admin:gpg_key"
+            fi
+            rm -f "$gpg_key_file"
+          fi
+
+          {
+            echo "	signingkey = $GPG_KEY_ID"
+          } >> "$HOME/.gitconfig.local"
+          {
+            echo ""
+            echo "[commit]"
+            echo "	gpgsign = true"
+          } >> "$HOME/.gitconfig.local"
+          echo "  ✓ Added signingkey and commit.gpgsign to ~/.gitconfig.local"
+        fi
+      fi
+    fi
+  fi
 else
   echo ""
-  echo -e "  ${YELLOW}⚠ gh CLI not found, skipping GitHub SSH key setup${NC}"
+  echo -e "  ${YELLOW}⚠ gh CLI not found, skipping GitHub SSH key and GPG key setup${NC}"
 fi
 
 # ============================================================================
