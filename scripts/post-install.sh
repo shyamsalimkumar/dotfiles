@@ -56,7 +56,12 @@ if command -v gh &>/dev/null; then
   echo "==> Setting up GitHub SSH key..."
 
   if ! gh auth status &>/dev/null; then
-    echo "  ⚠ gh is not logged in - run 'gh auth login', then re-run this script"
+    echo "  Not logged into GitHub - launching 'gh auth login' (opens your browser)..."
+    gh auth login --hostname github.com --git-protocol ssh --scopes admin:public_key --web || true
+  fi
+
+  if ! gh auth status &>/dev/null; then
+    echo "  ⚠ Still not logged in - skipping GitHub SSH key setup. Run 'gh auth login', then re-run this script"
   else
     GITHUB_KEY="$HOME/.ssh/github"
     if [[ ! -f "$GITHUB_KEY" ]]; then
