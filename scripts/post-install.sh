@@ -149,7 +149,11 @@ if command -v gh &>/dev/null; then
     chmod 600 "$GITHUB_KEY"
 
     if [[ "$OS" == "Darwin" ]]; then
-      ssh-add --apple-use-keychain "$GITHUB_KEY" 2>&1 || true
+      # --apple-use-keychain only exists on Apple's ssh-add. If openssh
+      # (nix/home.nix) is ahead of /usr/bin on PATH, `ssh-add` resolves to
+      # the vanilla OpenSSH build instead, which rejects that flag - fall
+      # back to a plain ssh-add so the key still gets loaded either way.
+      ssh-add --apple-use-keychain "$GITHUB_KEY" 2>&1 || ssh-add "$GITHUB_KEY" 2>&1 || true
     else
       eval "$(ssh-agent -s)" >/dev/null 2>&1 || true
       ssh-add "$GITHUB_KEY" 2>&1 || true
@@ -172,7 +176,6 @@ if command -v gh &>/dev/null; then
       echo "    User git"
       echo "    IdentityFile $GITHUB_KEY"
       echo "    IdentitiesOnly yes"
-      [[ "$OS" == "Darwin" ]] && echo "    UseKeychain yes"
       echo "    AddKeysToAgent yes"
     } >> "$HOME/.ssh/config.local"
     echo "  ✓ Added github.com entry to ~/.ssh/config.local"
