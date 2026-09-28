@@ -31,11 +31,15 @@ if [[ "$OS" == "Darwin" ]]; then
   brew tap vishvavariya/notchy
   brew trust --taps vishvavariya/notchy
 
-  # HOMEBREW_NO_REQUIRE_TAP_TRUST (previously written here) is now deprecated
-  # by Homebrew itself in favor of the brew trust call above - strip it from
-  # any machine that already has it from an earlier run of this script.
-  if [[ -f /etc/homebrew/brew.env ]] && grep -q "^HOMEBREW_NO_REQUIRE_TAP_TRUST=" /etc/homebrew/brew.env; then
-    sudo sed -i '' '/^HOMEBREW_NO_REQUIRE_TAP_TRUST=/d' /etc/homebrew/brew.env
+  # Homebrew now warns that HOMEBREW_NO_REQUIRE_TAP_TRUST is deprecated in
+  # favor of the brew trust call above - that fix was tried (see git log)
+  # and the untrusted-tap error came straight back during darwin-rebuild's
+  # root-context brew cleanup, so the underlying root-context trust-store
+  # lookup this env var works around is NOT actually fixed upstream yet.
+  # Deprecated-but-working beats warning-free-but-broken - restored.
+  sudo mkdir -p /etc/homebrew
+  if ! grep -q "^HOMEBREW_NO_REQUIRE_TAP_TRUST=" /etc/homebrew/brew.env 2>/dev/null; then
+    echo "HOMEBREW_NO_REQUIRE_TAP_TRUST=1" | sudo tee -a /etc/homebrew/brew.env >/dev/null
   fi
 
   # If WhatsApp was already installed by hand (not via Homebrew), brew bundle
