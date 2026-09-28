@@ -84,7 +84,7 @@
 
       # Utilities
       "google-chrome"     # Web browser
-      "opensuperwhisper"  # Speech recognition
+      "handy"             # Speech recognition
 
       # Fonts
       "font-hack-nerd-font"
