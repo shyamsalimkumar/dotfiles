@@ -82,7 +82,10 @@
       "chatgpt"           # AI assistant (desktop app)
       "antigravity-cli"   # AI coding assistant (CLI) - replaces deprecated gemini-cli
       "meld"              # Diff/merge tool
-      "xcodes-app"        # Manages Xcode installs/versions (Xcode itself has no cask - see note)
+      # Note: Xcode has no cask and can't be installed via Nix either - Apple
+      # only distributes it via the App Store or developer.apple.com, and
+      # doesn't allow third-party redistribution. scripts/post-install.sh
+      # checks for it and warns if missing instead of trying to install it.
       # "ghostpepper"     # Speech-to-text/meeting transcription (https://github.com/matthartman/ghost-pepper)
                           # - not installed automatically, uncomment to enable
 

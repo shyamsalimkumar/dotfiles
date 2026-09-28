@@ -363,4 +363,14 @@ if [[ "$OS" == "Darwin" ]]; then
   echo -e "${YELLOW}  brew trust --tap derailed/k9s${NC}"
   echo -e "${YELLOW}  brew trust --tap homeport/tap${NC}"
   echo -e "${YELLOW}  brew trust --tap vishvavariya/notchy${NC}"
+
+  # Xcode has no cask and can't be installed via Nix - Apple only distributes
+  # it via the App Store / developer.apple.com and doesn't allow third-party
+  # redistribution. Silent if already present; only warn when it's missing.
+  if [[ ! -d "/Applications/Xcode.app" ]]; then
+    echo ""
+    echo -e "${YELLOW}NOTE: Xcode is not installed. Nix/Homebrew can't install it for you -${NC}"
+    echo -e "${YELLOW}  install it yourself from the App Store, or download it from${NC}"
+    echo -e "${YELLOW}  https://developer.apple.com/download/all/?q=Xcode${NC}"
+  fi
 fi
