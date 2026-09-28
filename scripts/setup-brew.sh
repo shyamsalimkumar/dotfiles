@@ -31,6 +31,16 @@ if [[ "$OS" == "Darwin" ]]; then
   brew tap vishvavariya/notchy
   brew trust --taps vishvavariya/notchy
 
+  # `brew trust` records into $HOME/.homebrew/trust.json. But nix-darwin's
+  # activation script runs `brew bundle`/`brew cleanup` as root (whose home is
+  # /var/root, not this user's), so it can't see the trust recorded above.
+  # Copy the record over so root's brew sees the tap as trusted too.
+  TRUST_FILE="$HOME/.homebrew/trust.json"
+  if [[ -f "$TRUST_FILE" ]]; then
+    sudo mkdir -p /var/root/.homebrew
+    sudo cp "$TRUST_FILE" /var/root/.homebrew/trust.json
+  fi
+
   # If WhatsApp was already installed by hand (not via Homebrew), brew bundle
   # refuses to overwrite it and darwin-rebuild fails. Force it to take over here,
   # while we're still running interactively and can prompt for a password.
