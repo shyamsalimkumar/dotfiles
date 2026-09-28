@@ -62,14 +62,32 @@ if command -v gh &>/dev/null; then
 
   if ! gh auth status &>/dev/null; then
     echo "  ⚠ Still not logged in - skipping GitHub SSH key setup. Run 'gh auth login', then re-run this script"
+  elif grep -q "^Host github\.com$" "$HOME/.ssh/config.local" 2>/dev/null; then
+    echo "  ✓ github.com already configured in ~/.ssh/config.local"
   else
-    GITHUB_KEY="$HOME/.ssh/github"
-    if [[ ! -f "$GITHUB_KEY" ]]; then
-      echo "  Generating a new ed25519 key at $GITHUB_KEY..."
-      key_email="$(git config --get user.email 2>/dev/null || echo "$(whoami)@$(hostname -s)")"
-      ssh-keygen -t ed25519 -f "$GITHUB_KEY" -N "" -C "$key_email"
+    GITHUB_KEY=""
+    mapfile -t existing_keys < <(find "$HOME/.ssh" -maxdepth 1 -type f -name "*.pub" 2>/dev/null | sed 's/\.pub$//')
+    if [[ ${#existing_keys[@]} -gt 0 ]]; then
+      echo "  Use an existing SSH key for GitHub, or generate a dedicated one?"
+      select choice in "${existing_keys[@]}" "Generate a new dedicated key"; do
+        if [[ "$REPLY" -ge 1 && "$REPLY" -le ${#existing_keys[@]} ]]; then
+          GITHUB_KEY="$choice"
+        fi
+        break
+      done
+    fi
+
+    if [[ -z "$GITHUB_KEY" ]]; then
+      GITHUB_KEY="$HOME/.ssh/github"
+      if [[ ! -f "$GITHUB_KEY" ]]; then
+        echo "  Generating a new ed25519 key at $GITHUB_KEY..."
+        key_email="$(git config --get user.email 2>/dev/null || echo "$(whoami)@$(hostname -s)")"
+        ssh-keygen -t ed25519 -f "$GITHUB_KEY" -N "" -C "$key_email"
+      else
+        echo "  ✓ $GITHUB_KEY already exists, reusing it"
+      fi
     else
-      echo "  ✓ $GITHUB_KEY already exists, reusing it"
+      echo "  ✓ Reusing existing key: $GITHUB_KEY"
     fi
     chmod 600 "$GITHUB_KEY"
 
@@ -90,19 +108,17 @@ if command -v gh &>/dev/null; then
       echo "    gh auth refresh -h github.com -s admin:public_key"
     fi
 
-    if ! grep -q "^Host github\.com$" "$HOME/.ssh/config.local" 2>/dev/null; then
-      {
-        echo ""
-        echo "Host github.com"
-        echo "    HostName github.com"
-        echo "    User git"
-        echo "    IdentityFile $GITHUB_KEY"
-        echo "    IdentitiesOnly yes"
-        [[ "$OS" == "Darwin" ]] && echo "    UseKeychain yes"
-        echo "    AddKeysToAgent yes"
-      } >> "$HOME/.ssh/config.local"
-      echo "  ✓ Added github.com entry to ~/.ssh/config.local"
-    fi
+    {
+      echo ""
+      echo "Host github.com"
+      echo "    HostName github.com"
+      echo "    User git"
+      echo "    IdentityFile $GITHUB_KEY"
+      echo "    IdentitiesOnly yes"
+      [[ "$OS" == "Darwin" ]] && echo "    UseKeychain yes"
+      echo "    AddKeysToAgent yes"
+    } >> "$HOME/.ssh/config.local"
+    echo "  ✓ Added github.com entry to ~/.ssh/config.local"
   fi
 else
   echo ""
