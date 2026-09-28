@@ -379,11 +379,11 @@ if [[ "$OS" == "Darwin" ]]; then
   # updating a single self-updating app (Zoom, etc.) without going through
   # that whole prompt, or checking outside of a full install.sh run.
   echo ""
-  echo "TIP: Some apps (Zoom, and other Homebrew casks) auto-update in the"
-  echo "  background, so a plain 'brew outdated' won't show them as behind."
-  echo "  Force-check/update one manually with:"
-  echo "    brew upgrade --cask --greedy zoom"
-  echo "  Or check/update everything Homebrew manages at once:"
-  echo "    brew outdated --greedy"
-  echo "    brew upgrade --greedy"
+  echo -e "${YELLOW}TIP: Some apps (Zoom, and other Homebrew casks) auto-update in the${NC}"
+  echo -e "${YELLOW}  background, so a plain 'brew outdated' won't show them as behind.${NC}"
+  echo -e "${YELLOW}  Force-check/update one manually with:${NC}"
+  echo -e "${YELLOW}    brew upgrade --cask --greedy zoom${NC}"
+  echo -e "${YELLOW}  Or check/update everything Homebrew manages at once:${NC}"
+  echo -e "${YELLOW}    brew outdated --greedy${NC}"
+  echo -e "${YELLOW}    brew upgrade --greedy${NC}"
 fi
