@@ -48,6 +48,44 @@ else
 fi
 
 # ============================================================================
+# AWS CLI configuration - region/output default only. Credentials are left
+# empty on purpose (no real access keys or SSO details can be guessed here),
+# and gcloud gets nothing: it self-initializes its own config on first use
+# (gcloud init/gcloud auth login), so there's no static file worth seeding.
+# ============================================================================
+mkdir -p "$HOME/.aws"
+chmod 700 "$HOME/.aws"
+if [[ ! -f "$HOME/.aws/config" ]]; then
+  echo ""
+  echo "==> Creating ~/.aws/config..."
+  cat > "$HOME/.aws/config" <<EOF
+[default]
+region = eu-west-1
+output = json
+EOF
+  chmod 600 "$HOME/.aws/config"
+  echo "  ✓ Created ~/.aws/config"
+else
+  echo "  ✓ ~/.aws/config already exists"
+fi
+
+if [[ ! -f "$HOME/.aws/credentials" ]]; then
+  echo ""
+  echo "==> Creating ~/.aws/credentials..."
+  cat > "$HOME/.aws/credentials" <<EOF
+# Not tracked in git. Add a profile here, e.g.:
+# [default]
+# aws_access_key_id = ...
+# aws_secret_access_key = ...
+# Or use AWS SSO instead: run 'aws configure sso' to populate this file.
+EOF
+  chmod 600 "$HOME/.aws/credentials"
+  echo "  ✓ Created ~/.aws/credentials"
+else
+  echo "  ✓ ~/.aws/credentials already exists"
+fi
+
+# ============================================================================
 # GitHub SSH key - generate a dedicated key, register it with GitHub via the
 # gh CLI, and wire it into config.local. Idempotent: safe to re-run.
 # ============================================================================
