@@ -47,20 +47,22 @@ if [[ "$OS" == "Darwin" ]]; then
   # while we're still running interactively and can prompt for a password.
   if [[ -d "/Applications/WhatsApp.app" ]] && ! brew list --cask whatsapp &>/dev/null; then
     echo "  WhatsApp.app exists but isn't managed by Homebrew - reinstalling it via brew..."
-    brew install --cask whatsapp --force
+    brew install --cask whatsapp --force --yes
   fi
 
   # Check for updates to every Homebrew-managed app/tool (casks and
   # formulae). --greedy also checks self-updating casks (Zoom, etc), which
   # brew skips by default on the assumption the app updates itself silently.
-  outdated="$(brew outdated --greedy 2>/dev/null || true)"
+  # --verbose shows the installed and new versions, so the prompt below has
+  # everything up front and brew's own confirmation can be skipped with --yes.
+  outdated="$(brew outdated --greedy --verbose 2>/dev/null || true)"
   if [[ -n "$outdated" ]]; then
     echo ""
     echo "  Updates available:"
     echo "$outdated" | sed 's/^/    /'
     read -rp "  Install these updates now? [y/N]: " update_outdated
     if [[ "$update_outdated" =~ ^[Yy] ]]; then
-      brew upgrade --greedy || true
+      brew upgrade --greedy --yes || true
     fi
   fi
 fi
