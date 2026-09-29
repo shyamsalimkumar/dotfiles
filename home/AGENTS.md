@@ -52,10 +52,8 @@ Global instructions for all AI coding assistants (Claude, Codex, OpenCode, etc.)
 - Never add Co-Authored-By, "Generated with", or any AI attribution lines to commit messages or PR descriptions.
 
 ## Git Worktrees
-- Always create worktrees in one of two locations:
-  - `./worktrees/<branch-name>` inside the project repo, OR
-  - `~/worktrees/<project-name>-<branch-name>` in the home directory
-- Prefer `./worktrees/` when the repo's `.gitignore` covers it; use `~/worktrees/` otherwise
+- Always create worktrees at `./worktrees/<branch-name>` inside the project repo, never in the home directory
+- If the repo's `.gitignore` doesn't already ignore `worktrees/`, add it before creating the worktree
 
 ## Writing Style
 - Never use em dashes. Use a single dash (-), a comma, or a semicolon instead, whichever fits the sentence.

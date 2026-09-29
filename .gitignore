@@ -207,3 +207,6 @@ nix/local.nix
 # Nix build results
 result
 result-*
+
+### Git Worktrees ###
+worktrees/
