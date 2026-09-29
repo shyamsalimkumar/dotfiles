@@ -14,6 +14,38 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 echo "==> Running post-installation tasks..."
 
 # ============================================================================
+# Machine type - asked once, remembered in ~/.config/dotfiles/machine. Work
+# machines get distinctly named keys so they're easy to spot on GitHub, and
+# every key registered with GitHub is recorded in ~/.config/dotfiles/registered
+# so scripts/offboard.sh knows exactly what to remove when leaving the job.
+# ============================================================================
+DOTFILES_STATE_DIR="$HOME/.config/dotfiles"
+MACHINE_TYPE_FILE="$DOTFILES_STATE_DIR/machine"
+REGISTERED_FILE="$DOTFILES_STATE_DIR/registered"
+mkdir -p "$DOTFILES_STATE_DIR"
+
+if [[ -f "$MACHINE_TYPE_FILE" ]]; then
+  MACHINE_TYPE="$(cat "$MACHINE_TYPE_FILE")"
+  echo "  ✓ Machine type: $MACHINE_TYPE"
+else
+  echo ""
+  echo "==> Is this a personal or work machine?"
+  select MACHINE_TYPE in personal work; do
+    [[ -n "$MACHINE_TYPE" ]] && break
+  done
+  echo "$MACHINE_TYPE" > "$MACHINE_TYPE_FILE"
+  echo "  ✓ Saved machine type to $MACHINE_TYPE_FILE"
+fi
+
+if [[ "$MACHINE_TYPE" == "work" ]]; then
+  GITHUB_KEY_NAME="github-work"
+  GITHUB_KEY_TITLE="work-$(hostname -s) (dotfiles)"
+else
+  GITHUB_KEY_NAME="github"
+  GITHUB_KEY_TITLE="$(hostname -s) (dotfiles)"
+fi
+
+# ============================================================================
 # Git local configuration
 # ============================================================================
 if [[ ! -f "$HOME/.gitconfig.local" ]]; then
@@ -88,6 +120,10 @@ else
   echo "  ✓ ~/.aws/credentials already exists"
 fi
 
+record_registered() {
+  grep -qxF "$1" "$REGISTERED_FILE" 2>/dev/null || echo "$1" >> "$REGISTERED_FILE"
+}
+
 # ============================================================================
 # GitHub SSH key - generate a dedicated key, register it with GitHub via the
 # gh CLI, and wire it into config.local. Idempotent: safe to re-run.
@@ -135,7 +171,7 @@ if command -v gh &>/dev/null; then
     fi
 
     if [[ -z "$GITHUB_KEY" ]]; then
-      GITHUB_KEY="$HOME/.ssh/github"
+      GITHUB_KEY="$HOME/.ssh/$GITHUB_KEY_NAME"
       if [[ ! -f "$GITHUB_KEY" ]]; then
         echo "  Generating a new ed25519 key at $GITHUB_KEY..."
         key_email="$(git config --get user.email 2>/dev/null || echo "$(whoami)@$(hostname -s)")"
@@ -162,7 +198,7 @@ if command -v gh &>/dev/null; then
     fingerprint="$(ssh-keygen -lf "${GITHUB_KEY}.pub" | awk '{print $2}')"
     if gh ssh-key list 2>/dev/null | grep -q "$fingerprint"; then
       echo "  ✓ Key already registered with GitHub"
-    elif gh ssh-key add "${GITHUB_KEY}.pub" --title "$(hostname -s) (dotfiles)" 2>&1; then
+    elif gh ssh-key add "${GITHUB_KEY}.pub" --title "$GITHUB_KEY_TITLE" 2>&1; then
       echo "  ✓ Key added to your GitHub account"
     else
       echo -e "  ${YELLOW}⚠ Failed to add key to GitHub - you may need broader auth scope:${NC}"
@@ -211,7 +247,7 @@ if command -v gh &>/dev/null; then
     fi
     gpg_key_file="$(mktemp)"
     gpg --armor --export "$local_signingkey" > "$gpg_key_file"
-    if gh gpg-key add "$gpg_key_file" --title "$(hostname -s) (dotfiles)" 2>&1; then
+    if gh gpg-key add "$gpg_key_file" --title "$GITHUB_KEY_TITLE" 2>&1; then
       echo "  ✓ Key added to your GitHub account"
     else
       echo -e "  ${YELLOW}⚠ Failed to add key to GitHub - you may need broader auth scope:${NC}"
@@ -264,7 +300,7 @@ if command -v gh &>/dev/null; then
           else
             gpg_key_file="$(mktemp)"
             gpg --armor --export "$GPG_KEY_ID" > "$gpg_key_file"
-            if gh gpg-key add "$gpg_key_file" --title "$(hostname -s) (dotfiles)" 2>&1; then
+            if gh gpg-key add "$gpg_key_file" --title "$GITHUB_KEY_TITLE" 2>&1; then
               echo "  ✓ Key added to your GitHub account"
             else
               echo -e "  ${YELLOW}⚠ Failed to add key to GitHub - you may need broader auth scope:${NC}"
@@ -285,6 +321,23 @@ if command -v gh &>/dev/null; then
         fi
       fi
     fi
+  fi
+
+  # Look up what's actually registered on GitHub (rather than recording it
+  # inside each branch above), so re-running this on a machine set up before
+  # the receipt existed backfills it too.
+  if gh auth status &>/dev/null; then
+    ssh_identity="$(awk '/^Host github\.com$/ {f=1; next} /^Host / {f=0} f && $1 == "IdentityFile" {print $2; exit}' "$HOME/.ssh/config.local" 2>/dev/null || true)"
+    if [[ -n "$ssh_identity" && -f "${ssh_identity}.pub" ]]; then
+      ssh_pubkey="$(cut -d' ' -f1,2 "${ssh_identity}.pub")"
+      ssh_key_id="$(gh api user/keys --jq ".[] | select(.key == \"$ssh_pubkey\") | .id" 2>/dev/null || true)"
+      [[ -n "$ssh_key_id" ]] && record_registered "ssh-key=$ssh_key_id"
+    fi
+    signingkey="$(git config --file "$HOME/.gitconfig.local" --get user.signingkey 2>/dev/null || true)"
+    if [[ -n "$signingkey" ]] && gh gpg-key list 2>/dev/null | grep -q "$signingkey"; then
+      record_registered "gpg-key=$signingkey"
+    fi
+    [[ -s "$REGISTERED_FILE" ]] && echo "  ✓ Recorded registered GitHub keys in $REGISTERED_FILE (used by scripts/offboard.sh)"
   fi
 else
   echo ""

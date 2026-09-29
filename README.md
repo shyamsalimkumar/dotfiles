@@ -28,12 +28,35 @@ validation, rollback — see [nix/README.md](nix/README.md).
    standalone `home-manager` on Linux/WSL (see [nix/README.md](nix/README.md))
 4. **Sets up `~/Projects`** — see [Projects layout](#projects-layout) below
 5. **Installs AI assistant tools** — see [AI assistant tools](#ai-assistant-tools) below
-6. **Runs post-install tasks** — git identity prompt, Neovim plugin sync, Claude plugin
-   installation
+6. **Runs post-install tasks** — personal/work machine prompt, git identity prompt,
+   GitHub SSH/GPG keys, Neovim plugin sync, Claude plugin installation
 
 Packages, shell config, and dotfile symlinks are all declared in `nix/home.nix` and
 applied by the Nix build in step 3 — see [nix/README.md](nix/README.md) for what's
 symlinked where.
+
+## Leaving a job (offboarding)
+
+`scripts/post-install.sh` asks once whether the machine is personal or work
+(saved in `~/.config/dotfiles/machine`). Work machines get a `~/.ssh/github-work`
+key titled `work-<hostname> (dotfiles)` on GitHub, and every key registered with
+GitHub is recorded in `~/.config/dotfiles/registered`.
+
+Before handing a work laptop back, run this on it:
+
+```bash
+./scripts/offboard.sh
+```
+
+It deletes the recorded SSH/GPG keys from GitHub, then (after a confirmation)
+logs the machine out of gh, git's credential store, gcloud, AWS SSO, npm, Docker,
+1Password CLI and Claude Code. Key files stay on disk. It ends with a checklist of
+things only a browser can do (GitHub sessions/apps/tokens, Google and Apple
+devices, and so on).
+
+If the laptop is already gone, run it on another machine: with no receipt it
+lists your GitHub keys so you can pick the old ones, and you answer "no" to the
+log-out step so the current machine stays logged in.
 
 ## Neovim
 
