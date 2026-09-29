@@ -492,7 +492,7 @@ fi
 # step") need to be mirrored into its skills directory directly. Treats
 # ~/.agents/skills as the source of truth and self-heals here on every run,
 # same as the Claude skill reconciliation above.
-if command -v pi &>/dev/null; then
+if [[ -e "$HOME/.nvm/alias/pi" ]]; then
   echo ""
   echo "==> Linking global skills for Pi..."
   agents_skills_dir="$HOME/.agents/skills"
@@ -509,6 +509,52 @@ if command -v pi &>/dev/null; then
       ln -sfn "$skill_src" "$pi_target"
       echo "  ✓ Linked global skill for Pi: $name"
     done
+  fi
+fi
+
+# ============================================================================
+# Ollama for Pi - the server runs as a background service (services.ollama in
+# nix/home.nix) and pi/models.json points Pi at it. Pi's default model is an
+# Ollama cloud model, which needs this machine signed in to ollama.com.
+# ============================================================================
+if command -v ollama &>/dev/null; then
+  echo ""
+  echo "==> Setting up Ollama for Pi..."
+  pi_model="$(jq -r '.defaultModel' "$DOTFILES_DIR/pi/settings.json")"
+
+  for _ in {1..15}; do
+    curl -sf http://localhost:11434/api/version &>/dev/null && break
+    sleep 1
+  done
+
+  if ! curl -sf http://localhost:11434/api/version &>/dev/null; then
+    echo -e "  ${YELLOW}⚠ Ollama server isn't running - apply the Nix config, then re-run this script${NC}"
+  else
+    ollama_signed_in() {
+      [[ "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:11434/api/me)" == "200" ]]
+    }
+
+    if ollama_signed_in; then
+      echo "  ✓ Signed in to ollama.com"
+    else
+      read -rp "  Sign in to ollama.com now (needed for $pi_model)? [Y/n]: " ollama_signin
+      if [[ ! "$ollama_signin" =~ ^[Nn]$ ]]; then
+        # signin only opens the browser and returns, so wait for the user.
+        ollama signin
+        read -rp "  Press Enter once you've connected this Mac in the browser... " _
+      fi
+      if ollama_signed_in; then
+        echo "  ✓ Signed in to ollama.com"
+      else
+        echo -e "  ${YELLOW}⚠ Not signed in - Pi can't use $pi_model until you run: ollama signin${NC}"
+      fi
+    fi
+
+    if ollama pull "$pi_model" &>/dev/null; then
+      echo "  ✓ Model ready: $pi_model"
+    else
+      echo -e "  ${YELLOW}⚠ Failed to pull $pi_model - try: ollama pull $pi_model${NC}"
+    fi
   fi
 fi
 

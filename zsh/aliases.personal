@@ -32,14 +32,15 @@ alias rm="rm -i"
 alias cp="cp -i"
 alias mv="mv -i"
 
-# pi needs Node's zstd support in zlib (missing before ~v22.15/v23.x), so pin it
-# to a known-good install instead of whatever `nvm alias default` happens to be.
+# pi runs on the Node its nvm alias points at (set by scripts/setup-ai-tools.sh
+# from pi's own engines.node requirement), whatever the default Node is.
 pi() {
-  local pi_node="$HOME/.nvm/versions/node/v23.11.0/bin/pi"
-  if [[ -x "$pi_node" ]]; then
-    "$pi_node" "$@"
+  local nvm_dir="${NVM_DIR:-$HOME/.nvm}"
+  local pi_bin="$nvm_dir/versions/node/$(cat "$nvm_dir/alias/pi" 2>/dev/null)/bin"
+  if [[ -x "$pi_bin/pi" ]]; then
+    "$pi_bin/node" "$pi_bin/pi" "$@"
   else
-    echo "pi: pinned node v23.11.0 not found under nvm on this machine - falling back to PATH, run 'pi update' if it fails" >&2
-    command pi "$@"
+    echo "pi: no Node found for the 'pi' nvm alias - re-run scripts/setup-ai-tools.sh" >&2
+    return 1
   fi
 }

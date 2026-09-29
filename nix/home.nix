@@ -26,7 +26,6 @@
     # AI Coding Assistants
     codex
     opencode
-    ollama
     # Note: gemini-cli is deprecated (Google discontinued it in favor of
     # Antigravity) - see antigravity-cli cask in darwin.nix instead.
     # Note: claude-code is added below, Linux/WSL only - already installed via
@@ -300,6 +299,10 @@
     nix-direnv.enable = true;
   };
 
+  # Ollama server for Pi (see pi/models.json), kept running in the background.
+  # Sign-in for cloud models happens in scripts/post-install.sh.
+  services.ollama.enable = true;
+
   # Out-of-store symlinks for live-editable configs
   # These configs can be edited without rebuilding
   home.file = {
@@ -336,6 +339,7 @@
 
     # Pi settings and extensions
     ".pi/agent/settings.json".source = ../pi/settings.json;
+    ".pi/agent/models.json".source = ../pi/models.json;
     ".pi/agent/keybindings.json".source = ../pi/keybindings.json;
     ".pi/agent/extensions/custom-footer".source = ../pi/extensions/custom-footer;
 
