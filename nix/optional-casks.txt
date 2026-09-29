@@ -1,0 +1,33 @@
+# Mac apps (Homebrew casks) that are optional on work machines.
+# Personal machines install all of them. On a work machine,
+# scripts/setup-machine.sh asks which ones to install and saves the picks in
+# ~/.config/dotfiles/optional-casks, which nix/darwin.nix reads.
+# Format: <cask> # <description shown in the pick-list>
+
+# Security & Password Management
+1password           # Password manager
+1password-cli       # Password manager CLI
+tailscale-app       # Mesh VPN
+nordvpn             # VPN
+ausweisapp          # German ID card authentication
+
+# AI assistants
+claude              # Claude desktop app
+chatgpt             # ChatGPT desktop app
+antigravity-cli     # Google's AI coding CLI
+
+# Productivity & Utilities
+notchy              # Dynamic Island for macOS
+google-chrome       # Web browser
+firefox             # Web browser
+handy               # Speech recognition
+shottr              # Screenshot tool
+
+# Communication
+slack               # Team chat
+whatsapp            # Messaging
+zoom                # Video calls
+
+# Media & Creative
+blender             # 3D creation suite
+spotify             # Music

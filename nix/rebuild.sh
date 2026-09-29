@@ -12,6 +12,8 @@ echo -e "${YELLOW}Rebuilding Darwin configuration...${NC}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Rebuild
-sudo darwin-rebuild switch --flake "$SCRIPT_DIR#mac"
+# --impure lets darwin.nix and work-profiles.nix read per-machine files outside
+# the flake (~/.config/dotfiles, local.nix) - pure evaluation treats them as missing.
+sudo darwin-rebuild switch --impure --flake "$SCRIPT_DIR#mac"
 
 echo -e "${GREEN}Rebuild complete!${NC}"

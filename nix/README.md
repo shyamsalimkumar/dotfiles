@@ -62,8 +62,12 @@ cd nix
 
 Or from anywhere:
 ```bash
-sudo darwin-rebuild switch --flake ~/.config/nix-darwin#mac
+sudo darwin-rebuild switch --impure --flake ~/.config/nix-darwin#mac
 ```
+
+`--impure` is needed because `darwin.nix` and `modules/work-profiles.nix` read
+per-machine files that aren't tracked in git (`~/.config/dotfiles/*`,
+`local.nix`). Without it, Nix quietly treats those files as missing.
 
 ### Linux / WSL
 
@@ -165,7 +169,7 @@ cp ~/.config/nix-darwin/local.nix.example ~/.config/nix-darwin/local.nix
 
 3. **Rebuild** to apply changes:
 ```bash
-sudo darwin-rebuild switch --flake ~/.config/nix-darwin#mac
+sudo darwin-rebuild switch --impure --flake ~/.config/nix-darwin#mac
 ```
 
 #### Profile Structure
@@ -237,7 +241,7 @@ nix flake check
 nix build .#darwinConfigurations.mac.system
 
 # macOS: preview changes
-darwin-rebuild build --flake ~/.config/nix-darwin#mac
+darwin-rebuild build --impure --flake ~/.config/nix-darwin#mac
 
 # Linux/WSL: build without switching
 nix build .#homeConfigurations.linux.activationPackage

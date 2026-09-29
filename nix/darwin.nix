@@ -1,5 +1,20 @@
-{ pkgs, user, ... }:
+{ lib, user, ... }:
 
+let
+  # Needs --impure (see nix/rebuild.sh): these files live outside the flake,
+  # and pure evaluation silently treats them as missing.
+  stateDir = "/Users/${user}/.config/dotfiles";
+  readList = file:
+    lib.filter (cask: cask != "")
+      (map (line: lib.trim (lib.head (lib.splitString "#" line)))
+        (lib.splitString "\n" (builtins.readFile file)));
+  isWork = builtins.pathExists "${stateDir}/machine"
+    && lib.trim (builtins.readFile "${stateDir}/machine") == "work";
+  optionalCasks =
+    if !isWork then readList ./optional-casks.txt
+    else if builtins.pathExists "${stateDir}/optional-casks" then readList "${stateDir}/optional-casks"
+    else [ ];
+in
 {
   # Nix is installed and managed by Determinate (see nix/bootstrap.sh), not nix-darwin.
   # nix.settings below has no effect while this is false, but Determinate already
@@ -64,23 +79,14 @@
       "dockutil"    # Dock management
     ];
 
-    # macOS Applications (Casks)
+    # macOS Applications (Casks). These are always installed; the rest live in
+    # optional-casks.txt so work machines can pick which of them to install.
     casks = [
-      # Security & Password Management
-      "1password"
-      "1password-cli"
-      "tailscale-app"     # Mesh VPN
-      "nordvpn"
-      "ausweisapp"        # German ID card authentication
-
       # Development Tools
       "visual-studio-code"
       # Note: wezterm IS in nixpkgs, but using cask for now for consistency
       "wezterm"
       "claude-code"       # AI coding assistant (CLI)
-      "claude"            # AI coding assistant (desktop app)
-      "chatgpt"           # AI assistant (desktop app)
-      "antigravity-cli"   # AI coding assistant (CLI) - replaces deprecated gemini-cli
       "meld"              # Diff/merge tool
       # Note: Xcode has no cask and can't be installed via Nix either - Apple
       # only distributes it via the App Store or developer.apple.com, and
@@ -92,27 +98,9 @@
       # Cloud & DevOps
       "gcloud-cli"        # gcloud CLI (formerly google-cloud-sdk / google-cloud-cli)
 
-      # Productivity
-      "notchy"            # Dynamic Island for macOS
-
-      # Utilities
-      "google-chrome"     # Web browser
-      "firefox"           # Web browser
-      "handy"             # Speech recognition
-      "shottr"            # Screenshot tool
-
       # Fonts
       "font-hack-nerd-font"
-
-      # Communication
-      "slack"
-      "whatsapp"
-      "zoom"
-
-      # Media & Creative
-      "blender"
-      "spotify"
-    ];
+    ] ++ optionalCasks;
   };
 
   # Used for backwards compatibility

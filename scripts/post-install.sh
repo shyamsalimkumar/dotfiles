@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Post-installation tasks for Nix-based dotfiles
-# Run this after: sudo darwin-rebuild switch --flake ~/.config/nix-darwin#mac (macOS)
+# Run this after: sudo darwin-rebuild switch --impure --flake ~/.config/nix-darwin#mac (macOS)
 # or: home-manager switch --flake ~/.config/home-manager#linux (Linux/WSL)
 
 set -euo pipefail
@@ -14,28 +14,15 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 echo "==> Running post-installation tasks..."
 
 # ============================================================================
-# Machine type - asked once, remembered in ~/.config/dotfiles/machine. Work
-# machines get distinctly named keys so they're easy to spot on GitHub, and
-# every key registered with GitHub is recorded in ~/.config/dotfiles/registered
-# so scripts/offboard.sh knows exactly what to remove when leaving the job.
+# Machine type - install.sh asks this first; ask here too if post-install.sh
+# is run on its own. Work machines get distinctly named keys so they're easy
+# to spot on GitHub, and every key registered with GitHub is recorded in
+# ~/.config/dotfiles/registered so scripts/offboard.sh knows exactly what to
+# remove when leaving the job.
 # ============================================================================
-DOTFILES_STATE_DIR="$HOME/.config/dotfiles"
-MACHINE_TYPE_FILE="$DOTFILES_STATE_DIR/machine"
-REGISTERED_FILE="$DOTFILES_STATE_DIR/registered"
-mkdir -p "$DOTFILES_STATE_DIR"
-
-if [[ -f "$MACHINE_TYPE_FILE" ]]; then
-  MACHINE_TYPE="$(cat "$MACHINE_TYPE_FILE")"
-  echo "  ✓ Machine type: $MACHINE_TYPE"
-else
-  echo ""
-  echo "==> Is this a personal or work machine?"
-  select MACHINE_TYPE in personal work; do
-    [[ -n "$MACHINE_TYPE" ]] && break
-  done
-  echo "$MACHINE_TYPE" > "$MACHINE_TYPE_FILE"
-  echo "  ✓ Saved machine type to $MACHINE_TYPE_FILE"
-fi
+"$DOTFILES_DIR/scripts/setup-machine.sh"
+MACHINE_TYPE="$(cat "$HOME/.config/dotfiles/machine")"
+REGISTERED_FILE="$HOME/.config/dotfiles/registered"
 
 if [[ "$MACHINE_TYPE" == "work" ]]; then
   GITHUB_KEY_NAME="github-work"
@@ -595,7 +582,7 @@ echo ""
 echo "Next steps:"
 echo "  1. Restart your terminal to load the new configuration"
 if [[ "$OS" == "Darwin" ]]; then
-  echo "  2. Run 'sudo darwin-rebuild switch --flake ~/.config/nix-darwin#mac' to apply Nix changes"
+  echo "  2. Run 'sudo darwin-rebuild switch --impure --flake ~/.config/nix-darwin#mac' to apply Nix changes"
 else
   echo "  2. Run 'home-manager switch --flake ~/.config/home-manager#linux' to apply Nix changes"
 fi

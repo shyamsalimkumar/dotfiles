@@ -38,7 +38,9 @@ fi
 
 # Run first build
 echo -e "${YELLOW}Running first darwin-rebuild...${NC}"
-sudo nix run nix-darwin -- switch --flake "$SCRIPT_DIR#mac"
+# --impure lets darwin.nix and work-profiles.nix read per-machine files outside
+# the flake (~/.config/dotfiles, local.nix) - pure evaluation treats them as missing.
+sudo nix run nix-darwin -- switch --impure --flake "$SCRIPT_DIR#mac"
 
 echo -e "${GREEN}Bootstrap complete!${NC}"
 echo ""

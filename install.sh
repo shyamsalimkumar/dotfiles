@@ -13,8 +13,13 @@ fi
 echo "==> Installing dotfiles with Nix..."
 echo ""
 
-# Step 1: Prerequisites
-echo "Step 1/5: Installing prerequisites..."
+# Step 1: Machine type (and, on work machines, which optional apps to install)
+echo "Step 1/6: Machine type..."
+"$DOTFILES_DIR/scripts/setup-machine.sh"
+echo ""
+
+# Step 2: Prerequisites
+echo "Step 2/6: Installing prerequisites..."
 if [[ "$OS" == "Darwin" ]]; then
   "$DOTFILES_DIR/scripts/setup-xcode.sh"
   "$DOTFILES_DIR/scripts/setup-brew.sh"
@@ -23,8 +28,8 @@ else
 fi
 echo ""
 
-# Step 2: Bootstrap Nix and the system configuration
-echo "Step 2/5: Installing Nix and building system configuration..."
+# Step 3: Bootstrap Nix and the system configuration
+echo "Step 3/6: Installing Nix and building system configuration..."
 if [[ "$OS" == "Darwin" ]]; then
   "$DOTFILES_DIR/nix/bootstrap.sh"
 else
@@ -32,18 +37,18 @@ else
 fi
 echo ""
 
-# Step 3: One-time project setup
-echo "Step 3/5: Setting up project directories..."
+# Step 4: One-time project setup
+echo "Step 4/6: Setting up project directories..."
 "$DOTFILES_DIR/scripts/setup-projects.sh"
 echo ""
 
-# Step 4: AI tools installation
-echo "Step 4/5: Installing AI assistant tools..."
+# Step 5: AI tools installation
+echo "Step 5/6: Installing AI assistant tools..."
 "$DOTFILES_DIR/scripts/setup-ai-tools.sh"
 echo ""
 
-# Step 5: Post-installation tasks
-echo "Step 5/5: Running post-installation tasks..."
+# Step 6: Post-installation tasks
+echo "Step 6/6: Running post-installation tasks..."
 "$DOTFILES_DIR/scripts/post-install.sh"
 echo ""
 
