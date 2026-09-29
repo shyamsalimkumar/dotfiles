@@ -102,6 +102,14 @@ The coding-assistant CLIs themselves — `claude` ([Claude Code](https://github.
 | [gnhf](https://github.com/kunchenguid/gnhf) ("Good Night, Have Fun") | Autonomous agent runner — give it an objective and it drives Claude Code/Codex/etc. through iterative commits unattended, with rollback on failure. | `npm install -g gnhf` | `gnhf "reduce complexity of the codebase without changing functionality"` inside a git repo with a clean working tree. |
 | [firstmate](https://github.com/kunchenguid/firstmate) | **Not a global binary and not per-project.** It's a single repo you clone once, then `cd` into and launch your agent harness (`claude`, `codex`, etc.) inside — `AGENTS.md` takes over from there. There is no separate "app" to install. When you ask it about a GitHub project, *it* clones that project under its own `projects/` subdirectory and spawns supervised sub-agents ("crewmates") in worktrees/tmux to work on it and open a PR. | `setup-ai-tools.sh` clones it once to `~/Projects/github.com/kunchenguid/firstmate` (consistent with the [Projects layout](#projects-layout) above). Requires `gh auth login` first. | `cd ~/Projects/github.com/kunchenguid/firstmate && claude`, then talk to it: `> look at my github project xyz, fix the flaky login test`; approve with `> merge it`. |
 
+## Blender MCP
+
+On macOS, `scripts/post-install.sh` sets up [MCP for Blender](https://github.com/ahujasid/blender-mcp):
+it registers `uvx mcp-for-blender` with Claude Code, the Claude desktop app
+and Codex, and installs the Blender add-on. Enabling the add-on and clicking
+**Start MCP Server** inside Blender are manual; the script prints those
+steps at the end of its run.
+
 ## Web search
 
 Claude Code's built-in `WebSearch` tool is disabled (`permissions.deny` in

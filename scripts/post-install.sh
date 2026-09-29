@@ -454,6 +454,70 @@ if command -v pi &>/dev/null; then
   fi
 fi
 
+# ============================================================================
+# Blender MCP (https://github.com/ahujasid/blender-mcp) - Blender itself is a
+# cask in nix/darwin.nix and uv comes from nix/home.nix. Registers the MCP
+# server with Claude Code, the Claude desktop app and Codex, and installs
+# the Blender add-on. Enabling the add-on and starting its server inside
+# Blender can't be scripted - those steps are printed at the very end.
+# ============================================================================
+blender_mcp_configured=false
+if [[ "$OS" == "Darwin" && -d "/Applications/Blender.app" ]] && command -v uvx &>/dev/null; then
+  blender_mcp_configured=true
+  echo ""
+  echo "==> Setting up Blender MCP..."
+
+  if command -v claude &>/dev/null; then
+    if claude mcp get blender &>/dev/null; then
+      echo "  ✓ Already registered with Claude Code"
+    elif claude mcp add --scope user blender -- uvx mcp-for-blender 2>&1; then
+      echo "  ✓ Registered with Claude Code"
+    else
+      echo -e "  ${YELLOW}⚠ Failed to register with Claude Code${NC}"
+    fi
+  fi
+
+  # GUI apps don't inherit the shell's Nix PATH, so the desktop app gets
+  # uvx's absolute path instead of a bare "uvx".
+  if [[ -d "/Applications/Claude.app" ]]; then
+    desktop_config="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+    mkdir -p "$(dirname "$desktop_config")"
+    [[ -s "$desktop_config" ]] || echo '{}' > "$desktop_config"
+    if jq -e '.mcpServers.blender' "$desktop_config" &>/dev/null; then
+      echo "  ✓ Already registered with the Claude desktop app"
+    else
+      desktop_config_tmp="$(mktemp)"
+      if jq --arg uvx "$(command -v uvx)" \
+        '.mcpServers.blender = {command: $uvx, args: ["mcp-for-blender"]}' \
+        "$desktop_config" > "$desktop_config_tmp"; then
+        mv "$desktop_config_tmp" "$desktop_config"
+        echo "  ✓ Registered with the Claude desktop app"
+      else
+        rm -f "$desktop_config_tmp"
+        echo -e "  ${YELLOW}⚠ Failed to update $desktop_config${NC}"
+      fi
+    fi
+  fi
+
+  if command -v codex &>/dev/null; then
+    if codex mcp get blender &>/dev/null; then
+      echo "  ✓ Already registered with Codex"
+    elif codex mcp add blender -- uvx mcp-for-blender 2>&1; then
+      echo "  ✓ Registered with Codex"
+    else
+      echo -e "  ${YELLOW}⚠ Failed to register with Codex${NC}"
+    fi
+  fi
+
+  # Re-run every time so the add-on stays in step with the server, which
+  # uvx always fetches at its latest version.
+  if uvx mcp-for-blender install-addon 2>&1; then
+    echo "  ✓ Blender add-on installed"
+  else
+    echo -e "  ${YELLOW}⚠ Failed to install the Blender add-on (open Blender once, then re-run this script)${NC}"
+  fi
+fi
+
 echo ""
 echo "==> Post-installation complete!"
 echo ""
@@ -495,4 +559,15 @@ if [[ "$OS" == "Darwin" ]]; then
   echo -e "${YELLOW}  Or check/update everything Homebrew manages at once:${NC}"
   echo -e "${YELLOW}    brew outdated --greedy${NC}"
   echo -e "${YELLOW}    brew upgrade --greedy${NC}"
+fi
+
+if [[ "$blender_mcp_configured" == "true" ]]; then
+  echo ""
+  echo -e "${YELLOW}ACTION NEEDED: Finish the Blender MCP setup inside Blender yourself:${NC}"
+  echo -e "${YELLOW}  1. Open Blender -> Edit -> Preferences -> Add-ons${NC}"
+  echo -e "${YELLOW}  2. Enable 'Interface: MCP for Blender'${NC}"
+  echo -e "${YELLOW}  3. In the 3D viewport, press N -> 'MCP for Blender' tab -> 'Start MCP Server'${NC}"
+  echo -e "${YELLOW}  4. Restart the Claude desktop app so it picks up the new MCP server${NC}"
+  echo -e "${YELLOW}  If the add-on is missing, open Blender once, then run:${NC}"
+  echo -e "${YELLOW}    uvx mcp-for-blender install-addon${NC}"
 fi
