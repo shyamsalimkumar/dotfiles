@@ -32,7 +32,6 @@ Then, before creating anything, print a pre-flight summary: base branch, integra
 ## Always work in worktrees
 
 - Before branching, `git fetch` the base branch's remote so you build on current state, not stale local state.
-- Worktree location: `./worktrees/<branch>` if the repo's `.gitignore` covers it; otherwise `~/worktrees/<project>-<branch>`. Check `.gitignore` yourself and fall back automatically — do not ask.
 - If the target worktree path or branch name already exists: stop and ask the user how to proceed (reuse, remove, or rename). Never silently overwrite or delete unknown state.
 - While these rules are active, create and remove worktrees/branches without per-action confirmation — that standing authorization is the point of turning them on.
 
