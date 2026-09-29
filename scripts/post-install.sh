@@ -329,6 +329,24 @@ else
 fi
 
 # ============================================================================
+# Zsh completions - most tools ship completion files zsh already finds (see
+# fpath in nix/home.nix). uvx only prints its own on demand, so write it to
+# ~/.local/share/zsh/site-functions. Re-generated on every run to stay in
+# step with the installed version.
+# ============================================================================
+if command -v uvx &>/dev/null; then
+  echo ""
+  echo "==> Generating zsh completions..."
+  completions_dir="$HOME/.local/share/zsh/site-functions"
+  mkdir -p "$completions_dir"
+  if uvx --generate-shell-completion zsh > "$completions_dir/_uvx"; then
+    echo "  ✓ uvx"
+  else
+    echo -e "  ${YELLOW}⚠ Failed to generate completions for uvx${NC}"
+  fi
+fi
+
+# ============================================================================
 # Claude settings.json (real writable file, not a Nix-managed symlink -
 # the claude CLI needs to write to it for plugin/marketplace state)
 # ============================================================================
