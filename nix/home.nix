@@ -228,6 +228,12 @@
     # Note: userName and userEmail should be configured in ~/.gitconfig.local
     # See README Prerequisites section for setup instructions
 
+    # Written to ~/.config/git/ignore, which git reads by default in every repo
+    ignores = [
+      # Claude desktop app session worktrees
+      ".claude/worktrees/"
+    ];
+
     settings = {
       core = {
         editor = "nvim";
