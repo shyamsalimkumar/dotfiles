@@ -607,13 +607,13 @@ if [[ "$OS" == "Darwin" ]]; then
 
   # This script already offers to check/update every Homebrew app on every
   # run (see scripts/setup-brew.sh) - this is just a manual reference for
-  # updating a single self-updating app (Zoom, etc.) without going through
+  # updating a single self-updating app (Slack, etc.) without going through
   # that whole prompt, or checking outside of a full install.sh run.
   echo ""
-  echo -e "${YELLOW}TIP: Some apps (Zoom, and other Homebrew casks) auto-update in the${NC}"
+  echo -e "${YELLOW}TIP: Some apps (Slack, and other Homebrew casks) auto-update in the${NC}"
   echo -e "${YELLOW}  background, so a plain 'brew outdated' won't show them as behind.${NC}"
   echo -e "${YELLOW}  Force-check/update one manually with:${NC}"
-  echo -e "${YELLOW}    brew upgrade --cask --greedy zoom${NC}"
+  echo -e "${YELLOW}    brew upgrade --cask --greedy slack${NC}"
   echo -e "${YELLOW}  Or check/update everything Homebrew manages at once:${NC}"
   echo -e "${YELLOW}    brew outdated --greedy${NC}"
   echo -e "${YELLOW}    brew upgrade --greedy${NC}"

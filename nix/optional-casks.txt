@@ -26,7 +26,6 @@ shottr              # Screenshot tool
 # Communication
 slack               # Team chat
 whatsapp            # Messaging
-zoom                # Video calls
 
 # Media & Creative
 blender             # 3D creation suite
