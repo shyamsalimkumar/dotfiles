@@ -51,7 +51,7 @@ if [[ "$OS" == "Darwin" ]]; then
   fi
 
   # Check for updates to every Homebrew-managed app/tool (casks and
-  # formulae). --greedy also checks self-updating casks (Zoom, etc), which
+  # formulae). --greedy also checks self-updating casks (Slack, etc), which
   # brew skips by default on the assumption the app updates itself silently.
   # --verbose shows the installed and new versions, so the prompt below has
   # everything up front and brew's own confirmation can be skipped with --yes.
