@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="405" viewBox="0 0 600 405" font-family="Menlo, Consolas, monospace" font-size="14">
+<rect x="0" y="0" width="292" height="100%" rx="8" fill="#1e1e1e"/>
+<text x="16" y="28" fill="#9d9d9d" font-weight="bold">Old .gitconfig colors</text>
+<text x="16.0" y="66" fill="#d4d4d4" font-weight="bold" xml:space="preserve">$ git status</text>
+<text x="16.0" y="85" fill="#d4d4d4" xml:space="preserve">On branch main</text>
+<text x="16.0" y="104" fill="#d4d4d4" xml:space="preserve">Changes to be committed:</text>
+<text x="16.0" y="123" fill="#d4d4d4" xml:space="preserve">        </text>
+<text x="83.2" y="123" fill="#f5f543" xml:space="preserve">new file:   config.yaml</text>
+<text x="16.0" y="161" fill="#d4d4d4" xml:space="preserve">Changes not staged for commit:</text>
+<text x="16.0" y="180" fill="#d4d4d4" xml:space="preserve">        </text>
+<text x="83.2" y="180" fill="#23d18b" xml:space="preserve">modified:   app.go</text>
+<text x="16.0" y="218" fill="#d4d4d4" xml:space="preserve">Untracked files:</text>
+<text x="16.0" y="237" fill="#d4d4d4" xml:space="preserve">        </text>
+<text x="83.2" y="237" fill="#29b8db" xml:space="preserve">notes.txt</text>
+<text x="16.0" y="275" fill="#d4d4d4" font-weight="bold" xml:space="preserve">$ git branch -a</text>
+<text x="16.0" y="294" fill="#d4d4d4" xml:space="preserve">  </text>
+<text x="32.8" y="294" fill="#f5f543" xml:space="preserve">feature-login</text>
+<text x="16.0" y="313" fill="#d4d4d4" xml:space="preserve">  </text>
+<text x="32.8" y="313" fill="#f5f543" xml:space="preserve">fix-typo</text>
+<text x="16.0" y="332" fill="#d4d4d4" xml:space="preserve">* </text>
+<rect x="32.8" y="318" width="33.6" height="18" fill="#f5f543"/>
+<text x="32.8" y="332" fill="#1e1e1e" xml:space="preserve">main</text>
+<text x="16.0" y="351" fill="#d4d4d4" xml:space="preserve">  </text>
+<text x="32.8" y="351" fill="#23d18b" xml:space="preserve">remotes/origin/feature-login</text>
+<text x="16.0" y="370" fill="#d4d4d4" xml:space="preserve">  </text>
+<text x="32.8" y="370" fill="#23d18b" xml:space="preserve">remotes/origin/main</text>
+<rect x="308" y="0" width="292" height="100%" rx="8" fill="#1e1e1e"/>
+<text x="324" y="28" fill="#9d9d9d" font-weight="bold">Git defaults (current)</text>
+<text x="324.0" y="66" fill="#d4d4d4" font-weight="bold" xml:space="preserve">$ git status</text>
+<text x="324.0" y="85" fill="#d4d4d4" xml:space="preserve">On branch main</text>
+<text x="324.0" y="104" fill="#d4d4d4" xml:space="preserve">Changes to be committed:</text>
+<text x="324.0" y="123" fill="#d4d4d4" xml:space="preserve">        </text>
+<text x="391.2" y="123" fill="#23d18b" xml:space="preserve">new file:   config.yaml</text>
+<text x="324.0" y="161" fill="#d4d4d4" xml:space="preserve">Changes not staged for commit:</text>
+<text x="324.0" y="180" fill="#d4d4d4" xml:space="preserve">        </text>
+<text x="391.2" y="180" fill="#f14c4c" xml:space="preserve">modified:   app.go</text>
+<text x="324.0" y="218" fill="#d4d4d4" xml:space="preserve">Untracked files:</text>
+<text x="324.0" y="237" fill="#d4d4d4" xml:space="preserve">        </text>
+<text x="391.2" y="237" fill="#f14c4c" xml:space="preserve">notes.txt</text>
+<text x="324.0" y="275" fill="#d4d4d4" font-weight="bold" xml:space="preserve">$ git branch -a</text>
+<text x="324.0" y="294" fill="#d4d4d4" xml:space="preserve">  feature-login</text>
+<text x="324.0" y="313" fill="#d4d4d4" xml:space="preserve">  fix-typo</text>
+<text x="324.0" y="332" fill="#d4d4d4" xml:space="preserve">* </text>
+<text x="340.8" y="332" fill="#23d18b" xml:space="preserve">main</text>
+<text x="324.0" y="351" fill="#d4d4d4" xml:space="preserve">  </text>
+<text x="340.8" y="351" fill="#f14c4c" xml:space="preserve">remotes/origin/feature-login</text>
+<text x="324.0" y="370" fill="#d4d4d4" xml:space="preserve">  </text>
+<text x="340.8" y="370" fill="#f14c4c" xml:space="preserve">remotes/origin/main</text>
+</svg>

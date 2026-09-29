@@ -35,7 +35,7 @@ Before running bootstrap, ensure you have:
    cp .gitconfig.local.example ~/.gitconfig.local
    # Edit ~/.gitconfig.local with your name and email
    ```
-   The main `.gitconfig` includes this file via `[include] path = ~/.gitconfig.local`.
+   `programs.git` in `home.nix` includes this file via `include.path = "~/.gitconfig.local"`.
 
 2. **Xcode Command Line Tools** (macOS): Will be installed automatically by bootstrap if missing
 
@@ -127,6 +127,20 @@ All system preferences declared in `darwin.nix`:
 - Finder list view
 - Desktop icons hidden
 - Trackpad tap-to-click
+
+### Git Colors
+`git status` and `git branch` use git's default colors. The old repo-root `.gitconfig` (from before Nix) had custom ones:
+
+![Old .gitconfig colors vs git defaults](docs/git-colors-old-vs-new.svg)
+
+To bring the old colors back, add this to `programs.git.settings` in `home.nix`. Diff colors aren't listed because `delta` draws diffs instead.
+
+```nix
+color = {
+  branch = { current = "yellow reverse"; local = "yellow"; remote = "green"; };
+  status = { added = "yellow"; changed = "green"; untracked = "cyan"; };
+};
+```
 
 ### Multi-Company Work Profiles (macOS only)
 Supports working with multiple companies simultaneously with isolated configurations.
