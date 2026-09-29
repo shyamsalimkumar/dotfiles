@@ -12,7 +12,7 @@ echo "==> Installing AI assistant tools..."
 update_ai_tools=false
 if command -v no-mistakes >/dev/null 2>&1 || command -v treehouse >/dev/null 2>&1 \
   || command -v omp >/dev/null 2>&1 || command -v gnhf >/dev/null 2>&1 \
-  || command -v pi >/dev/null 2>&1; then
+  || [[ -e "$HOME/.nvm/alias/pi" ]]; then
   read -rp "  Check for updates to already-installed AI tools? [y/N]: " check_updates
   [[ "$check_updates" =~ ^[Yy] ]] && update_ai_tools=true
 fi
@@ -115,12 +115,41 @@ if command -v npm >/dev/null 2>&1; then
     echo "  Installing/updating gnhf..."
     npm install -g gnhf
   fi
+else
+  echo -e "  ${YELLOW}WARNING: npm not found, skipping gnhf install${NC}"
+fi
 
+# pi runs from its own nvm alias ("pi", used by zsh/aliases.personal) so
+# changing the default Node can't break it. The alias only moves when pi's
+# own engines.node requirement outgrows the Node it points at.
+pi_package="@earendil-works/pi-coding-agent"
+version_at_least() { [[ "$(printf '%s\n' "$1" "$2" | sort -V | head -1)" == "$2" ]]; }
+if command -v npm >/dev/null 2>&1; then
+  pi_node_min="$(npm view "$pi_package" engines.node 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
+  pi_node="$(cat "$NVM_DIR/alias/pi" 2>/dev/null || true)"
   pi_install=true
-  if command -v pi >/dev/null 2>&1; then
+  if [[ -n "$pi_node" && -x "$NVM_DIR/versions/node/$pi_node/bin/node" ]] \
+    && { [[ -z "$pi_node_min" ]] || version_at_least "${pi_node#v}" "$pi_node_min"; }; then
+    echo "  pi uses Node $pi_node (needs >=${pi_node_min:-any})"
+  else
+    echo "  Installing a Node for pi (needs >=${pi_node_min:-any})..."
+    set +u
+    nvm install --lts >/dev/null
+    pi_node="$(nvm version 'lts/*')"
+    if [[ -n "$pi_node_min" ]] && ! version_at_least "${pi_node#v}" "$pi_node_min"; then
+      nvm install node >/dev/null
+      pi_node="$(nvm version node)"
+    fi
+    nvm alias pi "$pi_node" >/dev/null
+    set -u
+    echo "  ✓ nvm alias 'pi' -> $pi_node"
+  fi
+
+  pi_node_bin="$NVM_DIR/versions/node/$pi_node/bin"
+  if [[ -x "$pi_node_bin/pi" ]]; then
     pi_install=false
     if [[ "$update_ai_tools" == "true" ]]; then
-      if npm outdated -g @earendil-works/pi-coding-agent >/dev/null 2>&1; then
+      if PATH="$pi_node_bin:$PATH" npm outdated -g "$pi_package" >/dev/null 2>&1; then
         echo "  ✓ pi already up to date"
       else
         echo "  pi: update available"
@@ -131,11 +160,11 @@ if command -v npm >/dev/null 2>&1; then
     fi
   fi
   if [[ "$pi_install" == "true" ]]; then
-    echo "  Installing/updating pi (@earendil-works/pi-coding-agent)..."
-    npm install -g @earendil-works/pi-coding-agent
+    echo "  Installing/updating pi ($pi_package) under Node $pi_node..."
+    PATH="$pi_node_bin:$PATH" npm install -g "$pi_package"
   fi
 else
-  echo -e "  ${YELLOW}WARNING: npm not found, skipping gnhf and pi install${NC}"
+  echo -e "  ${YELLOW}WARNING: npm not found, skipping pi install${NC}"
 fi
 
 # omp.sh/install is fetched from can1357/oh-my-pi on GitHub (found by

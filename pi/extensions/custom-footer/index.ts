@@ -121,11 +121,15 @@ export default function (pi: ExtensionAPI) {
   };
 
   // Heartbeat: try to apply the footer to the most recent context every 2 seconds.
+  // A ctx goes stale (and throws) once its session ends, e.g. after `pi -p`.
   setInterval(() => {
-    if (latestCtx) {
+    if (!latestCtx) return;
+    try {
       setupFooter(latestCtx);
+    } catch {
+      latestCtx = null;
     }
-  }, 2000);
+  }, 2000).unref();
 
   const eventsToHook = [
     "session_start",

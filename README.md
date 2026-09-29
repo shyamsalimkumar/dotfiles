@@ -147,27 +147,13 @@ and Codex, and installs the Blender add-on. Enabling the add-on and clicking
 **Start MCP Server** inside Blender are manual; the script prints those
 steps at the end of its run.
 
-## Web search
+## Pi and Ollama
 
-Claude Code's built-in `WebSearch` tool is disabled (`permissions.deny` in
-`claude/settings.json`) in favor of
-[Agent Reach](https://github.com/Panniantong/agent-reach) — an open-source,
-free CLI/MCP toolkit that gives the agent broader internet access (web
-search, arbitrary webpages, YouTube, RSS, and more) than the built-in tool
-alone.
-
-```bash
-brew install pipx
-pipx install https://github.com/Panniantong/agent-reach/archive/main.zip
-agent-reach install --env=auto
-npm install -g mcporter
-mcporter config add exa https://mcp.exa.ai/mcp --scope home
-```
-
-The last two lines register Exa's MCP server, which is what actually backs
-web search once `WebSearch` is off — run `agent-reach doctor` to check
-channel status. This is a per-machine setup step, not automated by
-`install.sh`.
+Pi runs on Ollama. `nix/home.nix` keeps the Ollama server running in the
+background, and `pi/models.json` points Pi at it. Pi's default model
+(`defaultModel` in `pi/settings.json`) is an Ollama cloud model, so
+`scripts/post-install.sh` asks you to sign in to ollama.com and pulls the
+model. To sign in later, run `ollama signin`.
 
 ## Manual step
 
