@@ -22,25 +22,39 @@ validation, rollback — see [nix/README.md](nix/README.md).
 ## What `install.sh` does
 
 1. **Detects OS** — supports macOS and Linux/WSL2; exits on anything else
-2. **macOS only** — installs Xcode CLI tools and Homebrew (used by `nix-darwin` for the
+2. **Asks personal or work** — see [Work machines](#work-machines) below
+3. **macOS only** — installs Xcode CLI tools and Homebrew (used by `nix-darwin` for the
    handful of packages/casks not available in nixpkgs, declared in `nix/darwin.nix`)
-3. **Installs Nix and builds the system configuration** — `nix-darwin` on macOS,
+4. **Installs Nix and builds the system configuration** — `nix-darwin` on macOS,
    standalone `home-manager` on Linux/WSL (see [nix/README.md](nix/README.md))
-4. **Sets up `~/Projects`** — see [Projects layout](#projects-layout) below
-5. **Installs AI assistant tools** — see [AI assistant tools](#ai-assistant-tools) below
-6. **Runs post-install tasks** — personal/work machine prompt, git identity prompt,
+5. **Sets up `~/Projects`** — see [Projects layout](#projects-layout) below
+6. **Installs AI assistant tools** — see [AI assistant tools](#ai-assistant-tools) below
+7. **Runs post-install tasks** — git identity prompt,
    GitHub SSH/GPG keys, Neovim plugin sync, Claude plugin installation
 
 Packages, shell config, and dotfile symlinks are all declared in `nix/home.nix` and
-applied by the Nix build in step 3 — see [nix/README.md](nix/README.md) for what's
+applied by the Nix build in step 4 — see [nix/README.md](nix/README.md) for what's
 symlinked where.
 
-## Leaving a job (offboarding)
+## Work machines
 
-`scripts/post-install.sh` asks once whether the machine is personal or work
-(saved in `~/.config/dotfiles/machine`). Work machines get a `~/.ssh/github-work`
-key titled `work-<hostname> (dotfiles)` on GitHub, and every key registered with
-GitHub is recorded in `~/.config/dotfiles/registered`.
+`scripts/setup-machine.sh` (the first step of `install.sh`) asks once whether
+the machine is personal or work, and saves the answer in
+`~/.config/dotfiles/machine`.
+
+On a work Mac it also lists the optional apps in `nix/optional-casks.txt`
+(password manager, chat apps, Spotify, and so on) and asks which to install;
+pressing Enter installs none. The picks are saved in
+`~/.config/dotfiles/optional-casks`, and `nix/darwin.nix` installs only those.
+Core dev apps and all command-line tools install everywhere. Personal machines
+get every app. To pick again, delete that file, run `scripts/setup-machine.sh`,
+then `nix/rebuild.sh`.
+
+Work machines also get a `~/.ssh/github-work` key titled
+`work-<hostname> (dotfiles)` on GitHub, and every key registered with GitHub is
+recorded in `~/.config/dotfiles/registered` for offboarding.
+
+## Leaving a job (offboarding)
 
 Before handing a work laptop back, run this on it:
 
