@@ -55,6 +55,12 @@ Global instructions for all AI coding assistants (Claude, Codex, OpenCode, etc.)
 - Always create worktrees at `./worktrees/<branch-name>` inside the project repo, never in the home directory
 - If the repo's `.gitignore` doesn't already ignore `worktrees/`, add it before creating the worktree
 
+## Machine Changes Go Through Dotfiles
+- This machine is set up from the dotfiles repo at `~/Projects/github.com/shyamsalimkumar/dotfiles` (Nix + install scripts). A new machine must come out the same from `install.sh`.
+- When asked to install, configure, or fix anything on the machine itself (apps, CLI tools, shell, editors, AI tool config, background services), make the change in that repo, not only locally. Follow `/fix-machine` (`claude/commands/fix-machine.md` in that repo).
+- A one-off local command is fine only to repair something the repo already declares (e.g. `brew reinstall --cask firefox` for a cask listed in Nix). Say which file declares it.
+- Doesn't apply to changes inside the project being worked on.
+
 ## Writing Style
 - Never use em dashes. Use a single dash (-), a comma, or a semicolon instead, whichever fits the sentence.
 
