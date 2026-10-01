@@ -4,8 +4,8 @@ set -euo pipefail
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# shellcheck source=scripts/lib/pick-list.sh
-source "$(dirname "${BASH_SOURCE[0]}")/lib/pick-list.sh"
+# shellcheck source=scripts/pick-list.sh
+source "$(dirname "${BASH_SOURCE[0]}")/pick-list.sh"
 
 echo "==> Installing AI assistant tools..."
 

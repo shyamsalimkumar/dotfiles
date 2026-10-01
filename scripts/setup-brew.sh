@@ -3,8 +3,8 @@ set -euo pipefail
 
 OS="$(uname -s)"
 
-# shellcheck source=scripts/lib/pick-list.sh
-source "$(dirname "${BASH_SOURCE[0]}")/lib/pick-list.sh"
+# shellcheck source=scripts/pick-list.sh
+source "$(dirname "${BASH_SOURCE[0]}")/pick-list.sh"
 
 if [[ "$OS" == "Linux" ]] && command -v apt-get &>/dev/null; then
   echo "==> Installing Homebrew prerequisites..."
