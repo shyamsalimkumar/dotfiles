@@ -75,7 +75,9 @@ in
       "trurl"       # URL tool
 
       # macOS-specific formulae
-      "colima"      # Docker runtime for macOS
+      # Docker runtime for macOS. start_service runs it as a brew service, so
+      # it starts on login instead of needing a manual `colima start`.
+      { name = "colima"; start_service = true; }
       "dockutil"    # Dock management
     ];
 
