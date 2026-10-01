@@ -75,7 +75,7 @@ in
       "trurl"       # URL tool
 
       # macOS-specific formulae
-      "colima"      # Docker runtime for macOS
+      "colima"      # Docker runtime for macOS (started on login by launchd.user.agents.colima)
       "dockutil"    # Dock management
     ];
 
@@ -101,6 +101,18 @@ in
       # Fonts
       "font-hack-nerd-font"
     ] ++ optionalCasks;
+  };
+
+  # Starts Colima on login. Not a brew service because those can't pass flags,
+  # and colima start saves --cpus/--memory into its own config, which it also
+  # rewrites itself - so the sizes live here instead of a managed colima.yaml.
+  launchd.user.agents.colima.serviceConfig = {
+    ProgramArguments = [ "/opt/homebrew/bin/colima" "start" "--foreground" "--cpus" "4" "--memory" "8" ];
+    EnvironmentVariables.PATH = "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+    RunAtLoad = true;
+    KeepAlive.SuccessfulExit = false;
+    StandardOutPath = "/Users/${user}/Library/Logs/colima.log";
+    StandardErrorPath = "/Users/${user}/Library/Logs/colima.log";
   };
 
   # Used for backwards compatibility
