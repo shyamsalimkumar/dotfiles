@@ -108,7 +108,8 @@ in
   # rewrites itself - so the sizes live here instead of a managed colima.yaml.
   launchd.user.agents.colima.serviceConfig = {
     ProgramArguments = [ "/opt/homebrew/bin/colima" "start" "--foreground" "--cpus" "4" "--memory" "8" ];
-    EnvironmentVariables.PATH = "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+    # Colima needs the docker CLI, which home.nix installs into the per-user profile.
+    EnvironmentVariables.PATH = "/etc/profiles/per-user/${user}/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin";
     RunAtLoad = true;
     KeepAlive.SuccessfulExit = false;
     StandardOutPath = "/Users/${user}/Library/Logs/colima.log";
