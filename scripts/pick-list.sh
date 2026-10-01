@@ -3,6 +3,10 @@
 # ticked. Plain bash (3.2-safe) since setup-brew.sh runs before Nix exists.
 pick_from_list() {
   local items=("$@") chosen=() cursor=0 i key rest pointer box all
+  # Long lines would wrap and throw off the redraw, so cut them to fit.
+  local cols
+  cols="$(stty size 2>/dev/null | cut -d' ' -f2 || true)"
+  local width=$((${cols:-80} - 9))
   for i in "${!items[@]}"; do chosen[i]=false; done
   PICKED=()
 
@@ -15,7 +19,7 @@ pick_from_list() {
       box="[ ]"
       if [[ $i -eq $cursor ]]; then pointer=">"; fi
       if [[ ${chosen[i]} == true ]]; then box="[x]"; fi
-      printf '\033[2K  %s %s %s\n' "$pointer" "$box" "${items[$i]}"
+      printf '\033[2K  %s %s %.*s\n' "$pointer" "$box" "$width" "${items[$i]}"
     done
 
     IFS= read -rsn1 key || break
