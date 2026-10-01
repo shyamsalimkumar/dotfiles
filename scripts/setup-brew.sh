@@ -3,6 +3,9 @@ set -euo pipefail
 
 OS="$(uname -s)"
 
+# shellcheck source=scripts/lib/pick-list.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/pick-list.sh"
+
 if [[ "$OS" == "Linux" ]] && command -v apt-get &>/dev/null; then
   echo "==> Installing Homebrew prerequisites..."
   sudo apt-get update -qq
@@ -53,16 +56,19 @@ if [[ "$OS" == "Darwin" ]]; then
   # Check for updates to every Homebrew-managed app/tool (casks and
   # formulae). --greedy also checks self-updating casks (Slack, etc), which
   # brew skips by default on the assumption the app updates itself silently.
-  # --verbose shows the installed and new versions, so the prompt below has
+  # --verbose shows the installed and new versions, so the pick-list below has
   # everything up front and brew's own confirmation can be skipped with --yes.
   outdated="$(brew outdated --greedy --verbose 2>/dev/null || true)"
   if [[ -n "$outdated" ]]; then
     echo ""
     echo "  Updates available:"
-    echo "$outdated" | sed 's/^/    /'
-    read -rp "  Install these updates now? [y/N]: " update_outdated
-    if [[ "$update_outdated" =~ ^[Yy] ]]; then
-      brew upgrade --greedy --yes || true
+    lines=()
+    while IFS= read -r line; do lines+=("$line"); done <<< "$outdated"
+    pick_from_list "${lines[@]}"
+    names=()
+    for i in ${PICKED[@]+"${PICKED[@]}"}; do names+=("${lines[$i]%% *}"); done
+    if [[ ${#names[@]} -gt 0 ]]; then
+      brew upgrade --greedy --yes "${names[@]}" || true
     fi
   fi
 fi
