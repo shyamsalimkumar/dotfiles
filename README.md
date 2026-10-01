@@ -130,7 +130,7 @@ The coding-assistant CLIs themselves — `claude` ([Claude Code](https://github.
 
 ## AI assistant tools
 
-`scripts/setup-ai-tools.sh` installs a few CLI tools built around coding agents (missing tools are installed; installed ones are checked for updates and you pick which to update from a numbered list). It pipes each project's own install script from GitHub into `sh`/`npm`, so review `scripts/setup-ai-tools.sh` and each tool's install script if you want to audit what runs before you `./install.sh` on a new machine.
+`scripts/setup-ai-tools.sh` installs a few CLI tools built around coding agents (missing tools are installed; installed ones are checked for updates and you tick which to update in an arrow-key checklist). It pipes each project's own install script from GitHub into `sh`/`npm`, so review `scripts/setup-ai-tools.sh` and each tool's install script if you want to audit what runs before you `./install.sh` on a new machine.
 
 | Tool | What it does | Install | Usage |
 |---|---|---|---|
