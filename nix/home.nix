@@ -299,9 +299,14 @@
     nix-direnv.enable = true;
   };
 
-  # Ollama server for Pi (see pi/models.json), kept running in the background.
-  # Sign-in for cloud models happens in scripts/post-install.sh.
-  services.ollama.enable = true;
+  # Ollama server for Pi (see pi/models.json) and Snaply's meeting notes,
+  # kept running in the background. Sign-in for cloud models and the local
+  # model pull happen in scripts/post-install.sh. The default 4K context
+  # silently truncates meeting transcripts, so raise it to fit a long meeting.
+  services.ollama = {
+    enable = true;
+    environmentVariables.OLLAMA_CONTEXT_LENGTH = "32768";
+  };
 
   # Out-of-store symlinks for live-editable configs
   # These configs can be edited without rebuilding

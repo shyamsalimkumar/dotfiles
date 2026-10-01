@@ -559,6 +559,45 @@ if command -v ollama &>/dev/null; then
 fi
 
 # ============================================================================
+# Snaply (https://snaply.ai) - meeting notes with on-device transcription.
+# There's no Homebrew cask, so install the latest DMG from Snaply's own
+# version API (the app updates itself after that). Notes are written by a
+# local Gemma 4 model in Ollama; pointing Snaply at it happens in the app and
+# is printed at the very end.
+# ============================================================================
+snaply_model="gemma4:12b"
+snaply_installed=false
+if [[ "$OS" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+  echo ""
+  echo "==> Setting up Snaply..."
+
+  if [[ -d "/Applications/Snaply.app" ]]; then
+    echo "  ✓ Snaply already installed"
+    snaply_installed=true
+  else
+    snaply_url="$(curl -sf https://snaply.ai/api/version | jq -r '.downloadUrl // empty')"
+    snaply_tmp="$(mktemp -d)"
+    if [[ -n "$snaply_url" ]] && curl -sfL "$snaply_url" -o "$snaply_tmp/Snaply.dmg" &&
+      hdiutil attach -nobrowse -quiet -mountpoint "$snaply_tmp/mnt" "$snaply_tmp/Snaply.dmg"; then
+      ditto "$snaply_tmp/mnt/Snaply.app" /Applications/Snaply.app && snaply_installed=true
+      hdiutil detach -quiet "$snaply_tmp/mnt"
+    fi
+    rm -rf "$snaply_tmp"
+    if $snaply_installed; then
+      echo "  ✓ Installed Snaply"
+    else
+      echo -e "  ${YELLOW}⚠ Failed to install Snaply - download it from https://snaply.ai/download${NC}"
+    fi
+  fi
+
+  if curl -sf http://localhost:11434/api/version &>/dev/null && ollama pull "$snaply_model" &>/dev/null; then
+    echo "  ✓ Model ready: $snaply_model"
+  else
+    echo -e "  ${YELLOW}⚠ Failed to pull $snaply_model - try: ollama pull $snaply_model${NC}"
+  fi
+fi
+
+# ============================================================================
 # Blender MCP (https://github.com/ahujasid/blender-mcp) - Blender itself is a
 # cask in nix/darwin.nix and uv comes from nix/home.nix. Registers the MCP
 # server with Claude Code, the Claude desktop app and Codex, and installs
@@ -674,4 +713,12 @@ if [[ "$blender_mcp_configured" == "true" ]]; then
   echo -e "${YELLOW}  4. Restart the Claude desktop app so it picks up the new MCP server${NC}"
   echo -e "${YELLOW}  If the add-on is missing, open Blender once, then run:${NC}"
   echo -e "${YELLOW}    uvx mcp-for-blender install-addon${NC}"
+fi
+
+if [[ "$snaply_installed" == "true" ]]; then
+  echo ""
+  echo -e "${YELLOW}ACTION NEEDED: Point Snaply's meeting notes at the local Gemma 4 model:${NC}"
+  echo -e "${YELLOW}  1. Open Snaply and finish onboarding (Microphone, Accessibility, System Audio)${NC}"
+  echo -e "${YELLOW}  2. Settings -> Writing Assistant -> AI Models -> OpenAI-compatible endpoint${NC}"
+  echo -e "${YELLOW}  3. Base URL: http://localhost:11434/v1   Model: $snaply_model   API key: (empty)${NC}"
 fi
