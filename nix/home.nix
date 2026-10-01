@@ -62,6 +62,8 @@
     docker
     docker-compose
     k9s
+    kind
+    kubectl
 
     # gRPC & Protobuf
     buf
