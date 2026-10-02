@@ -22,3 +22,14 @@ load-nvmrc() {
 sort_json() {
   jq -S '.' "$1"
 }
+
+# Start Colima the first time docker is used, so it doesn't sit on 8 GB of
+# memory all day. The socket only exists while Colima is running.
+if (( $+commands[colima] )); then
+  _colima_up() {
+    [[ -S "$HOME/.colima/default/docker.sock" ]] || colima start --cpus 4 --memory 8
+  }
+  docker() { _colima_up && command docker "$@"; }
+  docker-compose() { _colima_up && command docker-compose "$@"; }
+  kind() { _colima_up && command kind "$@"; }
+fi
