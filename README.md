@@ -171,7 +171,9 @@ improve-codebase-architecture, tdd, to-tickets, wayfinder, codebase-design,
 teach, and more) and karpathy-guidelines come from the `mattpocock-skills` and
 `andrej-karpathy-skills` Claude Code plugins instead of `npx skills add` — see
 `enabledPlugins` in `claude/settings.json`, installed automatically by
-`scripts/setup-claude.sh` / `scripts/post-install.sh`.
+`scripts/setup-claude.sh` / `scripts/post-install.sh`. Claude Code keeps
+`mattpocock-skills` up to date on its own (`autoUpdate` under
+`extraKnownMarketplaces` in the same file).
 
 [Pi](https://github.com/earendil-works/pi-coding-agent) (`npm-globals.txt`)
 has no plugin/marketplace system, so those same skills are still installed

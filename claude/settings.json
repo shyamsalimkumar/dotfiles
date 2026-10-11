@@ -17,5 +17,14 @@
   },
   "outputStyle": "ELI5",
   "alwaysThinkingEnabled": true,
-  "disableClaudeAiConnectors": true
+  "disableClaudeAiConnectors": true,
+  "extraKnownMarketplaces": {
+    "mattpocock": {
+      "source": {
+        "source": "github",
+        "repo": "mattpocock/skills"
+      },
+      "autoUpdate": true
+    }
+  }
 }
