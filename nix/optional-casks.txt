@@ -22,6 +22,7 @@ google-chrome       # Web browser
 firefox             # Web browser
 handy               # Speech recognition
 shottr              # Screenshot tool
+wordcraft           # Word processor (open-source MS Word alternative)
 
 # Communication
 slack               # Team chat
