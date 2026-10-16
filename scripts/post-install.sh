@@ -559,6 +559,24 @@ if command -v ollama &>/dev/null; then
 fi
 
 # ============================================================================
+# Vorssaint settings - vorssaint/settings.plist is the app's own Settings ->
+# Advanced -> Export, which leaves out machine-specific state. Only applied
+# when Vorssaint has no settings yet, so it never overwrites a running setup.
+# ============================================================================
+vorssaint_settings="$DOTFILES_DIR/vorssaint/settings.plist"
+if [[ "$OS" == "Darwin" && -f "$vorssaint_settings" ]]; then
+  echo ""
+  echo "==> Setting up Vorssaint..."
+  if defaults read com.vorssaint.utils &>/dev/null; then
+    echo "  ✓ Vorssaint already has settings"
+  elif plutil -extract settings xml1 -o - "$vorssaint_settings" | defaults import com.vorssaint.utils -; then
+    echo "  ✓ Restored Vorssaint settings"
+  else
+    echo -e "  ${YELLOW}⚠ Failed to restore Vorssaint settings - import $vorssaint_settings from Settings -> Advanced${NC}"
+  fi
+fi
+
+# ============================================================================
 # Snaply (https://snaply.ai) - meeting notes with on-device transcription.
 # There's no Homebrew cask, so install the latest DMG from Snaply's own
 # version API (the app updates itself after that). Notes are written by a

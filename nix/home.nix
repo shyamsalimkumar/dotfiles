@@ -19,6 +19,7 @@
     zsh-syntax-highlighting
     starship
     tmux
+    herdr           # Agent-aware tmux alternative, trialled alongside tmux
     direnv
     tree
     watchexec
@@ -195,6 +196,9 @@
 
       # kubectl completion
       command -v kubectl &> /dev/null && source <(kubectl completion zsh)
+
+      # herdr completion
+      command -v herdr &> /dev/null && source <(herdr completion zsh)
 
       ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         # Colima Docker configuration
