@@ -28,18 +28,11 @@ fi
 echo "Homebrew ready: $(brew --version)"
 
 if [[ "$OS" == "Darwin" ]]; then
-  # Homebrew refuses to install casks from third-party taps until they're
-  # explicitly trusted. Darwin.nix's homebrew.taps installs vishvavariya/notchy,
-  # so trust it here before nix-darwin's activation tries to install its cask.
-  brew tap vishvavariya/notchy
-  brew trust --taps vishvavariya/notchy
-
-  # Homebrew now warns that HOMEBREW_NO_REQUIRE_TAP_TRUST is deprecated in
-  # favor of the brew trust call above - that fix was tried (see git log)
-  # and the untrusted-tap error came straight back during darwin-rebuild's
-  # root-context brew cleanup, so the underlying root-context trust-store
-  # lookup this env var works around is NOT actually fixed upstream yet.
-  # Deprecated-but-working beats warning-free-but-broken - restored.
+  # Homebrew refuses to install from third-party taps until they're
+  # explicitly trusted, and a per-user `brew trust` didn't reach
+  # darwin-rebuild's root-context brew cleanup (tried, see git log). The
+  # HOMEBREW_NO_REQUIRE_TAP_TRUST env var is deprecated but still works, and
+  # deprecated-but-working beats warning-free-but-broken.
   sudo mkdir -p /etc/homebrew
   if ! grep -q "^HOMEBREW_NO_REQUIRE_TAP_TRUST=" /etc/homebrew/brew.env 2>/dev/null; then
     echo "HOMEBREW_NO_REQUIRE_TAP_TRUST=1" | sudo tee -a /etc/homebrew/brew.env >/dev/null

@@ -17,8 +17,7 @@ chatgpt             # ChatGPT desktop app
 antigravity-cli     # Google's AI coding CLI
 
 # Productivity & Utilities
-notchy              # Dynamic Island for macOS
-vorssaint           # Menu bar toolkit with a Dynamic Island (trying as a Notchy replacement)
+vorssaint           # Menu bar toolkit with a Dynamic Island
 google-chrome       # Web browser
 firefox             # Web browser
 handy               # Speech recognition

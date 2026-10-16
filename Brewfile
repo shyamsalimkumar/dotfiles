@@ -1,7 +1,6 @@
 # Taps
 tap "derailed/k9s"
 tap "homeport/tap"
-tap "vishvavariya/notchy"
 
 # Editors
 brew "fd"
