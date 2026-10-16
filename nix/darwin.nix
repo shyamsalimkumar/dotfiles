@@ -62,7 +62,6 @@ in
     taps = [
       "derailed/k9s"
       "homeport/tap"
-      "vishvavariya/notchy"
     ];
 
     # Homebrew packages (formulae) not available in nixpkgs

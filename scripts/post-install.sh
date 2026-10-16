@@ -678,7 +678,6 @@ if [[ "$OS" == "Darwin" ]]; then
   echo -e "${YELLOW}NOTE: If you see Homebrew tap trust warnings, you may need to manually trust taps:${NC}"
   echo -e "${YELLOW}  brew trust --tap derailed/k9s${NC}"
   echo -e "${YELLOW}  brew trust --tap homeport/tap${NC}"
-  echo -e "${YELLOW}  brew trust --tap vishvavariya/notchy${NC}"
 
   # Xcode has no cask and can't be installed via Nix - Apple only distributes
   # it via the App Store / developer.apple.com and doesn't allow third-party
