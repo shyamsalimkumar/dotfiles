@@ -459,7 +459,7 @@ fi
 # file if the name collides.
 # ============================================================================
 plugin_skill_names="$(find "$HOME/.claude/plugins/marketplaces"/*/skills -iname "SKILL.md" 2>/dev/null \
-  | xargs -n1 dirname 2>/dev/null | xargs -n1 basename 2>/dev/null | sort -u)"
+  | sed -e 's#/[^/]*$##' -e 's#.*/##' | sort -u)"
 
 claude_agents_skills_dir="$HOME/.agents/skills"
 if [[ -d "$claude_agents_skills_dir" ]]; then

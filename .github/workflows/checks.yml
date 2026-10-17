@@ -1,0 +1,32 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: shellcheck
+        run: shellcheck -S warning $(git ls-files '*.sh' install.sh)
+      - name: JSON is valid
+        run: git ls-files '*.json' | xargs -I{} jq empty {}
+
+  darwin:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - name: Build the nix-darwin config
+        run: nix build --impure --no-link ./nix#darwinConfigurations.mac.system
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - name: Build the home-manager config
+        run: nix build --impure --no-link ./nix#homeConfigurations.linux.activationPackage
