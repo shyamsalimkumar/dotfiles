@@ -41,8 +41,8 @@ if [[ -n "$AI_AGENT" && -x /usr/bin/trash ]]; then
         *) [[ -e "$arg" || -L "$arg" ]] && files+=("$arg") || $force || { echo "rm: $arg: No such file or directory" >&2; return 1; } ;;
       esac
     done
-    (( ${#files} )) && /usr/bin/trash -- "${files[@]}"
-    return 0
+    (( ${#files} )) || return 0
+    /usr/bin/trash "${files[@]}"
   }
 elif [[ -z "$AI_AGENT" ]]; then
   alias rm="rm -i"
