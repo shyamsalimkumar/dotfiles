@@ -11,6 +11,10 @@ echo -e "${YELLOW}Rebuilding Darwin configuration...${NC}"
 # Get the directory containing this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# shellcheck source=nix/pick-branch.sh
+source "$SCRIPT_DIR/pick-branch.sh"
+pick_branch "$SCRIPT_DIR"
+
 # Rebuild
 # --impure lets darwin.nix and work-profiles.nix read per-machine files outside
 # the flake (~/.config/dotfiles, local.nix) - pure evaluation treats them as missing.

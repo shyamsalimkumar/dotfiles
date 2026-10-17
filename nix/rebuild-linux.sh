@@ -11,6 +11,10 @@ echo -e "${YELLOW}Rebuilding home-manager configuration...${NC}"
 # Get the directory containing this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# shellcheck source=nix/pick-branch.sh
+source "$SCRIPT_DIR/pick-branch.sh"
+pick_branch "$SCRIPT_DIR"
+
 # Rebuild
 home-manager switch -b backup --flake "$SCRIPT_DIR#linux"
 
