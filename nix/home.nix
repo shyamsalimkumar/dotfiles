@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   # Home Manager state version
@@ -330,10 +330,11 @@
     ".config/tmux".source = ../tmux/.config/tmux;
 
     # Claude settings and skills
-    # Note: settings.json is NOT symlinked here - the `claude` CLI itself
-    # writes to it at runtime (installed plugins, marketplaces), which a
-    # read-only Nix store symlink would block. scripts/post-install.sh
-    # seeds it once as a real, writable file instead.
+    # The claude CLI writes to settings.json at runtime (plugins, permissions),
+    # so it links straight to the repo file rather than a read-only store copy.
+    # Those writes show up as changes in the repo.
+    ".claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/Projects/github.com/shyamsalimkumar/dotfiles/claude/settings.json";
     ".claude/keybindings.json".source = ../claude/keybindings.json;
     ".claude/skills".source = ../claude/skills;
     ".claude/agents".source = ../claude/agents;

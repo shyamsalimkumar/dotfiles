@@ -387,18 +387,23 @@ if command -v uvx &>/dev/null; then
 fi
 
 # ============================================================================
-# Claude settings.json (real writable file, not a Nix-managed symlink -
-# the claude CLI needs to write to it for plugin/marketplace state)
+# AI_AGENT for Codex - zsh/aliases.personal gives agents an rm that moves
+# files to the Trash. Claude Code sets AI_AGENT itself and the pi() wrapper
+# sets it for Pi; Codex needs it in its own (app-managed) config.toml.
 # ============================================================================
-mkdir -p "$HOME/.claude"
-# Remove a leftover read-only Nix-managed symlink from before this file was
-# excluded from home.nix's home.file, if one is still there.
-[[ -L "$HOME/.claude/settings.json" ]] && rm "$HOME/.claude/settings.json"
-if [[ ! -e "$HOME/.claude/settings.json" ]]; then
+codex_config="$HOME/.codex/config.toml"
+if command -v codex &>/dev/null; then
   echo ""
-  echo "==> Seeding ~/.claude/settings.json..."
-  cp "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json"
-  echo "  ✓ Created ~/.claude/settings.json"
+  echo "==> Setting AI_AGENT for Codex..."
+  if grep -q '^AI_AGENT' "$codex_config" 2>/dev/null; then
+    echo "  ✓ Codex already sets AI_AGENT"
+  elif grep -q '^\[shell_environment_policy' "$codex_config" 2>/dev/null; then
+    echo -e "  ${YELLOW}⚠ $codex_config has its own shell_environment_policy - add AI_AGENT = \"1\" to its set table${NC}"
+  else
+    mkdir -p "$HOME/.codex"
+    printf '\n[shell_environment_policy.set]\nAI_AGENT = "1"\n' >> "$codex_config"
+    echo "  ✓ Codex now sets AI_AGENT"
+  fi
 fi
 
 # ============================================================================

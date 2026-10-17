@@ -4,10 +4,12 @@
     "pr": ""
   },
   "permissions": {
-    "allow": [],
+    "allow": [
+      "Edit(~/Projects/github.com/shyamsalimkumar/*/worktrees/**)"
+    ],
     "deny": [],
     "ask": [],
-    "defaultMode": "plan"
+    "defaultMode": "auto"
   },
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
@@ -25,6 +27,20 @@
         "repo": "mattpocock/skills"
       },
       "autoUpdate": true
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
     }
+  },
+  "theme": "dark",
+  "agentPushNotifEnabled": true,
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Editing, creating or deleting files inside a worktrees/ folder under ~/Projects/github.com/shyamsalimkumar/ (these are temporary agent working copies on their own branch, never a main checkout)"
+    ]
   }
 }

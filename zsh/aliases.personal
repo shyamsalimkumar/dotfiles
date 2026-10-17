@@ -27,10 +27,28 @@ alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset
 alias Projects="cd ~/Projects"
 alias github="cd ~/Projects/github.com"
 
-# Safety
-alias rm="rm -i"
-alias cp="cp -i"
-alias mv="mv -i"
+# Safety. Agents can't answer -i prompts, so when AI_AGENT is set (by Claude
+# Code itself, Codex's config.toml, or the pi() wrapper below) rm moves files
+# to the Trash instead, where a mistake can be undone, and cp/mv don't ask.
+if [[ -n "$AI_AGENT" && -x /usr/bin/trash ]]; then
+  rm() {
+    local arg force=false
+    local -a files
+    for arg in "$@"; do
+      case "$arg" in
+        --) ;;
+        -*) [[ "$arg" == *f* ]] && force=true ;;
+        *) [[ -e "$arg" || -L "$arg" ]] && files+=("$arg") || $force || { echo "rm: $arg: No such file or directory" >&2; return 1; } ;;
+      esac
+    done
+    (( ${#files} )) && /usr/bin/trash -- "${files[@]}"
+    return 0
+  }
+elif [[ -z "$AI_AGENT" ]]; then
+  alias rm="rm -i"
+  alias cp="cp -i"
+  alias mv="mv -i"
+fi
 
 # pi runs on the Node its nvm alias points at (set by scripts/setup-ai-tools.sh
 # from pi's own engines.node requirement), whatever the default Node is.
@@ -38,7 +56,7 @@ pi() {
   local nvm_dir="${NVM_DIR:-$HOME/.nvm}"
   local pi_bin="$nvm_dir/versions/node/$(cat "$nvm_dir/alias/pi" 2>/dev/null)/bin"
   if [[ -x "$pi_bin/pi" ]]; then
-    "$pi_bin/node" "$pi_bin/pi" "$@"
+    AI_AGENT=1 "$pi_bin/node" "$pi_bin/pi" "$@"
   else
     echo "pi: no Node found for the 'pi' nvm alias - re-run scripts/setup-ai-tools.sh" >&2
     return 1
