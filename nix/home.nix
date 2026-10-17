@@ -19,7 +19,6 @@
     zsh-syntax-highlighting
     starship
     tmux
-    herdr           # Agent-aware tmux alternative, trialled alongside tmux
     direnv
     tree
     watchexec
@@ -106,6 +105,7 @@
     openssh
   ]
   ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+    herdr           # Agent-aware tmux alternative, trialled alongside tmux (fails to build on Linux)
     xcodegen        # Generates Xcode projects from project.yml
   ]
   ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
