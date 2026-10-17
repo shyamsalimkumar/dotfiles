@@ -105,6 +105,9 @@
     gnupg
     openssh
   ]
+  ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+    xcodegen        # Generates Xcode projects from project.yml
+  ]
   ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     claude-code
   ];
