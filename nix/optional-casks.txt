@@ -21,7 +21,6 @@ vorssaint           # Menu bar toolkit with a Dynamic Island
 google-chrome       # Web browser
 firefox             # Web browser
 handy               # Speech recognition
-openwhispr          # Dictation and meeting notes, local models (open-source)
 shottr              # Screenshot tool
 wordcraft           # Word processor (open-source MS Word alternative)
 stirling-pdf        # Local PDF toolkit (merge, split, PDF to image, OCR)
