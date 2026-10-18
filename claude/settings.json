@@ -5,7 +5,8 @@
   },
   "permissions": {
     "allow": [
-      "Edit(~/Projects/github.com/shyamsalimkumar/*/worktrees/**)"
+      "Edit(~/Projects/github.com/shyamsalimkumar/*/worktrees/**)",
+      "Bash(gh pr merge:*)"
     ],
     "deny": [],
     "ask": [],
