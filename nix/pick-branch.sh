@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Sourced by rebuild.sh and rebuild-linux.sh before they build.
 # Builds normally come from the latest master. If this checkout is on another
 # branch, or its master is behind origin/master, ask whether to build what's
