@@ -92,6 +92,10 @@
     # Utilities
     htop
     imagemagick
+    poppler-utils   # pdftotext / pdftoppm, which Claude's PDF reading needs
+    shellcheck      # Same lint CI runs, so it fails before the PR instead of after
+    # Libraries agents' one-off scripts keep reaching for (image edits, YAML, PDFs)
+    (python3.withPackages (ps: with ps; [ pillow pyyaml pypdf ]))
     yt-dlp
     gawk
     ghostscript
@@ -257,6 +261,8 @@
     ignores = [
       # Claude desktop app session worktrees
       ".claude/worktrees/"
+      # Worktrees agents make themselves (see home/AGENTS.md)
+      "worktrees/"
     ];
 
     settings = {
@@ -373,6 +379,20 @@
   // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
     "Library/Application Support/Code/User/settings.json".source = ../vscode/settings.json;
     "Library/Application Support/Code/User/keybindings.json".source = ../vscode/keybindings.json;
+
+    # Nix's fontconfig ships no config on macOS, so Nix tools (ImageMagick)
+    # can't find any font by name. Point it at the system font folders.
+    ".config/fontconfig/fonts.conf".text = ''
+      <?xml version="1.0"?>
+      <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+      <fontconfig>
+        <dir>/System/Library/Fonts</dir>
+        <dir>/Library/Fonts</dir>
+        <dir>~/Library/Fonts</dir>
+        <dir prefix="xdg">fonts</dir>
+        <cachedir prefix="xdg">fontconfig</cachedir>
+      </fontconfig>
+    '';
   }
   // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
     ".config/Code/User/settings.json".source = ../vscode/settings.json;

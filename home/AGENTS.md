@@ -21,7 +21,7 @@ Ask when requirements conflict, the choice is architectural or hard to reverse, 
 
 ## Git
 - Commit messages and PR descriptions carry no AI attribution (no Co-Authored-By, no "Generated with").
-- Create worktrees at `./worktrees/<branch-name>` inside the repo; first add `worktrees/` to `.gitignore` if it is missing.
+- A session the desktop app already started in a worktree (`.claude/worktrees/...`) works there and makes no second one. A worktree you create yourself goes at `./worktrees/<branch-name>` inside the repo (git-ignored globally).
 
 ## Writing
 Use a single dash (-), comma or semicolon where an em dash would go; never write em dashes.
