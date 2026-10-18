@@ -31,4 +31,5 @@ whatsapp            # Messaging
 
 # Media & Creative
 blender             # 3D creation suite
+comfy               # AI image, 3D and sound generator (ComfyUI)
 spotify             # Music
