@@ -584,11 +584,12 @@ fi
 # ============================================================================
 # Snaply (https://snaply.ai) - meeting notes with on-device transcription.
 # There's no Homebrew cask, so install the latest DMG from Snaply's own
-# version API (the app updates itself after that). Notes are written by a
-# local Gemma 4 model in Ollama; pointing Snaply at it happens in the app and
-# is printed at the very end.
+# version API (the app updates itself after that). Notes are written by
+# Gemma 4 E4B in Ollama, the same model Snaply would otherwise download as its
+# own 5 GB copy, so one copy serves Snaply and any other local app (OpenWhispr).
+# Pointing Snaply at it happens in the app and is printed at the very end.
 # ============================================================================
-snaply_model="gemma4:12b"
+snaply_model="gemma4:e4b"
 snaply_installed=false
 if [[ "$OS" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
   echo ""
@@ -743,4 +744,5 @@ if [[ "$snaply_installed" == "true" ]]; then
   echo -e "${YELLOW}  1. Open Snaply and finish onboarding (Microphone, Accessibility, System Audio)${NC}"
   echo -e "${YELLOW}  2. Settings -> Writing Assistant -> AI Models -> OpenAI-compatible endpoint${NC}"
   echo -e "${YELLOW}  3. Base URL: http://localhost:11434/v1   Model: $snaply_model   API key: (empty)${NC}"
+  echo -e "${YELLOW}  4. Delete Snaply's built-in Gemma model in its AI Models list, so it isn't stored twice${NC}"
 fi
