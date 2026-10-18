@@ -166,6 +166,11 @@ npx skills add anthropics/skills --skill skill-creator -g
 npx skills add kunchenguid/lavish-axi --skill lavish -g
 ```
 
+Squoosh (image resize, compress and convert) has no Mac app, so add it
+as a web app: open https://squoosh.app in Safari, then **File > Add to
+Dock**. It works offline and images never leave the Mac. Stirling PDF
+(`nix/optional-casks.txt`) covers PDFs.
+
 Matt Pocock's skills (grill-me, grill-with-docs, handoff, implement,
 improve-codebase-architecture, tdd, to-tickets, wayfinder, codebase-design,
 teach, and more) and karpathy-guidelines come from the `mattpocock-skills` and
