@@ -210,6 +210,10 @@
       ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         # Colima Docker configuration
         export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+
+        # Nix's fontconfig has no default config on macOS and never looks in
+        # ~/.config/fontconfig on its own; point it at the file declared below
+        export FONTCONFIG_FILE="$HOME/.config/fontconfig/fonts.conf"
       ''}
 
       # Colorize output
