@@ -8,7 +8,10 @@
       "Edit(~/Projects/github.com/shyamsalimkumar/*/worktrees/**)",
       "Bash(gh pr merge:*)"
     ],
-    "deny": [],
+    "deny": [
+      "Bash(op read:*)",
+      "Bash(op item get:*)"
+    ],
     "ask": [],
     "defaultMode": "auto"
   },
