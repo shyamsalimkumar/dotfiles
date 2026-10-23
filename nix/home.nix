@@ -187,6 +187,12 @@
         # Homebrew path (for packages not in Nix)
         export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
+        # Apple's /etc/ssl/cert.pem (used by /usr/bin/curl, /usr/bin/python3)
+        # lags Mozilla's distrust actions, e.g. it still trusted the eMudhra
+        # intermediates in Oct 2026. Use the plain server-auth bundle: LibreSSL
+        # ignores the distrust bits in nix-darwin's TRUSTED CERTIFICATE bundle.
+        export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-no-trust-rules-bundle.crt"
+
         # gcloud SDK path (if installed via Homebrew)
         if [ -f "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc" ]; then
           source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
