@@ -349,7 +349,10 @@
     ".claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink
       "${config.home.homeDirectory}/Projects/github.com/shyamsalimkumar/dotfiles/claude/settings.json";
     ".claude/keybindings.json".source = ../claude/keybindings.json;
-    ".claude/skills".source = ../claude/skills;
+    # Skills from `npx skills add` are git-ignored symlinks in claude/skills/,
+    # which a flake's store copy leaves out, so link the live repo folder.
+    ".claude/skills".source = config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/Projects/github.com/shyamsalimkumar/dotfiles/claude/skills";
     ".claude/agents".source = ../claude/agents;
     ".claude/commands".source = ../claude/commands;
     ".claude/hooks".source = ../claude/hooks;
