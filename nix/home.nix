@@ -310,6 +310,13 @@
         command = "${pkgs.gitleaks}/bin/gitleaks git --pre-commit --staged --redact --verbose --no-banner --log-level warn";
       };
 
+      # Nix git's osxkeychain helper is ad-hoc signed and its store path changes on
+      # every git update, so the keychain re-prompts for "Always Allow" each time.
+      # gh keeps its token behind Apple's /usr/bin/security, which never re-prompts.
+      # The empty entry drops the inherited osxkeychain helper for these hosts.
+      credential."https://github.com".helper = [ "" "!${pkgs.gh}/bin/gh auth git-credential" ];
+      credential."https://gist.github.com".helper = [ "" "!${pkgs.gh}/bin/gh auth git-credential" ];
+
       alias = {
         pretty-graph = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%w(0,4,4)%+b' --abbrev-commit";
       };
