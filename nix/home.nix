@@ -302,6 +302,14 @@
       merge.conflictstyle = "diff3";
       diff.colorMoved = "default";
 
+      # Config-based hook (git >= 2.54): scans staged changes for secrets in every
+      # repo and runs alongside each repo's own hooks, unlike core.hooksPath.
+      # Opt a repo out with `git config hook.gitleaks.enabled false`.
+      hook.gitleaks = {
+        event = "pre-commit";
+        command = "${pkgs.gitleaks}/bin/gitleaks git --pre-commit --staged --redact --verbose --no-banner --log-level warn";
+      };
+
       alias = {
         pretty-graph = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%w(0,4,4)%+b' --abbrev-commit";
       };
