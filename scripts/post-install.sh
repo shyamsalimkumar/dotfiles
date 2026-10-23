@@ -455,9 +455,9 @@ fi
 # Claude skills - reconcile skills installed via `npx skills add ... -g` (see
 # README "Manual step") into claude/skills/. That installer isn't reliably
 # leaving the symlink in place, so treat ~/.agents/skills as the source of
-# truth and self-heal here on every run. claude/skills/ is Nix-managed as a
-# single directory symlink (see nix/home.nix), so linking happens inside the
-# repo itself, not directly under ~/.claude/skills. Skills already provided
+# truth and self-heal here on every run. ~/.claude/skills links straight to
+# claude/skills/ (see nix/home.nix), so linking happens inside the repo
+# itself, not directly under ~/.claude/skills. Skills already provided
 # by a Claude Code plugin (mattpocock-skills, andrej-karpathy-skills) are
 # skipped - claude/skills/ is a tracked working tree, and duplicating a
 # plugin skill there both fights the plugin and risks clobbering a tracked

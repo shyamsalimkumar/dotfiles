@@ -164,6 +164,7 @@ npx skills add vercel-labs/agent-skills
 # npx skills add vercel-labs/skills@find-skills
 npx skills add anthropics/skills --skill skill-creator -g
 npx skills add kunchenguid/lavish-axi --skill lavish -g
+npx skills add cloudflare/security-audit-skill --skill security-audit -g
 ```
 
 Squoosh (image resize, compress and convert) has no Mac app, so add it
