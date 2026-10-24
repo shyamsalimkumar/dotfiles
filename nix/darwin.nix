@@ -74,7 +74,7 @@ in
       "trurl"       # URL tool
 
       # macOS-specific formulae
-      "colima"      # Docker runtime for macOS (started on first docker call, see zsh/functions.personal)
+      "colima"      # Docker runtime for macOS (started on first docker call, see the shims in nix/home.nix)
       "dockutil"    # Dock management
     ];
 

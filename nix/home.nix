@@ -112,6 +112,18 @@
     herdr           # Agent-aware tmux alternative, trialled alongside tmux (fails to build on Linux)
     xcodegen        # Generates Xcode projects from project.yml
   ]
+  # Start Colima the first time docker is used, so it doesn't sit on 8 GB of
+  # memory all day. These shadow the real binaries on PATH (unlike a zsh
+  # function), so scripts, editors, agents and kind start it too. Colima runs
+  # docker itself while starting, hence the guard against recursing.
+  ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin (map
+    (bin: lib.hiPrio (writeShellScriptBin bin.name ''
+      if [ -z "''${COLIMA_STARTING:-}" ] && [ ! -S "$HOME/.colima/default/docker.sock" ]; then
+        COLIMA_STARTING=1 /opt/homebrew/bin/colima start --cpus 4 --memory 8 >&2 || exit
+      fi
+      exec ${bin.pkg}/bin/${bin.name} "$@"
+    ''))
+    [ { name = "docker"; pkg = docker; } { name = "docker-compose"; pkg = docker-compose; } ])
   ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     claude-code
   ];
