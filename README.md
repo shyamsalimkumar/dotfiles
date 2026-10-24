@@ -155,6 +155,51 @@ background, and `pi/models.json` points Pi at it. Pi's default model
 `scripts/post-install.sh` asks you to sign in to ollama.com and pulls the
 model. To sign in later, run `ollama signin`.
 
+## iOS sideloading
+
+Apps you build yourself and install with a free Apple ID stop opening after
+7 days, when their signing runs out. `ios-resign` (`helpers/personal/`)
+rebuilds and reinstalls each app before that, using only Xcode,
+`xcodebuild`, `xcrun devicectl` and `launchd`. It skips apps with more than
+3 days left, and deletes the old profile first so Xcode really makes a new
+7-day one.
+
+Your phone's UDID and app paths stay out of git, in
+`~/.config/dotfiles/ios-resign.conf`. Run `ios-resign` once to create it,
+then `ios-resign devices` to find the UDID:
+
+```
+device <UDID>
+app <Scheme> /absolute/path/to/MyApp.xcodeproj
+```
+
+| Command | Does |
+|---|---|
+| `ios-resign` / `ios-resign run [--force]` | Refresh every app in the config |
+| `ios-resign devices` | List phones with name and UDID |
+| `ios-resign install-timer` | Run daily at 10:00 via launchd (logs to `~/Library/Logs/ios-resign.log`) |
+| `ios-resign uninstall-timer` | Remove the daily job |
+| `ios-resign status` | Timer state, last log lines, each app's expiry |
+
+`scripts/post-install.sh` asks once whether to install the timer (default
+No). To be asked again, delete `~/.config/dotfiles/ios-resign-timer`.
+
+One-time setup:
+
+1. In Xcode, **Settings → Accounts**, add your free Apple ID.
+2. In each app, under **Signing & Capabilities**, pick your "Personal Team"
+   and give it a unique bundle ID.
+3. Plug the phone in once, trust the Mac, and turn on **Developer Mode**
+   (**Settings → Privacy & Security**).
+4. For Wi-Fi refresh: in Xcode, **Window → Devices and Simulators**, tick
+   **Connect via network**.
+5. After the first install, on the phone, **Settings → General → VPN &
+   Device Management**, trust the developer.
+
+Limits: up to 3 sideloaded apps at once, and about 10 new app IDs per 7 days
+(so don't keep changing bundle IDs). The Mac must be awake some time each
+day, with the phone plugged in or on the same Wi-Fi.
+
 ## Manual step
 
 ```bash

@@ -1,0 +1,379 @@
+#!/usr/bin/env bash
+# Keep self-built iOS apps alive on a phone signed with a free Apple ID.
+# Free provisioning profiles expire after 7 days, so this rebuilds and
+# reinstalls each app before that happens. The phone's UDID and the app
+# project paths live only in ~/.config/dotfiles/ios-resign.conf (untracked).
+#
+# Runs from launchd too, which means a minimal PATH and macOS /bin/bash 3.2:
+# no mapfile, no associative arrays.
+
+set -euo pipefail
+
+# System tools first: GNU coreutils from Nix would break `date -j` and friends.
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+CONFIG_DIR="$HOME/.config/dotfiles"
+CONFIG_FILE="$CONFIG_DIR/ios-resign.conf"
+LABEL="dotfiles.ios-resign"
+PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+LOG_FILE="$HOME/Library/Logs/ios-resign.log"
+CACHE_DIR="$HOME/Library/Caches/ios-resign"
+PROFILE_DIRS=(
+  "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
+  "$HOME/Library/MobileDevice/Provisioning Profiles"
+)
+REFRESH_WHEN_DAYS_LEFT=3
+
+warn() {
+  echo -e "  ${YELLOW}⚠ $*${NC}"
+}
+
+usage() {
+  cat <<EOF
+Usage: ios-resign [command]
+
+  run [--force]     Refresh every app in the config (default command)
+  devices           List connected phones with name and UDID
+  install-timer     Run 'ios-resign run' daily via launchd
+  uninstall-timer   Remove the launchd job
+  status            Timer state, last log lines, each app's profile expiry
+
+Config: $CONFIG_FILE
+EOF
+}
+
+# ----------------------------------------------------------------------------
+# Config
+# ----------------------------------------------------------------------------
+write_config_template() {
+  mkdir -p "$CONFIG_DIR"
+  cat > "$CONFIG_FILE" <<'EOF'
+# ios-resign config - not tracked in git. One item per line, # for comments.
+# Find your phone's UDID with: ios-resign devices
+#
+# device <UDID>
+# app <Scheme> /absolute/path/to/MyApp.xcodeproj
+# app <Scheme> /absolute/path/to/Other.xcworkspace
+#
+# Both the scheme name and the path may contain spaces; the path must be absolute.
+# app My App /Users/me/Projects/My App/MyApp.xcodeproj
+EOF
+}
+
+# Writes the template when the config is missing; returns 1 in that case.
+ensure_config() {
+  [[ -f "$CONFIG_FILE" ]] && return 0
+  write_config_template
+  echo "==> Created $CONFIG_FILE"
+  echo "  Fill in your phone's UDID (see: ios-resign devices) and your apps, then re-run."
+  return 1
+}
+
+DEVICE=""
+APP_SCHEMES=()
+APP_PATHS=()
+
+load_config() {
+  local keyword first rest
+  while read -r keyword first rest || [[ -n "$keyword" ]]; do
+    case "$keyword" in
+      "" | \#*) ;;
+      device) DEVICE="$first" ;;
+      app)
+        # The path is everything from the first " /", so schemes may have spaces.
+        rest="$first $rest"
+        APP_SCHEMES+=("${rest%% /*}")
+        APP_PATHS+=("/${rest#* /}")
+        ;;
+      *) warn "Ignoring unknown line in $CONFIG_FILE: $keyword $first $rest" ;;
+    esac
+  done < "$CONFIG_FILE"
+
+  if [[ -z "$DEVICE" ]]; then
+    warn "No 'device <UDID>' line in $CONFIG_FILE (see: ios-resign devices)"
+    return 1
+  fi
+  if [[ ${#APP_SCHEMES[@]} -eq 0 ]]; then
+    warn "No 'app <Scheme> <path>' lines in $CONFIG_FILE"
+    return 1
+  fi
+}
+
+# ----------------------------------------------------------------------------
+# Xcode project helpers
+# ----------------------------------------------------------------------------
+project_flag() {
+  case "$1" in
+    *.xcworkspace) echo "-workspace" ;;
+    *.xcodeproj) echo "-project" ;;
+    *) return 1 ;;
+  esac
+}
+
+# Sets BUNDLE_ID, TARGET_BUILD_DIR and WRAPPER_NAME from the scheme's first
+# .app target (extensions in the same scheme are .appex and get skipped).
+read_build_settings() {
+  local scheme="$1" path="$2" flag settings
+  flag="$(project_flag "$path")" || {
+    warn "$path is not an .xcodeproj or .xcworkspace"
+    return 1
+  }
+  settings="$(xcodebuild "$flag" "$path" -scheme "$scheme" -configuration Debug \
+    -destination "id=$DEVICE" -derivedDataPath "$CACHE_DIR/$scheme" \
+    -showBuildSettings 2>/dev/null)" || {
+    warn "Couldn't read build settings for $scheme ($path)"
+    return 1
+  }
+  # Build settings come in one block per target; keep the first .app block.
+  settings="$(awk '
+    /^Build settings for / { if (found) exit; block = ""; next }
+    { block = block $0 "\n" }
+    $1 == "WRAPPER_EXTENSION" && $3 == "app" { found = 1 }
+    END { if (found) printf "%s", block }
+  ' <<< "$settings")"
+  BUNDLE_ID="$(awk '$1 == "PRODUCT_BUNDLE_IDENTIFIER" { print $3; exit }' <<< "$settings")"
+  TARGET_BUILD_DIR="$(sed -n 's/^ *TARGET_BUILD_DIR = //p' <<< "$settings" | head -1)"
+  WRAPPER_NAME="$(sed -n 's/^ *WRAPPER_NAME = //p' <<< "$settings" | head -1)"
+  if [[ -z "$BUNDLE_ID" || -z "$TARGET_BUILD_DIR" || -z "$WRAPPER_NAME" ]]; then
+    warn "No app target found in scheme $scheme"
+    return 1
+  fi
+}
+
+# ----------------------------------------------------------------------------
+# Provisioning profiles
+# ----------------------------------------------------------------------------
+# Prints "<expiry epoch> <bundle id> <file>" for every installed profile.
+list_profiles() {
+  local dir file decoded app_id expiry
+  decoded="$(mktemp)"
+  for dir in "${PROFILE_DIRS[@]}"; do
+    for file in "$dir"/*.mobileprovision; do
+      [[ -f "$file" ]] || continue
+      security cms -D -i "$file" > "$decoded" 2>/dev/null || continue
+      app_id="$(plutil -extract Entitlements.application-identifier raw "$decoded" 2>/dev/null)" || continue
+      expiry="$(plutil -extract ExpirationDate raw "$decoded" 2>/dev/null)" || continue
+      expiry="$(date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$expiry" +%s 2>/dev/null)" || continue
+      echo "$expiry ${app_id#*.} $file"
+    done
+  done
+  rm -f "$decoded"
+}
+
+# Latest expiry (epoch) of a profile for exactly this bundle ID, or nothing.
+profile_expiry() {
+  list_profiles | awk -v id="$1" '$2 == id { print $1 }' | sort -n | tail -1
+}
+
+format_expiry() {
+  local expiry="$1" days
+  days=$(((expiry - $(date +%s)) / 86400))
+  echo "$(date -r "$expiry" '+%Y-%m-%d %H:%M') (${days} days left)"
+}
+
+# The bundle ID itself plus its extensions (bundleid.*). If an old profile is
+# left in place, Xcode reuses it and the reinstall doesn't extend the expiry.
+delete_profiles() {
+  local bundle_id="$1" expiry id file
+  while read -r expiry id file; do
+    if [[ "$id" == "$bundle_id" || "$id" == "$bundle_id".* ]]; then
+      rm -f "$file"
+      echo "  Removed old profile for $id"
+    fi
+  done < <(list_profiles)
+}
+
+# ----------------------------------------------------------------------------
+# Commands
+# ----------------------------------------------------------------------------
+refresh_app() {
+  local scheme="$1" path="$2" force="$3" expiry flag
+  echo ""
+  echo "==> $scheme"
+  read_build_settings "$scheme" "$path" || return 1
+
+  expiry="$(profile_expiry "$BUNDLE_ID")"
+  if [[ -n "$expiry" ]]; then
+    echo "  Current profile expires $(format_expiry "$expiry")"
+    if [[ "$force" != "true" && $((expiry - $(date +%s))) -gt $((REFRESH_WHEN_DAYS_LEFT * 86400)) ]]; then
+      echo "  ✓ More than $REFRESH_WHEN_DAYS_LEFT days left, skipping"
+      return 0
+    fi
+  else
+    echo "  No profile found for $BUNDLE_ID"
+  fi
+
+  delete_profiles "$BUNDLE_ID"
+
+  echo "  Building..."
+  flag="$(project_flag "$path")"
+  if ! xcodebuild "$flag" "$path" -scheme "$scheme" -configuration Debug \
+    -destination "id=$DEVICE" -derivedDataPath "$CACHE_DIR/$scheme" \
+    -allowProvisioningUpdates -allowProvisioningDeviceRegistration -quiet build; then
+    warn "Build failed for $scheme"
+    return 1
+  fi
+
+  echo "  Installing..."
+  if ! xcrun devicectl device install app --device "$DEVICE" "$TARGET_BUILD_DIR/$WRAPPER_NAME"; then
+    warn "Install failed for $scheme"
+    return 1
+  fi
+
+  expiry="$(profile_expiry "$BUNDLE_ID")"
+  if [[ -n "$expiry" ]]; then
+    echo "  ✓ Reinstalled $scheme, profile now expires $(format_expiry "$expiry")"
+  else
+    warn "Reinstalled $scheme, but no new profile was found for $BUNDLE_ID"
+  fi
+}
+
+cmd_run() {
+  local force=false failed=0 i
+  [[ "${1:-}" == "--force" ]] && force=true
+
+  echo "==> ios-resign run, $(date '+%Y-%m-%d %H:%M:%S')"
+  ensure_config || return 0
+  load_config
+
+  if ! xcrun devicectl device info details --device "$DEVICE" --timeout 30 >/dev/null 2>&1; then
+    warn "Phone $DEVICE isn't reachable (plug it in or join the same Wi-Fi). Will try again next run."
+    return 1
+  fi
+  echo "  ✓ Phone reachable"
+
+  for i in "${!APP_SCHEMES[@]}"; do
+    refresh_app "${APP_SCHEMES[$i]}" "${APP_PATHS[$i]}" "$force" || failed=$((failed + 1))
+  done
+
+  echo ""
+  if [[ $failed -gt 0 ]]; then
+    warn "$failed app(s) failed"
+    return 1
+  fi
+  echo "==> Done"
+}
+
+cmd_devices() {
+  local json count i name udid reality state
+  json="$(mktemp)"
+  xcrun devicectl list devices --json-output "$json" >/dev/null
+  count="$(plutil -extract result.devices raw "$json" 2>/dev/null || echo 0)"
+  echo "==> Phones known to this Mac"
+  for ((i = 0; i < count; i++)); do
+    reality="$(plutil -extract "result.devices.$i.hardwareProperties.reality" raw "$json" 2>/dev/null || true)"
+    [[ "$reality" == "physical" ]] || continue
+    name="$(plutil -extract "result.devices.$i.deviceProperties.name" raw "$json" 2>/dev/null || true)"
+    udid="$(plutil -extract "result.devices.$i.hardwareProperties.udid" raw "$json" 2>/dev/null || true)"
+    state="$(plutil -extract "result.devices.$i.connectionProperties.pairingState" raw "$json" 2>/dev/null || true)"
+    echo "  $name  $udid  ($state)"
+  done
+  rm -f "$json"
+  echo ""
+  echo "Add one to $CONFIG_FILE as: device <UDID>"
+}
+
+# The stable path the job runs, e.g. ~/.local/bin/personal/ios-resign - not
+# resolved into the Nix store, so it survives rebuilds.
+script_path() {
+  echo "$(cd "$(dirname "$0")" && pwd -L)/$(basename "$0")"
+}
+
+cmd_install_timer() {
+  echo "==> Installing the ios-resign timer..."
+  mkdir -p "$(dirname "$PLIST")" "$(dirname "$LOG_FILE")"
+  cat > "$PLIST" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>$LABEL</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>$(script_path)</string>
+    <string>run</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>10</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Xcode.app/Contents/Developer/usr/bin</string>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>$LOG_FILE</string>
+  <key>StandardErrorPath</key>
+  <string>$LOG_FILE</string>
+</dict>
+</plist>
+EOF
+  launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
+  launchctl bootstrap "gui/$(id -u)" "$PLIST"
+  echo "  ✓ Runs daily at 10:00 (or when the Mac next wakes), logs to $LOG_FILE"
+  ensure_config || true
+}
+
+cmd_uninstall_timer() {
+  echo "==> Removing the ios-resign timer..."
+  launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
+  rm -f "$PLIST"
+  echo "  ✓ Removed"
+}
+
+cmd_status() {
+  local i expiry
+  echo "==> Timer"
+  if launchctl print "gui/$(id -u)/$LABEL" >/dev/null 2>&1; then
+    echo "  ✓ Loaded ($PLIST)"
+  elif [[ -f "$PLIST" ]]; then
+    warn "$PLIST exists but isn't loaded (run: ios-resign install-timer)"
+  else
+    echo "  Not installed (run: ios-resign install-timer)"
+  fi
+
+  echo ""
+  echo "==> Last log lines ($LOG_FILE)"
+  if [[ -f "$LOG_FILE" ]]; then
+    tail -n 10 "$LOG_FILE" | sed 's/^/  /'
+  else
+    echo "  No log yet"
+  fi
+
+  echo ""
+  echo "==> Apps"
+  ensure_config || return 0
+  load_config
+  for i in "${!APP_SCHEMES[@]}"; do
+    if read_build_settings "${APP_SCHEMES[$i]}" "${APP_PATHS[$i]}"; then
+      expiry="$(profile_expiry "$BUNDLE_ID")"
+      if [[ -n "$expiry" ]]; then
+        echo "  ${APP_SCHEMES[$i]}: expires $(format_expiry "$expiry")"
+      else
+        echo "  ${APP_SCHEMES[$i]}: no profile found"
+      fi
+    fi
+  done
+}
+
+case "${1:-run}" in
+  run) cmd_run "${2:-}" ;;
+  devices) cmd_devices ;;
+  install-timer) cmd_install_timer ;;
+  uninstall-timer) cmd_uninstall_timer ;;
+  status) cmd_status ;;
+  -h | --help | help) usage ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac
