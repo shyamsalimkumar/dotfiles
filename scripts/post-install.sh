@@ -686,6 +686,34 @@ if [[ "$OS" == "Darwin" && -d "/Applications/Blender.app" ]] && command -v uvx &
   fi
 fi
 
+# ============================================================================
+# iOS app auto-refresh - helpers/personal/ios-resign rebuilds and reinstalls
+# self-built apps before their free 7-day signing runs out. The daily launchd
+# timer is opt-in: ask once (default No) and remember a "no" in
+# ~/.config/dotfiles/ios-resign-timer so it isn't asked again.
+# ============================================================================
+if [[ "$OS" == "Darwin" && -d "/Applications/Xcode.app" ]]; then
+  echo ""
+  echo "==> iOS app auto-refresh..."
+  ios_resign_state="$HOME/.config/dotfiles/ios-resign-timer"
+  ios_resign="$HOME/.local/bin/personal/ios-resign"
+  [[ -x "$ios_resign" ]] || ios_resign="$DOTFILES_DIR/helpers/personal/ios-resign"
+
+  if [[ -f "$HOME/Library/LaunchAgents/dotfiles.ios-resign.plist" ]]; then
+    echo "  ✓ iOS app auto-refresh timer installed"
+  elif [[ "$(cat "$ios_resign_state" 2>/dev/null)" == "declined" ]]; then
+    echo "  Skipped (declined before). To be asked again: rm $ios_resign_state"
+  else
+    read -rp "  Set up the iOS app auto-refresh timer? [y/N]: " setup_ios_resign
+    if [[ "$setup_ios_resign" =~ ^[Yy] ]]; then
+      "$ios_resign" install-timer
+    else
+      echo "declined" > "$ios_resign_state"
+      echo "  Skipping. To be asked again: rm $ios_resign_state"
+    fi
+  fi
+fi
+
 echo ""
 echo "==> Post-installation complete!"
 echo ""
