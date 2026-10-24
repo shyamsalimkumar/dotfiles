@@ -518,9 +518,10 @@ if [[ -e "$HOME/.nvm/alias/pi" ]]; then
 fi
 
 # ============================================================================
-# Ollama for Pi - the server runs as a background service (services.ollama in
-# nix/home.nix) and pi/models.json points Pi at it. Pi's default model is an
-# Ollama cloud model, which needs this machine signed in to ollama.com.
+# Ollama for Pi - the server runs as a background service (launchd.user.agents.ollama
+# in nix/darwin.nix, services.ollama in nix/home.nix on Linux) and pi/models.json
+# points Pi at it. Pi's default model is an Ollama cloud model, which needs
+# this machine signed in to ollama.com.
 # ============================================================================
 if command -v ollama &>/dev/null; then
   echo ""
