@@ -166,16 +166,25 @@ rebuilds and reinstalls each app before that, using only Xcode,
 
 Your phone's UDID and app paths stay out of git, in
 `~/.config/dotfiles/ios-resign.conf`. Run `ios-resign` once to create it,
-then `ios-resign devices` to find the UDID:
+then `ios-resign devices` to find the UDID. Add apps with `ios-resign add`
+from inside a project folder:
 
 ```
 device <UDID>
 app <Scheme> /absolute/path/to/MyApp.xcodeproj
+off <Scheme> /absolute/path/to/Other.xcodeproj
 ```
+
+The list can hold any number of apps, but a free Apple ID only allows 3 on
+the phone at once. `app` lines sync, `off` lines are kept but skipped.
+`ios-resign pick` chooses which (up to 3) sync, and offers to remove the
+ones you switch off from the phone, since they still count while installed.
 
 | Command | Does |
 |---|---|
-| `ios-resign` / `ios-resign run [--force]` | Refresh every app in the config |
+| `ios-resign` / `ios-resign run [--force]` | Refresh every synced app |
+| `ios-resign add [path]` | Add the Xcode project in `path` (default: here); synced if there's room, otherwise off |
+| `ios-resign pick` | Choose which apps sync |
 | `ios-resign devices` | List phones with name and UDID |
 | `ios-resign install-timer` | Run daily at 10:00 via launchd (logs to `~/Library/Logs/ios-resign.log`) |
 | `ios-resign uninstall-timer` | Remove the daily job |
@@ -196,7 +205,7 @@ One-time setup:
 5. After the first install, on the phone, **Settings → General → VPN &
    Device Management**, trust the developer.
 
-Limits: up to 3 sideloaded apps at once, and about 10 new app IDs per 7 days
+Limits: up to 3 sideloaded apps on the phone at once, and about 10 new app IDs per 7 days
 (so don't keep changing bundle IDs). The Mac must be awake some time each
 day, with the phone plugged in or on the same Wi-Fi.
 
