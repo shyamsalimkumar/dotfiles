@@ -343,8 +343,10 @@
   # kept running in the background. Sign-in for cloud models and the local
   # model pull happen in scripts/post-install.sh. The default 4K context
   # silently truncates meeting transcripts, so raise it to fit a long meeting.
+  # On macOS the server comes from the ollama-app cask instead (see nix/darwin.nix):
+  # nixpkgs builds Ollama without MLX, which Ollama >= 0.40 needs for Mac models.
   services.ollama = {
-    enable = true;
+    enable = !pkgs.stdenv.hostPlatform.isDarwin;
     environmentVariables.OLLAMA_CONTEXT_LENGTH = "32768";
   };
 
