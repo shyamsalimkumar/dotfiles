@@ -26,6 +26,8 @@ PROFILE_DIRS=(
   "$HOME/Library/MobileDevice/Provisioning Profiles"
 )
 REFRESH_WHEN_DAYS_LEFT=3
+# Free Apple IDs can only have this many self-built apps on a phone at once.
+FREE_APP_LIMIT=3
 
 warn() {
   echo -e "  ${YELLOW}⚠ $*${NC}"
@@ -35,7 +37,9 @@ usage() {
   cat <<EOF
 Usage: ios-resign [command]
 
-  run [--force]     Refresh every app in the config (default command)
+  run [--force]     Refresh every synced app (default command)
+  add [path]        Add the Xcode project in path (default: here) to the config
+  pick              Choose which apps sync (up to $FREE_APP_LIMIT)
   devices           List connected phones with name and UDID
   install-timer     Run 'ios-resign run' daily via launchd
   uninstall-timer   Remove the launchd job
@@ -54,12 +58,15 @@ write_config_template() {
 # ios-resign config - not tracked in git. One item per line, # for comments.
 # Find your phone's UDID with: ios-resign devices
 #
+# Add apps with: ios-resign add. Choose which ones sync with: ios-resign pick.
+#
 # device <UDID>
 # app <Scheme> /absolute/path/to/MyApp.xcodeproj
-# app <Scheme> /absolute/path/to/Other.xcworkspace
+# off <Scheme> /absolute/path/to/Other.xcworkspace
 #
+# 'app' lines are synced, 'off' lines are kept but not synced. A free Apple ID
+# allows 3 self-built apps on a phone at once, so keep at most 3 'app' lines.
 # Both the scheme name and the path may contain spaces; the path must be absolute.
-# app My App /Users/me/Projects/My App/MyApp.xcodeproj
 EOF
 }
 
@@ -75,6 +82,7 @@ ensure_config() {
 DEVICE=""
 APP_SCHEMES=()
 APP_PATHS=()
+APP_ON=() # 1 for 'app' lines (synced), 0 for 'off' lines
 
 load_config() {
   local keyword first rest
@@ -82,11 +90,12 @@ load_config() {
     case "$keyword" in
       "" | \#*) ;;
       device) DEVICE="$first" ;;
-      app)
+      app | off)
         # The path is everything from the first " /", so schemes may have spaces.
         rest="$first $rest"
         APP_SCHEMES+=("${rest%% /*}")
         APP_PATHS+=("/${rest#* /}")
+        if [[ "$keyword" == "app" ]]; then APP_ON+=(1); else APP_ON+=(0); fi
         ;;
       *) warn "Ignoring unknown line in $CONFIG_FILE: $keyword $first $rest" ;;
     esac
@@ -96,10 +105,38 @@ load_config() {
     warn "No 'device <UDID>' line in $CONFIG_FILE (see: ios-resign devices)"
     return 1
   fi
+}
+
+require_apps() {
   if [[ ${#APP_SCHEMES[@]} -eq 0 ]]; then
-    warn "No 'app <Scheme> <path>' lines in $CONFIG_FILE"
+    warn "No apps in $CONFIG_FILE yet (add one with: ios-resign add)"
     return 1
   fi
+}
+
+synced_count() {
+  local i count=0
+  for i in "${!APP_ON[@]}"; do
+    count=$((count + APP_ON[i]))
+  done
+  echo "$count"
+}
+
+# Rewrites each app/off line from APP_ON, keeping comments and order.
+save_app_states() {
+  local tmp line trimmed k=0
+  tmp="$(mktemp)"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    trimmed="${line#"${line%%[![:space:]]*}"}"
+    case "${trimmed%% *}" in
+      app | off)
+        if [[ "${APP_ON[k]}" == 1 ]]; then echo "app ${trimmed#* }"; else echo "off ${trimmed#* }"; fi
+        k=$((k + 1))
+        ;;
+      *) echo "$line" ;;
+    esac
+  done < "$CONFIG_FILE" > "$tmp"
+  mv "$tmp" "$CONFIG_FILE"
 }
 
 # ----------------------------------------------------------------------------
@@ -238,6 +275,11 @@ cmd_run() {
   echo "==> ios-resign run, $(date '+%Y-%m-%d %H:%M:%S')"
   ensure_config || return 0
   load_config
+  require_apps
+  if [[ "$(synced_count)" -eq 0 ]]; then
+    echo "  No apps are switched on (run: ios-resign pick)"
+    return 0
+  fi
 
   if ! xcrun devicectl device info details --device "$DEVICE" --timeout 30 >/dev/null 2>&1; then
     warn "Phone $DEVICE isn't reachable (plug it in or join the same Wi-Fi). Will try again next run."
@@ -245,7 +287,12 @@ cmd_run() {
   fi
   echo "  ✓ Phone reachable"
 
+  if [[ "$(synced_count)" -gt $FREE_APP_LIMIT ]]; then
+    warn "More than $FREE_APP_LIMIT apps are switched on; a free Apple ID can't install them all (run: ios-resign pick)"
+  fi
+
   for i in "${!APP_SCHEMES[@]}"; do
+    [[ "${APP_ON[$i]}" == 1 ]] || continue
     refresh_app "${APP_SCHEMES[$i]}" "${APP_PATHS[$i]}" "$force" || failed=$((failed + 1))
   done
 
@@ -255,6 +302,140 @@ cmd_run() {
     return 1
   fi
   echo "==> Done"
+}
+
+cmd_add() {
+  local target="$1" project="" candidates=() schemes=() list count i scheme
+  ensure_config || true
+  load_config
+
+  if [[ "$target" == *.xcodeproj || "$target" == *.xcworkspace ]]; then
+    project="$target"
+  elif [[ -d "$target" ]]; then
+    # A workspace wins over its project: it also builds CocoaPods/SPM setups.
+    for project in "$target"/*.xcworkspace "$target"/*.xcodeproj; do
+      [[ -d "$project" ]] && candidates+=("$project")
+    done
+    project=""
+    if [[ ${#candidates[@]} -eq 0 ]]; then
+      warn "No .xcodeproj or .xcworkspace in $target"
+      return 1
+    elif [[ ${#candidates[@]} -eq 1 ]]; then
+      project="${candidates[0]}"
+    else
+      echo "==> Which project?"
+      select project in "${candidates[@]}"; do
+        [[ -n "$project" ]] && break
+      done
+    fi
+  fi
+  if [[ ! -d "$project" ]]; then
+    warn "$target is not an Xcode project or a folder with one"
+    return 1
+  fi
+  project="$(cd "$(dirname "$project")" && pwd -P)/$(basename "$project")"
+
+  list="$(mktemp)"
+  if ! xcodebuild -list -json "$(project_flag "$project")" "$project" > "$list" 2>/dev/null; then
+    rm -f "$list"
+    warn "Couldn't list schemes in $project"
+    return 1
+  fi
+  count="$(plutil -extract project.schemes raw "$list" 2>/dev/null ||
+    plutil -extract workspace.schemes raw "$list" 2>/dev/null || echo 0)"
+  for ((i = 0; i < count; i++)); do
+    schemes+=("$(plutil -extract "project.schemes.$i" raw "$list" 2>/dev/null ||
+      plutil -extract "workspace.schemes.$i" raw "$list")")
+  done
+  rm -f "$list"
+
+  if [[ ${#schemes[@]} -eq 0 ]]; then
+    warn "No schemes in $project"
+    return 1
+  elif [[ ${#schemes[@]} -eq 1 ]]; then
+    scheme="${schemes[0]}"
+  else
+    echo "==> Which scheme builds the app?"
+    select scheme in "${schemes[@]}"; do
+      [[ -n "$scheme" ]] && break
+    done
+  fi
+
+  for i in "${!APP_SCHEMES[@]}"; do
+    if [[ "${APP_SCHEMES[$i]}" == "$scheme" && "${APP_PATHS[$i]}" == "$project" ]]; then
+      echo "  ✓ $scheme is already in $CONFIG_FILE"
+      return 0
+    fi
+  done
+
+  read_build_settings "$scheme" "$project" || return 1
+
+  if [[ "$(synced_count)" -lt $FREE_APP_LIMIT ]]; then
+    echo "app $scheme $project" >> "$CONFIG_FILE"
+    echo "  ✓ Added $scheme ($BUNDLE_ID), synced from the next run"
+  else
+    echo "off $scheme $project" >> "$CONFIG_FILE"
+    echo "  ✓ Added $scheme ($BUNDLE_ID), switched off: $FREE_APP_LIMIT apps already sync"
+    echo "  To sync it instead of another one, run: ios-resign pick"
+  fi
+}
+
+cmd_pick() {
+  local total i n picks=() chosen=() was_on=() count=0 remove
+  ensure_config || return 0
+  load_config
+  require_apps
+  total=${#APP_SCHEMES[@]}
+
+  echo "==> Apps (✓ = synced)"
+  for i in "${!APP_SCHEMES[@]}"; do
+    if [[ "${APP_ON[$i]}" == 1 ]]; then echo "  $((i + 1))) ✓ ${APP_SCHEMES[$i]}"; else echo "  $((i + 1)))   ${APP_SCHEMES[$i]}"; fi
+    chosen+=(0)
+    was_on+=("${APP_ON[$i]}")
+  done
+  echo ""
+  read -r -a picks -p "  Numbers to sync, up to $FREE_APP_LIMIT (e.g. 1 3), or Enter to keep: "
+  [[ ${#picks[@]} -eq 0 ]] && return 0
+
+  for n in "${picks[@]}"; do
+    if [[ ! "$n" =~ ^[0-9]+$ ]] || [[ $((10#$n)) -lt 1 || $((10#$n)) -gt $total ]]; then
+      warn "$n isn't one of the numbers above, nothing changed"
+      return 1
+    fi
+    n=$((10#$n))
+    [[ "${chosen[n - 1]}" == 1 ]] && continue
+    chosen[n - 1]=1
+    count=$((count + 1))
+  done
+  if [[ $count -gt $FREE_APP_LIMIT ]]; then
+    warn "That's $count apps; a free Apple ID allows $FREE_APP_LIMIT. Nothing changed."
+    return 1
+  fi
+
+  for i in "${!APP_SCHEMES[@]}"; do
+    APP_ON[i]="${chosen[i]}"
+  done
+  save_app_states
+  echo "  ✓ Saved"
+
+  # Switched-off apps still count toward the limit while installed.
+  for i in "${!APP_SCHEMES[@]}"; do
+    [[ "${was_on[i]}" == 1 && "${chosen[i]}" == 0 ]] || continue
+    read -rp "  Remove ${APP_SCHEMES[$i]} from the phone now? Its data on the phone goes too. [y/N]: " remove
+    [[ "$remove" =~ ^[Yy] ]] || continue
+    if read_build_settings "${APP_SCHEMES[$i]}" "${APP_PATHS[$i]}" &&
+      xcrun devicectl device uninstall app --device "$DEVICE" "$BUNDLE_ID" >/dev/null; then
+      echo "  ✓ Removed ${APP_SCHEMES[$i]} from the phone"
+    else
+      warn "Couldn't remove ${APP_SCHEMES[$i]}; delete it on the phone yourself"
+    fi
+  done
+
+  for i in "${!APP_SCHEMES[@]}"; do
+    if [[ "${was_on[i]}" == 0 && "${chosen[i]}" == 1 ]]; then
+      echo "  ${APP_SCHEMES[$i]} installs on the next run (or now: ios-resign run)"
+    fi
+  done
 }
 
 cmd_devices() {
@@ -353,8 +534,11 @@ cmd_status() {
   echo "==> Apps"
   ensure_config || return 0
   load_config
+  require_apps
   for i in "${!APP_SCHEMES[@]}"; do
-    if read_build_settings "${APP_SCHEMES[$i]}" "${APP_PATHS[$i]}"; then
+    if [[ "${APP_ON[$i]}" == 0 ]]; then
+      echo "  ${APP_SCHEMES[$i]}: off (not synced)"
+    elif read_build_settings "${APP_SCHEMES[$i]}" "${APP_PATHS[$i]}"; then
       expiry="$(profile_expiry "$BUNDLE_ID")"
       if [[ -n "$expiry" ]]; then
         echo "  ${APP_SCHEMES[$i]}: expires $(format_expiry "$expiry")"
@@ -367,6 +551,8 @@ cmd_status() {
 
 case "${1:-run}" in
   run) cmd_run "${2:-}" ;;
+  add) cmd_add "${2:-.}" ;;
+  pick) cmd_pick ;;
   devices) cmd_devices ;;
   install-timer) cmd_install_timer ;;
   uninstall-timer) cmd_uninstall_timer ;;
