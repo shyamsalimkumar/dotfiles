@@ -586,6 +586,37 @@ if [[ "$OS" == "Darwin" && -f "$vorssaint_settings" ]]; then
 fi
 
 # ============================================================================
+# Obsidian CLI - the obsidian cask already links `obsidian` into Homebrew's
+# bin, but the CLI refuses to run until Settings -> General -> Advanced ->
+# Command line interface is on. That toggle is "cli": true in the app's own
+# obsidian.json, which Obsidian rewrites while it runs, so it's only written
+# here while the app is closed; otherwise the toggle is printed at the end.
+# ============================================================================
+obsidian_cli_pending=false
+obsidian_config="$HOME/Library/Application Support/obsidian/obsidian.json"
+if [[ "$OS" == "Darwin" && -d "/Applications/Obsidian.app" ]]; then
+  echo ""
+  echo "==> Setting up the Obsidian CLI..."
+  if [[ -f "$obsidian_config" ]] && jq -e '.cli == true' "$obsidian_config" &>/dev/null; then
+    echo "  ✓ Obsidian CLI already enabled"
+  elif pgrep -xq Obsidian; then
+    obsidian_cli_pending=true
+    echo -e "  ${YELLOW}⚠ Obsidian is running - quit it and re-run this script, or enable the CLI in the app${NC}"
+  else
+    mkdir -p "$(dirname "$obsidian_config")"
+    [[ -f "$obsidian_config" ]] || echo '{}' > "$obsidian_config"
+    obsidian_tmp="$(mktemp)"
+    if jq '.cli = true' "$obsidian_config" > "$obsidian_tmp" && mv "$obsidian_tmp" "$obsidian_config"; then
+      echo "  ✓ Enabled the Obsidian CLI"
+    else
+      rm -f "$obsidian_tmp"
+      obsidian_cli_pending=true
+      echo -e "  ${YELLOW}⚠ Failed to enable the Obsidian CLI${NC}"
+    fi
+  fi
+fi
+
+# ============================================================================
 # Snaply (https://snaply.ai) - meeting notes with on-device transcription.
 # There's no Homebrew cask, so install the latest DMG from Snaply's own
 # version API (the app updates itself after that). Notes are written by
@@ -777,4 +808,12 @@ if [[ "$snaply_installed" == "true" ]]; then
   echo -e "${YELLOW}  2. Settings -> Writing Assistant -> AI Models -> OpenAI-compatible endpoint${NC}"
   echo -e "${YELLOW}  3. Base URL: http://localhost:11434/v1   Model: $snaply_model   API key: (empty)${NC}"
   echo -e "${YELLOW}  4. Delete Snaply's built-in Gemma model in its AI Models list, so it isn't stored twice${NC}"
+fi
+
+if [[ "$obsidian_cli_pending" == "true" ]]; then
+  echo ""
+  echo -e "${YELLOW}ACTION NEEDED: Turn on the Obsidian CLI so agents can use your vaults:${NC}"
+  echo -e "${YELLOW}  1. Open Obsidian -> Settings -> General -> Advanced${NC}"
+  echo -e "${YELLOW}  2. Turn on 'Command line interface' (skip its PATH prompt - Homebrew already links obsidian)${NC}"
+  echo -e "${YELLOW}  3. Open a new terminal and check: obsidian help${NC}"
 fi
