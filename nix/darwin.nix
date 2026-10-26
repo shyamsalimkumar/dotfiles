@@ -85,13 +85,6 @@ in
       "visual-studio-code"
       # Note: wezterm IS in nixpkgs, but using cask for now for consistency
       "wezterm"
-      "claude-code"       # AI coding assistant (CLI)
-      # Only its bundled CLI is used (launchd.user.agents.ollama below); don't open
-      # the app, it starts a second server. Unlike nixpkgs' build and the ollama
-      # formula, it ships MLX with xgrammar, so Mac models and JSON output work.
-      # greedy: brew skips auto-updating casks otherwise, and the app never runs.
-      { name = "ollama-app"; greedy = true; }
-      "meld"              # Diff/merge tool
       # Note: Xcode has no cask and can't be installed via Nix either - Apple
       # only distributes it via the App Store or developer.apple.com, and
       # doesn't allow third-party redistribution. scripts/post-install.sh
@@ -99,23 +92,29 @@ in
       # "ghostpepper"     # Speech-to-text/meeting transcription (https://github.com/matthartman/ghost-pepper)
                           # - not installed automatically, uncomment to enable
 
-      # Cloud & DevOps
-      "gcloud-cli"        # gcloud CLI (formerly google-cloud-sdk / google-cloud-cli)
-
       # Fonts
       "font-hack-nerd-font"
-    ] ++ optionalCasks;
+    ] ++ map (cask:
+      # Only ollama-app's bundled CLI is used (launchd.user.agents.ollama below);
+      # don't open the app, it starts a second server. Unlike nixpkgs' build and
+      # the ollama formula, it ships MLX with xgrammar, so Mac models and JSON
+      # output work. greedy: brew skips auto-updating casks otherwise, and the
+      # app never runs.
+      if cask == "ollama-app" then { name = cask; greedy = true; } else cask
+    ) optionalCasks;
   };
 
   # Ollama server for Pi and Snaply (the Linux equivalent is services.ollama in
   # home.nix). The default 4K context silently truncates meeting transcripts.
-  launchd.user.agents.ollama.serviceConfig = {
-    ProgramArguments = [ "/Applications/Ollama.app/Contents/Resources/ollama" "serve" ];
-    EnvironmentVariables.OLLAMA_CONTEXT_LENGTH = "32768";
-    RunAtLoad = true;
-    KeepAlive = true;
-    StandardOutPath = "/Users/${user}/Library/Logs/ollama.log";
-    StandardErrorPath = "/Users/${user}/Library/Logs/ollama.log";
+  launchd.user.agents.ollama = lib.mkIf (lib.elem "ollama-app" optionalCasks) {
+    serviceConfig = {
+      ProgramArguments = [ "/Applications/Ollama.app/Contents/Resources/ollama" "serve" ];
+      EnvironmentVariables.OLLAMA_CONTEXT_LENGTH = "32768";
+      RunAtLoad = true;
+      KeepAlive = true;
+      StandardOutPath = "/Users/${user}/Library/Logs/ollama.log";
+      StandardErrorPath = "/Users/${user}/Library/Logs/ollama.log";
+    };
   };
 
   # Used for backwards compatibility

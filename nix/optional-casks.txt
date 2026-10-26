@@ -4,6 +4,12 @@
 # ~/.config/dotfiles/optional-casks, which nix/darwin.nix reads.
 # Format: <cask> # <description shown in the pick-list>
 
+# Development Tools
+claude-code         # Claude coding CLI
+ollama-app          # Local AI models (runs the Ollama server for Pi and Snaply)
+meld                # Diff/merge tool
+gcloud-cli          # Google Cloud CLI
+
 # Security & Password Management
 1password           # Password manager
 1password-cli       # Password manager CLI
@@ -24,6 +30,7 @@ handy               # Speech recognition
 shottr              # Screenshot tool
 wordcraft           # Word processor (open-source MS Word alternative)
 stirling-pdf        # Local PDF toolkit (merge, split, PDF to image, OCR)
+obsidian            # Markdown notes app
 
 # Communication
 slack               # Team chat
