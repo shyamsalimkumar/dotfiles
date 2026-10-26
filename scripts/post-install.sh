@@ -425,6 +425,9 @@ if command -v claude &>/dev/null; then
   if ! claude plugin marketplace list 2>/dev/null | grep -q "karpathy-skills"; then
     claude plugin marketplace add multica-ai/andrej-karpathy-skills 2>&1 || true
   fi
+  if ! claude plugin marketplace list 2>/dev/null | grep -q "obsidian-notes"; then
+    claude plugin marketplace add m4bwav/obsidian-notes 2>&1 || true
+  fi
 
   plugins=$(jq -r '.enabledPlugins | to_entries[] | select(.value == true) | .key' \
     "$DOTFILES_DIR/claude/settings.json" 2>/dev/null || true)
