@@ -19,7 +19,8 @@
     "gopls-lsp@claude-plugins-official": true,
     "mattpocock-skills@mattpocock": true,
     "typescript-lsp@claude-plugins-official": true,
-    "andrej-karpathy-skills@karpathy-skills": true
+    "andrej-karpathy-skills@karpathy-skills": true,
+    "obsidian-notes@obsidian-notes": true
   },
   "outputStyle": "ELI5",
   "alwaysThinkingEnabled": true,
@@ -36,6 +37,12 @@
       "source": {
         "source": "github",
         "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "obsidian-notes": {
+      "source": {
+        "source": "github",
+        "repo": "m4bwav/obsidian-notes"
       }
     }
   },
