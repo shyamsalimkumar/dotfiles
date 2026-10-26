@@ -1,6 +1,6 @@
 ---
 name: learnings
-description: 'Read and record lessons agents learn across all projects, in the "Project ideas" Obsidian vault: one note per lesson, linked from the vault INDEX.md and from the project''s hub note. Use at the start of a task to read past lessons for the project, and right away when the user corrects you, the same mistake happens twice, a workaround or a better technique is found, or the user says "remember this", "learn from this", "add a learning", "note this lesson" or "don''t do that again".'
+description: 'Read and record lessons agents learn across all projects, in the "Project ideas" Obsidian vault: one note per lesson, linked from the vault INDEX.md and from the project''s hub note. Also keeps the vault''s Ideas.md list current. Use at the start of a task to read past lessons for the project, and right away when the user corrects you, the same mistake happens twice, a workaround or a better technique is found, or the user says "remember this", "learn from this", "add a learning", "note this lesson" or "don''t do that again". Also when work builds or starts an idea on Ideas.md, or the user says "add this to my ideas".'
 ---
 
 # Learnings
@@ -17,7 +17,8 @@ The path has spaces: always quote it. If `VAULT` does not exist (a work machine,
 
 ## Vault layout
 
-- `INDEX.md`: the entry point. A project list, then a `## Learnings` section with one line per lesson.
+- `INDEX.md`: the entry point. A link to `Ideas.md`, a project list, then a `## Learnings` section with one line per lesson.
+- `Ideas.md`: every project idea, in three sections: `## Built` (crossed out), `## Started or partly built`, `## Not started`. See part C.
 - `<Project>/<Project>.md` (or `<Project>.md` at the root, like `Hive.md`): the project's hub note. Its `Repo:` line holds the repo path. It has a `## Learnings` section with one line per lesson for that project.
 - `Learnings/<YYYY-MM-DD> <Title>.md`: one note per lesson. The date prefix keeps file names unique.
 
@@ -69,3 +70,15 @@ Record it the moment it happens, not at the end of the session.
    Newest lines go at the top of each section.
 5. **Check the links.** Every link you wrote must point to a file that exists: `ls` each target. If the obsidian-notes skill is available, also run its lint on `VAULT`.
 6. Tell the user in one line: the note's title and that it's linked from the index and the project.
+
+## C. Ideas (`VAULT/Ideas.md`)
+
+The list belongs to the user. Agents keep existing ideas current; they never add new ones on their own.
+
+1. **At the end of a task**, read `VAULT/Ideas.md`. If the work just started or finished an idea on it, update that idea:
+   - Started: move it to `## Started or partly built` and add its project link and what is built so far.
+   - Finished: move it to `## Built`, write it as `- [x] ~~<idea>~~ <project link>`, and say in a few words anything from the idea that was left out.
+   - Partly built and more got done: update the "what is built" words.
+2. **Project links:** the project's hub note when there is one (`[Homelab](Homelab/Homelab.md)`), else `Repo: [<name>](https://github.com/shyamsalimkumar/<name>)` when the repo is on GitHub, else the repo path in backticks.
+3. **New ideas:** add one only when the user asks ("add this to my ideas", "put that on the list"). Write it in their words, under `## Not started`, or under `## Started or partly built` with its link if a project already covers it. An idea you thought of yourself: mention it to the user in one line, and don't write it.
+4. Check every link you wrote, as in step B.5, and tell the user in one line what changed on the list.
