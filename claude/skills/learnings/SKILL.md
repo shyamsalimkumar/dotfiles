@@ -1,6 +1,6 @@
 ---
 name: learnings
-description: 'Read and record lessons agents learn across all projects, in the "Project ideas" Obsidian vault: one note per lesson, linked from the vault INDEX.md and from the project''s hub note. Also keeps the vault''s Ideas.md list current. Use at the start of a task to read past lessons for the project, and right away when the user corrects you, the same mistake happens twice, a workaround or a better technique is found, or the user says "remember this", "learn from this", "add a learning", "note this lesson" or "don''t do that again". Also when work builds or starts an idea on Ideas.md, or the user says "add this to my ideas".'
+description: 'Read and record lessons agents learn across all projects, in the "Project ideas" Obsidian vault: one note per lesson, linked from the vault INDEX.md and from the project''s hub note. Also keeps the vault''s Ideas.md list current. Use at the start of a task to read past lessons for the project, and right away when the user corrects you, the same mistake happens twice, a workaround or a better technique is found, or the user says "remember this", "learn from this", "add a learning", "note this lesson" or "don''t do that again". Also when work builds or starts an idea on Ideas.md, or the user says "add this to my ideas". Also whenever a project's design is discussed or decided (a game's story, art style, economy, characters, monsters, levels; an app's screens or rules), to keep it as design notes in the vault.'
 ---
 
 # Learnings
@@ -21,6 +21,7 @@ The path has spaces: always quote it. If `VAULT` does not exist (a work machine,
 - `Ideas.md`: every project idea, in three sections: `## Built` (crossed out), `## Started or partly built`, `## Not started`. See part C.
 - `<Project>/<Project>.md` (or `<Project>.md` at the root, like `Hive.md`): the project's hub note. Its `Repo:` line holds the repo path. It has a `## Learnings` section with one line per lesson for that project.
 - `Learnings/<YYYY-MM-DD> <Title>.md`: one note per lesson. The date prefix keeps file names unique.
+- `<Project>/<Project> - <Topic>.md`: the project's design notes, one per topic (`Hive - Story.md`, `Hive - Economy.md`), linked from the hub note's `## Design` section. See part D.
 
 Links are relative markdown links with spaces written as `%20`, for example `[Homelab](Homelab/Homelab.md)` or `[Never print secrets](Learnings/2026-10-26%20Never%20print%20secrets.md)`. Never wikilinks; the vault is also read outside Obsidian.
 
@@ -28,8 +29,8 @@ Links are relative markdown links with spaces written as `%20`, for example `[Ho
 
 1. Read `VAULT/INDEX.md`, the `## Learnings` section.
 2. Find the project's hub note. Get the repo folder name with `basename "$(git rev-parse --show-toplevel)"`, then `grep -rlE "Repo:.*/<name>\`" "VAULT" --include='*.md'`. No match: look for a hub file named after the project (`ls "VAULT"`). Still none: the project has no lessons yet.
-3. Read the hub note's `## Learnings` section.
-4. Open only the lesson notes whose titles fit the task. Follow them.
+3. Read the hub note's `## Learnings` and `## Design` sections.
+4. Open only the lesson and design notes whose titles fit the task. Follow them.
 
 ## B. Record (when a lesson happens)
 
@@ -82,3 +83,14 @@ The list belongs to the user. Agents keep existing ideas current; they never add
 2. **Project links:** the project's hub note when there is one (`[Homelab](Homelab/Homelab.md)`), else `Repo: [<name>](https://github.com/shyamsalimkumar/<name>)` when the repo is on GitHub, else the repo path in backticks.
 3. **New ideas:** add one only when the user asks ("add this to my ideas", "put that on the list"). Write it in their words, under `## Not started`, or under `## Started or partly built` with its link if a project already covers it. An idea you thought of yourself: mention it to the user in one line, and don't write it.
 4. Check every link you wrote, as in step B.5, and tell the user in one line what changed on the list.
+
+## D. Design notes
+
+When the user and you discuss or decide a project's design, save it in the vault without being asked, so it outlives the chat. Design means what the thing is, not how the code works: for a game, the story, world, characters, monsters, art style, sound, economy, progression and levels; for an app, its screens, flows and rules.
+
+1. **Find or make the hub** (step B.2). No repo yet: make the hub anyway, with `Repo: none yet`, and fix the line once a repo exists. If an `Ideas.md` line covers the project, link the hub from it.
+2. **One note per topic** at `VAULT/<Project>/<Project> - <Topic>.md`, with the frontmatter `title`, `date`, `tags: [design, <project>, <topic>]`, then the content, then `Up: [<Project>](<relative link to the hub>)`. Split a topic that grows past a screen or two (`Hive - Monsters.md` out of `Hive - World.md`).
+3. **Write the current design, not the chat.** Each note says what was decided, with a short why for anything not obvious. When a decision changes, edit the note to the new one and keep the old one in a `## Changed` list at the end (`2026-10-26: gold drops halved, the early game was too easy`). Open questions go in a `## Open questions` list.
+4. **Images and assets are links, never copies.** Big files would fill iCloud. Keep art, sprites, sounds and mockups in the repo (or wherever they already live) and link to them: the GitHub URL when the repo is on GitHub, else the path in backticks, or the web URL for a reference found online. Describe in words what each one shows, since the image won't show in the vault.
+5. **Link it** from the hub note's `## Design` section (create it before `## Learnings`, or before `Up:`), one line per note: `- [<Topic>](<relative link to the note>): <one line on what it covers>`.
+6. **Save as you go**: after each decision, not at the end of the session. Check the links (step B.5) and tell the user in one line which notes changed.
