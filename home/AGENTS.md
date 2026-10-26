@@ -5,7 +5,8 @@
 - Delegate research, exploration and parallel analysis to subagents, one focused task each, to keep the main context clean.
 - Given a bug report, fix it autonomously: read the logs, errors and failing tests, then resolve them. Write the failing test that reproduces it.
 - Prefer TDD (red, green, refactor) for features and bug fixes; skip it only for exploratory work and prototypes.
-- If the project has a `tasks/` folder, use it: read `tasks/issues.md` at the start, plan non-trivial work in `tasks/todo.md` as checkable items and tick them off as you go, and after a correction add the lesson to `tasks/issues.md`.
+- If the project has a `tasks/` folder, plan non-trivial work in `tasks/todo.md` as checkable items and tick them off as you go.
+- Lessons go in the Obsidian vault, following `~/.claude/skills/learnings/SKILL.md`: read the past lessons for the project at the start of a task, and record a new one the moment you are corrected, repeat a mistake, or find a workaround or better technique.
 - Before calling a task done, prove it works: tests pass, behaviour diffed against main when relevant, and the change would pass a staff engineer's review.
 - For non-trivial changes, ask whether a more elegant solution exists before presenting; replace hacky fixes with the elegant one.
 
