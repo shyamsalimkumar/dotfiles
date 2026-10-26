@@ -24,6 +24,7 @@ handy               # Speech recognition
 shottr              # Screenshot tool
 wordcraft           # Word processor (open-source MS Word alternative)
 stirling-pdf        # Local PDF toolkit (merge, split, PDF to image, OCR)
+obsidian            # Markdown notes app
 
 # Communication
 slack               # Team chat
