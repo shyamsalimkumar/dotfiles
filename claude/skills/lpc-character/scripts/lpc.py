@@ -43,6 +43,10 @@ ANIMS = {
     "1h_backslash": (46, 4, "backslash", [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]),
     "1h_halfslash": (50, 4, "halfslash", [0, 1, 2, 3, 4, 5]),
 }
+# Big-weapon swings drawn on larger frames (sources/custom-animations.ts): the
+# body's standard frames are centered in each cell, the weapon art fills it.
+# name: (standard animation the body frames come from, frame size)
+OVERSIZE = {"slash_oversize": ("slash", 192)}
 # Parts with no "animations" list cover only these.
 DEFAULT_ANIMS = ["spellcast", "thrust", "walk", "slash", "shoot", "hurt"]
 BODY_TYPES = ["male", "female", "teen", "child", "muscular", "pregnant"]
@@ -209,11 +213,13 @@ def build(args):
     body_color = next((c for d, c in picks if d.get("match_body_color") and c), None)
     anims = args.anims.split(",") if args.anims else list(ANIMS)
     for a in anims:
-        if a not in ANIMS:
-            sys.exit(f"unknown animation '{a}'; choose from {', '.join(ANIMS)}")
+        if a not in ANIMS and a not in OVERSIZE:
+            sys.exit(f"unknown animation '{a}'; choose from {', '.join([*ANIMS, *OVERSIZE])}")
+    big_anims = [a for a in anims if a in OVERSIZE]
+    anims = [a for a in anims if a in ANIMS]
     head = next((d for d, _ in picks if d["type_name"] == "head"), None)
 
-    draws = []  # (zPos, order, path_or_None, item, mapping, variant)
+    draws = []  # (zPos, order, path, item, mapping, variant, custom_animation)
     for order, (d, color) in enumerate(picks):
         mapping, variant = {}, None
         if d.get("variants"):
@@ -233,8 +239,12 @@ def build(args):
                     warnings.append(f"{d['id']}: palette sizes differ ({len(src)} vs {len(target)}), shading may be off")
                 mapping.update({hex_rgb(s): hex_rgb(t) for s, t in zip(src, target)})
         for layer in layers(d):
-            if "custom_animation" in layer:
-                warnings.append(f"{d['id']}: oversize weapon layer skipped (not on the standard sheet)")
+            custom = layer.get("custom_animation")
+            if custom and custom not in big_anims:
+                hint = f"add {custom} to --anims for its own sheet" if custom in OVERSIZE else "not supported"
+                warning = f"{d['id']}: {custom} layer skipped ({hint})"
+                if warning not in warnings:
+                    warnings.append(warning)
                 continue
             path = layer.get(args.body)
             if not path:
@@ -247,29 +257,68 @@ def build(args):
                     warnings.append(f"{d['id']}: no art for head '{head and head['name']}', layer skipped")
                     continue
                 path = path.replace("${head}", key)
-            draws.append((layer.get("zPos", 0), order, path, d, mapping, variant))
+            draws.append((layer.get("zPos", 0), order, path, d, mapping, variant, custom))
     draws.sort(key=lambda t: (t[0], t[1]))
 
-    rows = max(ANIMS[a][0] + ANIMS[a][1] for a in anims)
+    def layer_image(path, d, mapping, variant, anim):
+        """The part's art for one standard animation, or None."""
+        fname = ANIMS[anim][2]
+        f = LPC / "spritesheets" / (f"{path}{fname}/{variant.replace(' ', '_')}.png" if variant else f"{path}{fname}.png")
+        if anim not in d.get("animations", DEFAULT_ANIMS) or not f.exists():
+            return None
+        img = Image.open(f).convert("RGBA")
+        return recolor(img, mapping) if mapping else img
+
+    rows = max((ANIMS[a][0] + ANIMS[a][1] for a in anims), default=0)
     sheet = Image.new("RGBA", (FRAME * COLS, FRAME * rows), (0, 0, 0, 0))
     missing = {}
     for anim in anims:
-        row, _, fname, _ = ANIMS[anim]
-        for _, _, path, d, mapping, variant in draws:
-            if anim not in d.get("animations", DEFAULT_ANIMS):
+        for _, _, path, d, mapping, variant, custom in draws:
+            if custom:
+                continue
+            img = layer_image(path, d, mapping, variant, anim)
+            if img is None:
                 missing.setdefault(anim, []).append(d["id"])
                 continue
-            f = LPC / "spritesheets" / (f"{path}{fname}/{variant.replace(' ', '_')}.png" if variant else f"{path}{fname}.png")
-            if not f.exists():
-                missing.setdefault(anim, []).append(d["id"])
-                continue
-            img = Image.open(f).convert("RGBA")
-            sheet.alpha_composite(recolor(img, mapping) if mapping else img, (0, row * FRAME))
-    for anim, ids in missing.items():
-        warnings.append(f"{anim}: no art for {', '.join(dict.fromkeys(ids))} (left blank)")
+            sheet.alpha_composite(img, (0, ANIMS[anim][0] * FRAME))
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
+    big_meta = {}
+    for anim in big_anims:
+        base, size = OVERSIZE[anim]
+        _, n, _, cycle = ANIMS[base]
+        big = Image.new("RGBA", (size * len(cycle), size * n), (0, 0, 0, 0))
+        pad = (size - FRAME) // 2
+        own_art = {d["id"] for _, _, _, d, _, _, custom in draws if custom == anim}
+        for _, _, path, d, mapping, variant, custom in draws:
+            if custom == anim:
+                # Already laid out as this animation's full sheet.
+                f = LPC / "spritesheets" / f"{path}{variant.replace(' ', '_') if variant else ''}.png"
+                img = Image.open(f).convert("RGBA") if f.exists() else None
+                if img is None:
+                    missing.setdefault(anim, []).append(d["id"])
+                else:
+                    big.alpha_composite(recolor(img, mapping) if mapping else img)
+                continue
+            if custom or d["id"] in own_art:
+                continue
+            img = layer_image(path, d, mapping, variant, base)
+            if img is None:
+                missing.setdefault(anim, []).append(d["id"])
+                continue
+            for r in range(n):
+                for c, col in enumerate(cycle):
+                    frame = img.crop((col * FRAME, r * FRAME, (col + 1) * FRAME, (r + 1) * FRAME))
+                    big.alpha_composite(frame, (c * size + pad, r * size + pad))
+        big_path = out.with_name(f"{out.stem}_{anim}.png")
+        big.save(big_path)
+        for i in range(n):
+            big_meta[f"{anim}_{DIRECTIONS[i]}"] = {"image": big_path.name, "frame": [size, size], "row": i,
+                                                   "cols": list(range(len(cycle))), "fps": 8, "loop": False}
+    for anim, ids in missing.items():
+        warnings.append(f"{anim}: no art for {', '.join(dict.fromkeys(ids))} (left blank)")
+
     sheet.save(out)
     meta = {"image": out.name, "frame": [FRAME, FRAME], "animations": {},
             "lpc": {"body": args.body, "parts": args.parts}}
@@ -279,6 +328,7 @@ def build(args):
             name = anim if n == 1 else f"{anim}_{DIRECTIONS[i]}"
             meta["animations"][name] = {"row": row + i, "cols": cycle, "fps": 8 if anim != "idle" else 3,
                                         "loop": anim not in ("hurt", "slash", "thrust", "spellcast", "shoot")}
+    meta["animations"].update(big_meta)
     out.with_suffix(".json").write_text(json.dumps(meta, indent=2) + "\n")
     credits_path = out.with_name(out.stem + "_CREDITS.csv")
     with credits_path.open("w", newline="") as fh:

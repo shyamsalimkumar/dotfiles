@@ -5,6 +5,9 @@ Every sheet comes with a JSON file next to it (same stem):
 
     {"image": "hero.png", "frame": [16, 16],
      "animations": {"walk_down": {"row": 0, "cols": [0, 1, 2, 3], "fps": 8, "loop": true}}}
+
+An animation may set its own "image" and "frame" (e.g. an LPC big-weapon swing
+on 192px frames); frames of every size share one center.
 """
 import argparse
 import json
@@ -23,23 +26,34 @@ def load_sheet(png):
     return Image.open(png).convert("RGBA"), json.loads(meta_path.read_text())
 
 
+def anim_source(png, meta, a):
+    """(image file, frame width, frame height) an animation's frames come from."""
+    return (Path(png).with_name(a.get("image", meta["image"])), *a.get("frame", meta["frame"]))
+
+
 def preview(args):
     """One small image to look at: frames at 1x (how the player sees them),
     scaled up, and as solid silhouettes (is the shape readable?)."""
-    sheet, meta = load_sheet(args.png)
-    fw, fh = meta["frame"]
+    _, meta = load_sheet(args.png)
     anims = list(meta["animations"].items())
     if args.anim:
         anims = [a for a in anims if re.search(args.anim, a[0])]
     anims = anims[: args.max_rows]
     cols = min(args.max_cols, max(len(a["cols"]) for _, a in anims))
+    sources = {name: anim_source(args.png, meta, a) for name, a in anims}
+    fw = max(w for _, w, _ in sources.values())
+    fh = max(h for _, _, h in sources.values())
+    images = {f: Image.open(f).convert("RGBA") for f, _, _ in sources.values()}
     s, gap = args.scale, 2
     width = cols * fw * (1 + s + s) + gap * 3
     out = Image.new("RGBA", (width, len(anims) * (fh * s + gap)), (200, 200, 200, 255))
-    for r, (_, a) in enumerate(anims):
+    for r, (name, a) in enumerate(anims):
         y = r * (fh * s + gap)
+        f, w, h = sources[name]
         for c, col in enumerate(a["cols"][:cols]):
-            frame = sheet.crop((col * fw, a["row"] * fh, (col + 1) * fw, (a["row"] + 1) * fh))
+            frame = Image.new("RGBA", (fw, fh))
+            frame.alpha_composite(images[f].crop((col * w, a["row"] * h, (col + 1) * w, (a["row"] + 1) * h)),
+                                  ((fw - w) // 2, (fh - h) // 2))
             sil = Image.new("RGBA", frame.size, (0, 0, 0, 255))
             sil.putalpha(frame.getchannel("A").point(lambda v: 255 if v else 0))
             out.alpha_composite(frame, (c * fw, y))
@@ -55,6 +69,8 @@ def preview(args):
 def outline(args):
     """Add a 1px outline around every opaque shape, inside each frame."""
     sheet, meta = load_sheet(args.png)
+    if any("image" in a for a in meta["animations"].values()):
+        print("note: only the main sheet is outlined; run outline on each extra sheet too")
     color = tuple(int(args.color.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)) + (255,)
     alpha = sheet.getchannel("A").load()
     fw, fh = meta["frame"]
@@ -106,21 +122,22 @@ def godot(args):
     png = Path(args.png).resolve()
     _, meta = load_sheet(png)
     root = godot_project(png.parent)
-    fw, fh = meta["frame"]
-    subs, anims = [], []
+    textures, subs, anims = {}, [], []
     for name, a in meta["animations"].items():
+        f, fw, fh = anim_source(png, meta, a)
+        tid = textures.setdefault(f, str(len(textures) + 1))
         frames = []
         for col in a["cols"]:
             sid = f"AtlasTexture_{len(subs)}"
-            subs.append(f'[sub_resource type="AtlasTexture" id="{sid}"]\natlas = ExtResource("1")\n'
+            subs.append(f'[sub_resource type="AtlasTexture" id="{sid}"]\natlas = ExtResource("{tid}")\n'
                         f"region = Rect2({col * fw}, {a['row'] * fh}, {fw}, {fh})\n")
             frames.append(f'{{\n"duration": 1.0,\n"texture": SubResource("{sid}")\n}}')
         anims.append(f'{{\n"frames": [{", ".join(frames)}],\n"loop": {str(a.get("loop", True)).lower()},\n'
                      f'"name": &"{name}",\n"speed": {float(a.get("fps", 8))}\n}}')
-    res_path = "res://" + png.relative_to(root).as_posix()
-    tres = (f'[gd_resource type="SpriteFrames" load_steps={len(subs) + 2} format=3]\n\n'
-            f'[ext_resource type="Texture2D" path="{res_path}" id="1"]\n\n'
-            + "\n".join(subs) + f"\n[resource]\nanimations = [{', '.join(anims)}]\n")
+    exts = "".join(f'[ext_resource type="Texture2D" path="res://{f.relative_to(root).as_posix()}" id="{tid}"]\n'
+                   for f, tid in textures.items())
+    tres = (f'[gd_resource type="SpriteFrames" load_steps={len(subs) + len(textures) + 1} format=3]\n\n'
+            + exts + "\n" + "\n".join(subs) + f"\n[resource]\nanimations = [{', '.join(anims)}]\n")
     dest = png.with_name(png.stem + "_frames.tres")
     dest.write_text(tres)
     changed = set_nearest_filter(root / "project.godot")

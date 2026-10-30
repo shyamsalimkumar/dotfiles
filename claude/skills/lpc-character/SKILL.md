@@ -37,6 +37,7 @@ lpc.py build -b male body:green heads_orc_male torso_armour_plate:steel arms_arm
 
 - `id:color` picks a color (a variant name, or a palette color like `olive` / `lpcr.ivory`); `id:c1,c2` for two-color parts. Heads, ears and noses take the body's color when given none.
 - `--anims` from the brief (names: spellcast thrust walk slash shoot hurt climb idle jump sit emote run combat 1h_backslash 1h_halfslash).
+- Big weapons (mace, longsword, scimitar...) swing on 192px frames: add `slash_oversize` to `--anims` (use it instead of `slash`). It writes `<name>_slash_oversize.png` beside the sheet; the JSON points to it, and `sprites.py godot` puts both sheets in one `.tres`.
 - Output: `<name>.png` (832 px wide, 13 frames per row, rows up/left/down/right per animation), `<name>.json` (frames per animation + the recipe under `lpc`) and `<name>_CREDITS.csv`.
 - Fix every `warning:` line: swap the part, or tell the user what stays blank.
 
