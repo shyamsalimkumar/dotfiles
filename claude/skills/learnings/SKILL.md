@@ -10,7 +10,7 @@ Lessons live in an Obsidian vault so the user can browse them and every agent ca
 `VAULT` below means:
 
 ```
-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Obsidian/Project Ideas/Project ideas
+$HOME/Library/Mobile Documents/com~apple~CloudDocs/Obsidian/Project Ideas
 ```
 
 The path has spaces: always quote it. If `VAULT` does not exist (a work machine, iCloud not synced), say so in one line and skip this skill; never create the vault.
