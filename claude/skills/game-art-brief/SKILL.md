@@ -18,7 +18,7 @@ Every sprite in a game must follow one set of rules (same perspective, size, pal
    - engine: `project.godot` = godot; `ProjectSettings/` + `Assets/` = unity; otherwise ask.
    - existing art: `ls art/ assets/ 2>/dev/null`; the size of existing sprites (`python3 -c "from PIL import Image; print(Image.open('<png>').size)"`) and any `*.hex` palette fix those fields.
    - anything the user already said in this conversation or in `$ARGUMENTS`.
-4. If `$HOME/Library/Mobile Documents/com~apple~CloudDocs/Obsidian/Project Ideas/Project ideas` has a design note on this project's art (`<Project> - Art*.md`), read it; it outranks defaults.
+4. If `$HOME/Library/Mobile Documents/com~apple~CloudDocs/Obsidian/Project Ideas` has a design note on this project's art (`<Project> - Art*.md`), read it; it outranks defaults.
 
 ## 2. Ask what is left
 
