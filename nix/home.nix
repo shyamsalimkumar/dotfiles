@@ -287,6 +287,12 @@
       "worktrees/"
     ];
 
+    # Written to ~/.config/git/attributes. Parallel sessions each add their own
+    # lines to the plan, so a merge or rebase keeps both sides instead of conflicting.
+    attributes = [
+      "tasks/todo.md merge=union"
+    ];
+
     settings = {
       core = {
         editor = "nvim";
