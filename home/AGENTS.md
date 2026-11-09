@@ -12,6 +12,7 @@
 
 ## Code
 - Keep changes surgical: touch only what the task needs.
+- Change a file with the Edit tool, so the user sees each diff. A script earns its place only for one mechanical change across many files.
 - Let names carry meaning; write a comment only for the non-obvious why.
 - Generated files (`*_gen.go`) are read-only: put the change in a hand-written file instead (e.g. a new struct in `crud.go` beside `crud_gen.go`).
 - Leave the tree clean: remove unused variables, params, imports and methods you introduced, inline single-use variables, and delete build outputs and temp files.
