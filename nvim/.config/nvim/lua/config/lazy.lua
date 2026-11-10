@@ -18,6 +18,14 @@ require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+    -- extras go here, between lazyvim.plugins and our own plugins, or LazyVim
+    -- warns about import order
+    { import = "lazyvim.plugins.extras.editor.snacks_explorer" },
+    { import = "lazyvim.plugins.extras.lang.go" },
+    -- lang.go's nvim-dap-go / neotest-golang specs only take effect once these
+    -- are enabled (they're written as "optional" extensions of them)
+    { import = "lazyvim.plugins.extras.dap.core" },
+    { import = "lazyvim.plugins.extras.test.core" },
     -- import/override with our own plugins
     { import = "plugins" },
   },
