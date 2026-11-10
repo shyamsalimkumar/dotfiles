@@ -57,6 +57,11 @@ config.font = wezterm.font_with_fallback {
   -- "Hack Nerd Font",
 }
 config.font_size = 18.0
+-- Count emoji with a variation selector (e.g. starship's gcloud "☁️") as
+-- 2 cells, like tmux 3.5+ does (variation-selector-always-wide). WezTerm's
+-- default (9) counts them as 1, so tmux and WezTerm disagree on where the
+-- cursor is and redraws smear over pane borders.
+config.unicode_version = 14
 -- config.color_scheme = color_scheme_for_appearance(wezterm.gui.get_appearance())
 -- config.color_scheme = 'Google Dark (Gogh)'
 config.window_background_opacity = window_background_opacity
