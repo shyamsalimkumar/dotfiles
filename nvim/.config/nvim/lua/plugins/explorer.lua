@@ -1,5 +1,4 @@
 return {
-  { import = "lazyvim.plugins.extras.editor.snacks_explorer" },
   {
     "folke/snacks.nvim",
     opts = {
